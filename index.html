@@ -20,6 +20,17 @@
     .tabs button.active{background:#111;color:#fff;border-color:#111}
     .right{margin-left:auto}
     /* 하단 고정 탭 바 */
+/* ✅ 하단 고정 탭 버튼을 "균등 폭"으로 (폰에서 좌우 꽉 차게) */
+#bottomTabs{
+  display: flex;
+  width: 100%;
+  gap: 8px;
+}
+#bottomTabs button{
+  flex: 1;                /* 버튼 너비를 동일하게 */
+  text-align: center;
+  white-space: nowrap;    /* 글자 줄바꿈 방지 */
+}
 .bottomBar{
   position: fixed;
   left: 0; right: 0; bottom: 0;
@@ -35,6 +46,7 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+    
 body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여백 */
   </style>
 </head>
@@ -71,6 +83,8 @@ body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여
   <button data-tab="완료">완료</button>
   <button data-tab="기타">기타</button>
   <button data-tab="remain">잔여</button>
+  <button data-tab="mine">내 작업</button>
+  <button data-tab="recent">최근 변경</button>
 </div>
   </div>
 
@@ -132,6 +146,24 @@ async function load(){
   }
   items = await r.json();
   $("rt").innerText = "연결됨 ✅";
+  let lastAction = null; // {id, prev, timer}
+function showToast(msg){
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").innerText = msg;
+  t.style.display = "flex";
+}
+function hideToast(){
+  const t = document.getElementById("toast");
+  t.style.display = "none";
+}
+document.getElementById("undoBtn").onclick = async ()=>{
+  if(!lastAction) return;
+  clearTimeout(lastAction.timer);
+  const {id, prev} = lastAction;
+  lastAction = null;
+  hideToast();
+  await patchItem(id, prev, /*skipUndo*/ true);
+};
   render();
 }
 
@@ -150,7 +182,19 @@ function render(){
   if(tab === "remain"){
     // 잔여 = 완료가 아닌 것들(작업중/기타 포함)
     view = view.filter(x => normStatus(x.status) !== "완료");
+  } else if(tab === "mine"){
+    // 내 작업 = 내가 마지막으로 건드렸거나(업데이트), 내가 완료한 것
+    view = view.filter(x =>
+      (x.updated_by || "") === NICK || (x.completed_by || "") === NICK
+    );
+  } else if(tab === "recent"){
+    // 최근 변경 = 최근 30분 이내 updated_at
+    const since = Date.now() - 30*60*1000;
+    view = view.filter(x =>
+      x.updated_at && (new Date(x.updated_at).getTime() >= since)
+    );
   } else {
+    // 작업중/완료/기타 같은 일반 탭
     view = view.filter(x => normStatus(x.status) === tab);
   }
 }
@@ -300,9 +344,17 @@ load();
     <button data-tab="완료">완료</button>
     <button data-tab="기타">기타</button>
     <button data-tab="remain">잔여</button>
+    <button data-tab="mine">내 작업</button>
+    <button data-tab="recent">최근 변경</button>
   </div>
+</div>
+  <div id="toast" style="position:fixed;left:50%;bottom:96px;transform:translateX(-50%);
+display:none;gap:10px;align-items:center;background:#111;color:#fff;padding:10px 12px;border-radius:14px;z-index:10000">
+  <span id="toastMsg">저장됨</span>
+  <button id="undoBtn" style="background:#fff;color:#111;border:none;border-radius:12px;padding:8px 10px">되돌리기(5초)</button>
 </div>
 </body>
 </html>
+
 
 
