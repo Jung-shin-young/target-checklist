@@ -19,6 +19,23 @@
     .tabs button{border-radius:999px;padding:8px 12px}
     .tabs button.active{background:#111;color:#fff;border-color:#111}
     .right{margin-left:auto}
+    /* 하단 고정 탭 바 */
+.bottomBar{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  padding: 10px 12px;
+  z-index: 9999;
+}
+.bottomInner{
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여백 */
   </style>
 </head>
 <body>
@@ -48,12 +65,13 @@
       <span class="right muted" id="rt"></span>
     </div>
 
-    <div class="row tabs" style="margin-top:10px">
-      <button data-tab="all" class="active">전체</button>
-      <button data-tab="기타">기타</button>
-      <button data-tab="작업중">작업중</button>
-      <button data-tab="완료">완료</button>
-    </div>
+<div class="row tabs" style="margin-top:10px" id="topTabs">
+  <button data-tab="all" class="active">전체</button>
+  <button data-tab="작업중">작업중</button>
+  <button data-tab="완료">완료</button>
+  <button data-tab="기타">기타</button>
+  <button data-tab="remain">잔여</button>
+</div>
   </div>
 
   <div class="list" id="list"></div>
@@ -128,7 +146,15 @@ function render(){
   const q = $("search").value.trim();
   let view = items.map(x=>({...x, status:normStatus(x.status)}));
 
-  if(tab!=="all") view = view.filter(x=>x.status===tab);
+  if(tab !== "all"){
+  if(tab === "remain"){
+    // 잔여 = 완료가 아닌 것들(작업중/기타 포함)
+    view = view.filter(x => normStatus(x.status) !== "완료");
+  } else {
+    view = view.filter(x => normStatus(x.status) === tab);
+  }
+}
+
   if(q) view = view.filter(x=>String(x.vin).includes(q));
 
   const order = {"작업중":1,"완료":2,"기타":3};
@@ -248,18 +274,35 @@ $("downloadBtn").onclick = ()=>{
 };
 
 $("search").oninput = render;
-document.querySelectorAll(".tabs button").forEach(b=>{
-  b.onclick = ()=>{
-    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    tab = b.dataset.tab;
-    render();
-  };
+function setActiveTabs(newTab){
+  tab = newTab;
+
+  // 위/아래 탭 모두 active 동기화
+  document.querySelectorAll("#topTabs button, #bottomTabs button").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.tab === newTab);
+  });
+
+  render();
+}
+
+// 위/아래 탭 클릭 연결
+document.querySelectorAll("#topTabs button, #bottomTabs button").forEach(btn=>{
+  btn.onclick = ()=> setActiveTabs(btn.dataset.tab);
 });
 
 mustNick();
 load();
 </script>
+  <div class="bottomBar">
+  <div class="bottomInner tabs" id="bottomTabs">
+    <button data-tab="all" class="active">전체</button>
+    <button data-tab="작업중">작업중</button>
+    <button data-tab="완료">완료</button>
+    <button data-tab="기타">기타</button>
+    <button data-tab="remain">잔여</button>
+  </div>
+</div>
 </body>
 </html>
+
 
