@@ -95,10 +95,10 @@ body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여
 /* ======= 너 설정(필수) ======= */
 const SUPABASE_URL = "https://gpdtgrbiyrgekjtgxpgf.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwZHRncmJpeXJnZWtqdGd4cGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODI3ODAsImV4cCI6MjA4NTE1ODc4MH0.tLZb3obtmHgWMTiKf4xhbsiOqmg80o2MPibQhB5Ywco";
-const TABLE_NAME = "checklist";
+const TABLE_NAME = "checklist22";
 /* ============================ */
 
-let NICK = localStorage.getItem("checklist_nick") || "";
+let NICK = localStorage.getItem("checklist2_nick") || "";
 let tab = "all";
 let items = [];
 let saving = false;
@@ -110,13 +110,13 @@ function mustNick(){
     const n = prompt("닉네임을 입력하세요 (예: 신영/홍길동)");
     if(!n) continue;
     NICK = n.trim();
-    localStorage.setItem("checklist_nick", NICK);
+    localStorage.setItem("checklist2_nick", NICK);
   }
   $("nickLabel").innerText = NICK;
 }
 $("nickBtn").onclick = ()=>{
   NICK = "";
-  localStorage.removeItem("checklist_nick");
+  localStorage.removeItem("checklist2_nick");
   mustNick();
 };
 
@@ -380,10 +380,10 @@ $("downloadBtn").onclick = ()=>{
 
   // 6) 파일 생성/다운로드
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+  XLSX.utils.book_append_sheet(wb, ws, "checklist2");
 
   const stamp = new Date().toISOString().slice(0,19).replaceAll(":","-");
-  XLSX.writeFile(wb, `checklist_${stamp}.xlsx`);
+  XLSX.writeFile(wb, `checklist2_${stamp}.xlsx`);
 };
 
 
