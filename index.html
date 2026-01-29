@@ -49,6 +49,7 @@
     
 body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여백 */
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
 <body>
   <h2>대상 조치 체크리스트</h2>
@@ -58,7 +59,7 @@ body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여
       <div>사용자: <b id="nickLabel">(미설정)</b></div>
       <div class="row">
         <button id="nickBtn">닉네임 변경</button>
-        <button id="downloadBtn">엑셀 다운로드(CSV)</button>
+        <button id="downloadBtn">엑셀 다운로드(XLSX)</button>
       </div>
     </div>
 
@@ -173,6 +174,16 @@ function normStatus(s){
   if(s==="done") return "완료";
   return s || "미완료";
 }
+function formatKST(iso){
+  if(!iso) return "-";
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false
+  }).format(d);
+}
 
 function render(){
   const q = $("search").value.trim();
@@ -218,9 +229,9 @@ function render(){
   view.forEach(it=>{
     const d = document.createElement("div");
     d.className="card";
-    const completedText = it.completed_at ? new Date(it.completed_at).toLocaleString() : "-";
+    const completedText = formatKST(it.completed_at);
     const completedBy = it.completed_by || "-";
-    const updatedText = it.updated_at ? new Date(it.updated_at).toLocaleString() : "-";
+    const updatedText = formatKST(it.updated_at);
     const updatedBy = it.updated_by || "-";
 
     d.innerHTML = `
@@ -304,18 +315,77 @@ function toCSV(rows){
 }
 
 $("downloadBtn").onclick = ()=>{
-  const csv = toCSV(items);
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  // 1) 엑셀에 넣을 데이터 만들기 (한국시간 문자열)
+  const rows = items.map(r => ({
+    vin: r.vin,
+    status: (typeof normStatus === "function" ? normStatus(r.status) : (r.status || "")),
+    memo: r.memo || "",
+    updated_by: r.updated_by || "",
+    updated_at: formatKST(r.updated_at),
+    completed_by: r.completed_by || "",
+    completed_at: formatKST(r.completed_at),
+  }));
+
+  // 2) 헤더 + 데이터
+  const header = ["VIN","상태","메모","최근변경자","최근변경시간(KST)","완료자","완료시간(KST)"];
+  const aoa = [header, ...rows.map(x => [
+    x.vin, x.status, x.memo, x.updated_by, x.updated_at, x.completed_by, x.completed_at
+  ])];
+
+  // 3) 시트 생성
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // 4) 컬럼 너비
+  ws["!cols"] = [
+    { wch: 10 }, { wch: 8 }, { wch: 30 }, { wch: 12 },
+    { wch: 22 }, { wch: 12 }, { wch: 22 }
+  ];
+
+  // 5) 스타일(헤더 + 상태별 색)
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  // 헤더 스타일
+  for(let C = range.s.c; C <= range.e.c; ++C){
+    const addr = XLSX.utils.encode_cell({r:0, c:C});
+    if(ws[addr]){
+      ws[addr].s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "111111" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+    }
+  }
+
+  // 상태별 행 배경색
+  const colorByStatus = {
+    "완료": "C6EFCE",   // 초록
+    "작업중": "D9E1F2", // 파랑
+    "기타": "FFF2CC"    // 노랑
+  };
+
+  for(let R = 1; R <= range.e.r; ++R){
+    const sAddr = XLSX.utils.encode_cell({r:R, c:1}); // 상태 컬럼(B)
+    const statusVal = ws[sAddr]?.v;
+    const fillColor = colorByStatus[statusVal];
+    if(fillColor){
+      for(let C = range.s.c; C <= range.e.c; ++C){
+        const addr = XLSX.utils.encode_cell({r:R, c:C});
+        if(ws[addr]){
+          ws[addr].s = ws[addr].s || {};
+          ws[addr].s.fill = { fgColor: { rgb: fillColor } };
+        }
+      }
+    }
+  }
+
+  // 6) 파일 생성/다운로드
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+
   const stamp = new Date().toISOString().slice(0,19).replaceAll(":","-");
-  a.href = url;
-  a.download = `checklist_${stamp}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(wb, `checklist_${stamp}.xlsx`);
 };
+
 
 $("search").oninput = render;
 function setActiveTabs(newTab){
@@ -355,6 +425,7 @@ display:none;gap:10px;align-items:center;background:#111;color:#fff;padding:10px
 </div>
 </body>
 </html>
+
 
 
 
