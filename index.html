@@ -38,13 +38,19 @@
       <span class="pill" id="cntTotal">총 -</span>
       <span class="pill" id="cntDone">완료 -</span>
       <span class="pill" id="cntRemain">잔여 -</span>
+      <div style="margin-top:10px">
+  <div class="muted">완료율: <b id="pctText">-</b></div>
+  <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden">
+    <div id="pctBar" style="height:100%;width:0%"></div>
+  </div>
+</div>
       <span class="muted" id="saving"></span>
       <span class="right muted" id="rt"></span>
     </div>
 
     <div class="row tabs" style="margin-top:10px">
       <button data-tab="all" class="active">전체</button>
-      <button data-tab="미완료">미완료</button>
+      <button data-tab="기타">기타</button>
       <button data-tab="작업중">작업중</button>
       <button data-tab="완료">완료</button>
     </div>
@@ -125,7 +131,7 @@ function render(){
   if(tab!=="all") view = view.filter(x=>x.status===tab);
   if(q) view = view.filter(x=>String(x.vin).includes(q));
 
-  const order = {"미완료":1,"작업중":2,"완료":3};
+  const order = {"작업중":1,"완료":2,"기타":3};
   view.sort((a,b)=>(order[a.status]||9)-(order[b.status]||9) || String(a.vin).localeCompare(String(b.vin)));
 
   const total = items.length;
@@ -133,6 +139,9 @@ function render(){
   $("cntTotal").innerText = `총 ${total}`;
   $("cntDone").innerText = `완료 ${done}`;
   $("cntRemain").innerText = `잔여 ${total-done}`;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+  $("pctText").innerText = pct + "%";
+  $("pctBar").style.width = pct + "%";
 
   const box = $("list");
   box.innerHTML="";
@@ -149,10 +158,11 @@ function render(){
       <div class="muted">상태: <b>${normStatus(it.status)}</b></div>
       <div class="muted">완료: ${completedText} · ${completedBy}</div>
       <div class="muted">최근변경: ${updatedText} · ${updatedBy}</div>
+      <div class="muted">메모: ${it.memo ? it.memo : "-"}</div>
       <div class="row" style="margin-top:10px">
-        <button onclick="setStatus('${it.id}','미완료')">미완료</button>
         <button onclick="setStatus('${it.id}','작업중')">작업중</button>
         <button onclick="setStatus('${it.id}','완료')">완료</button>
+        <button onclick="setStatus('${it.id}','기타')">기타</button>
       </div>
     `;
     box.appendChild(d);
@@ -162,12 +172,28 @@ function render(){
 async function setStatus(id, status){
   mustNick();
   setSaving(true);
+  let memoValue = null;
+
+  // ✅ 기타 누르면 메모 입력 (취소하면 아무 것도 안 함)
+  if(status === "기타"){
+    const cur = items.find(x => x.id === id);
+    const prevMemo = cur?.memo || "";
+    const m = prompt("특이사항 메모 입력", prevMemo);
+    if(m === null){
+      setSaving(false);
+      return;
+    }
+    memoValue = m.trim();
+  }
 
   const payload = {
     status,
     updated_by: NICK,
     updated_at: new Date().toISOString()
   };
+  if(status === "기타"){
+    payload.memo = memoValue;
+  }
 
   if(status==="완료"){
     payload.completed_by = NICK;
@@ -236,3 +262,4 @@ load();
 </script>
 </body>
 </html>
+
