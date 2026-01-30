@@ -199,9 +199,9 @@ function render(){
 
   if(tab !== "all"){
   if(tab === "remain"){
-    // 잔여 = 완료가 아닌 것들(작업중/기타 포함)
-    view = view.filter(x => normStatus(x.status) !== "완료");
-  } else if(tab === "mine"){
+  // ✅ 미완료만
+  view = view.filter(x => normStatus(x.status) === "미완료");
+} else if(tab === "mine"){
     // 내 작업 = 내가 마지막으로 건드렸거나(업데이트), 내가 완료한 것
     view = view.filter(x =>
       (x.updated_by || "") === NICK || (x.completed_by || "") === NICK
@@ -442,6 +442,7 @@ display:none;gap:10px;align-items:center;background:#111;color:#fff;padding:10px
 </div>
 </body>
 </html>
+
 
 
 
