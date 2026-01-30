@@ -198,13 +198,19 @@ function render(){
     view = view.filter(x =>
       (x.updated_by || "") === NICK || (x.completed_by || "") === NICK
     );
-  } else if(tab === "recent"){
-    // 최근 변경 = 최근 30분 이내 updated_at
-    const since = Date.now() - 30*60*1000;
-    view = view.filter(x =>
-      x.updated_at && (new Date(x.updated_at).getTime() >= since)
-    );
-  } else {
+ } else if(tab === "recent"){
+  // 최근 변경 = 최근 30분 이내 updated_at
+  const since = Date.now() - 30*60*1000;
+  view = view.filter(x =>
+    x.updated_at && (new Date(x.updated_at).getTime() >= since)
+  );
+
+  // ✅ 추가: 최신순 정렬
+  view.sort((a, b) =>
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+}
+ else {
     // 작업중/완료/기타 같은 일반 탭
     view = view.filter(x => normStatus(x.status) === tab);
   }
@@ -399,13 +405,15 @@ function setActiveTabs(newTab){
   render();
 }
 
-// 위/아래 탭 클릭 연결
-document.querySelectorAll("#topTabs button, #bottomTabs button").forEach(btn=>{
-  btn.onclick = ()=> setActiveTabs(btn.dataset.tab);
-});
+// 위/아래 탭 클릭 연결 (DOM 다 만들어진 다음에 연결)
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('#topTabs button, #bottomTabs button').forEach(btn => {
+    btn.onclick = () => setActiveTabs(btn.dataset.tab);
+  });
 
-mustNick();
-load();
+  mustNick();
+  load();
+});
 </script>
   <div class="bottomBar">
   <div class="bottomInner tabs" id="bottomTabs">
@@ -413,7 +421,7 @@ load();
     <button data-tab="작업중">작업중</button>
     <button data-tab="완료">완료</button>
     <button data-tab="기타">기타</button>
-    <button data-tab="remain">잔여</button>
+    <button data-tab="remain">미완료</button>
     <button data-tab="mine">내 작업</button>
     <button data-tab="recent">최근 변경</button>
   </div>
@@ -425,6 +433,7 @@ display:none;gap:10px;align-items:center;background:#111;color:#fff;padding:10px
 </div>
 </body>
 </html>
+
 
 
 
