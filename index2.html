@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>대상 조치 체크리스트</title>
+  <title>SP3 화성 대상 조치 VIN 리스트</title>
   <style>
     body{font-family:system-ui,-apple-system;margin:18px;line-height:1.35}
     .box{border:1px solid #ddd;border-radius:14px;padding:12px}
@@ -83,7 +83,7 @@ body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여
   <button data-tab="작업중">작업중</button>
   <button data-tab="완료">완료</button>
   <button data-tab="기타">기타</button>
-  <button data-tab="remain">잔여</button>
+  <button data-tab="remain">미완료</button>
   <button data-tab="mine">내 작업</button>
   <button data-tab="recent">최근 변경</button>
 </div>
@@ -169,11 +169,19 @@ document.getElementById("undoBtn").onclick = async ()=>{
 }
 
 function normStatus(s){
-  if(s==="open") return "미완료";
-  if(s==="doing") return "작업중";
-  if(s==="done") return "완료";
-  return s || "미완료";
+  s = (s || "").toString().trim();
+
+  // ✅ 잔여/남음/미완료 계열은 전부 '미완료'로 통일
+  if (s === "" || s === "잔여" || s === "남음" || s === "remain" || s === "미완" || s === "미완료") return "미완료";
+
+  if (s === "작업중") return "작업중";
+  if (s === "완료") return "완료";
+  if (s === "기타") return "기타";
+
+  // 혹시 다른 값이면 기타 처리(원하면 미완료로 바꿔도 됨)
+  return s;
 }
+
 function formatKST(iso){
   if(!iso) return "-";
   const d = new Date(iso);
@@ -191,20 +199,26 @@ function render(){
 
   if(tab !== "all"){
   if(tab === "remain"){
-    // 잔여 = 완료가 아닌 것들(작업중/기타 포함)
-    view = view.filter(x => normStatus(x.status) !== "완료");
-  } else if(tab === "mine"){
+  // ✅ 미완료만
+  view = view.filter(x => normStatus(x.status) === "미완료");
+} else if(tab === "mine"){
     // 내 작업 = 내가 마지막으로 건드렸거나(업데이트), 내가 완료한 것
     view = view.filter(x =>
       (x.updated_by || "") === NICK || (x.completed_by || "") === NICK
     );
-  } else if(tab === "recent"){
-    // 최근 변경 = 최근 30분 이내 updated_at
-    const since = Date.now() - 30*60*1000;
-    view = view.filter(x =>
-      x.updated_at && (new Date(x.updated_at).getTime() >= since)
-    );
-  } else {
+ } else if(tab === "recent"){
+  // 최근 변경 = 최근 30분 이내 updated_at
+  const since = Date.now() - 30*60*1000;
+  view = view.filter(x =>
+    x.updated_at && (new Date(x.updated_at).getTime() >= since)
+  );
+
+  // ✅ 추가: 최신순 정렬
+  view.sort((a, b) =>
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+}
+ else {
     // 작업중/완료/기타 같은 일반 탭
     view = view.filter(x => normStatus(x.status) === tab);
   }
@@ -241,6 +255,7 @@ function render(){
       <div class="muted">최근변경: ${updatedText} · ${updatedBy}</div>
       <div class="muted">메모: ${it.memo ? it.memo : "-"}</div>
       <div class="row" style="margin-top:10px">
+        <button onclick="setStatus('${it.id}','미완료')">미완료</button>
         <button onclick="setStatus('${it.id}','작업중')">작업중</button>
         <button onclick="setStatus('${it.id}','완료')">완료</button>
         <button onclick="setStatus('${it.id}','기타')">기타</button>
@@ -399,13 +414,15 @@ function setActiveTabs(newTab){
   render();
 }
 
-// 위/아래 탭 클릭 연결
-document.querySelectorAll("#topTabs button, #bottomTabs button").forEach(btn=>{
-  btn.onclick = ()=> setActiveTabs(btn.dataset.tab);
-});
+// 위/아래 탭 클릭 연결 (DOM 다 만들어진 다음에 연결)
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('#topTabs button, #bottomTabs button').forEach(btn => {
+    btn.onclick = () => setActiveTabs(btn.dataset.tab);
+  });
 
 mustNick();
 load();
+});
 </script>
   <div class="bottomBar">
   <div class="bottomInner tabs" id="bottomTabs">
@@ -413,7 +430,7 @@ load();
     <button data-tab="작업중">작업중</button>
     <button data-tab="완료">완료</button>
     <button data-tab="기타">기타</button>
-    <button data-tab="remain">잔여</button>
+    <button data-tab="remain">미완료</button>
     <button data-tab="mine">내 작업</button>
     <button data-tab="recent">최근 변경</button>
   </div>
