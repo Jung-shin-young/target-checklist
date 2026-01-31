@@ -48,6 +48,24 @@
 }
     
 body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여백 */
+@media (max-width: 520px) {
+  .summaryRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .summaryRow #search {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .summaryPct {
+    width: 100%;
+  }
+}
+    
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
@@ -63,15 +81,15 @@ body{ padding-bottom: 86px; } /* 하단바 때문에 내용 가리지 않게 여
       </div>
     </div>
 
-    <div class="row" style="margin-top:10px">
+    <div class="row summaryRow" style="margin-top:10px">
       <input id="search" placeholder="VIN 검색(4자리)" inputmode="numeric" style="width:150px"/>
       <span class="pill" id="cntTotal">총 -</span>
       <span class="pill" id="cntDone">완료 -</span>
       <span class="pill" id="cntRemain">잔여 -</span>
-      <div style="margin-top:10px">
+      <div class="summaryPct" style="margin-top:10px">
   <div class="muted">완료율: <b id="pctText">-</b></div>
   <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden">
-    <div id="pctBar" style="height:100%;width:0%"></div>
+    <div id="pctBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#2e7d32);transition:width .25s ease"></div>
   </div>
 </div>
       <span class="muted" id="saving"></span>
@@ -442,6 +460,7 @@ display:none;gap:10px;align-items:center;background:#111;color:#fff;padding:10px
 </div>
 </body>
 </html>
+
 
 
 
