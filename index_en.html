@@ -71,21 +71,24 @@
       <span class="pill" id="cntUpd">Update completed -</span>
       <span class="pill" id="cntRemain">Remaining -</span>
 
-      <div class="summaryPct" style="margin-top:10px">
-        <div class="muted">
-          DTC Check Rate: <b id="pctText">-</b>
-          <span class="muted"> (Update: <b id="pctUpdText">-</b>)</span>
-        </div>
+<div class="summaryPct" style="margin-top:10px;width:100%">
+  <div class="muted" style="margin-bottom:6px">
+    Update Completion Rate: <b id="pctUpdText">-</b>
+  </div>
+  <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
+    <div id="updBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2563eb);transition:width .25s ease"></div>
+  </div>
 
-        <!-- segmented progress bar:
-             - left segment: Update completed
-             - middle segment: DTC check (final)
-             - rest: remaining
-        -->
-        <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
-          <div id="pctBar" style="height:100%;width:0%;transition:width .25s ease"></div>
-        </div>
-      </div>
+  <div style="height:10px"></div>
+
+  <div class="muted" style="margin-bottom:6px">
+    DTC Check Rate (Final): <b id="pctText">-</b>
+  </div>
+  <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
+    <div id="pctBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#2e7d32);transition:width .25s ease"></div>
+  </div>
+</div>
+
 
       <span class="muted" id="saving"></span>
       <span class="right muted" id="rt"></span>
@@ -210,23 +213,6 @@ async function load(){
   render();
 }
 
-function setProgressBar(pctUpd, pctDtc){
-  // pctUpd and pctDtc are 0..100
-  // Make sure DTC segment starts after Update segment (visual only).
-  // If DTC < Update, still show DTC as at least Update for gradient continuity.
-  const a = Math.max(0, Math.min(100, pctUpd));
-  const b = Math.max(a, Math.min(100, pctDtc));
-
-  // Segmented gradient: update (blue) -> dtc (green) -> remaining (gray)
-  const bar = $("pctBar");
-  bar.style.width = "100%";
-  bar.style.background = `linear-gradient(90deg,
-    #4f8cff 0% ${a}%,
-    #2e7d32 ${a}% ${b}%,
-    #e0e0e0 ${b}% 100%
-  )`;
-}
-
 function render(){
   const q = $("search").value.trim();
   let view = items.map(x=>({...x, status:normStatus(x.status)}));
@@ -279,9 +265,11 @@ function render(){
   const pctDtc = total ? Math.round((dtcDone / total) * 100) : 0;
   const pctUpd = total ? Math.round((updDone / total) * 100) : 0;
 
-  $("pctText").innerText = pctDtc + "%";
-  $("pctUpdText").innerText = pctUpd + "%";
-  setProgressBar(pctUpd, pctDtc);
+$("pctText").innerText = pctDtc + "%";
+$("pctBar").style.width = pctDtc + "%";
+
+$("pctUpdText").innerText = pctUpd + "%";
+$("updBar").style.width = pctUpd + "%";
 
   const box = $("list");
   box.innerHTML="";
