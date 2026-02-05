@@ -296,11 +296,14 @@ function render(){
     const d = document.createElement("div");
     d.className="card";
 
-    const updBy = it.update_by || it.updated_by || "-";
-    const updAt = it.update_at || it.updated_at || null;
+    const updBy = it.update_by || "-";
+    const updAt = it.update_at || null;
 
-    const dtcBy = it.dtc_by || it.completed_by || "-";
-    const dtcAt = it.dtc_at || it.completed_at || null;
+    const dtcBy = it.dtc_by || "-";
+    const dtcAt = it.dtc_at || null;
+
+    const lastBy = it.updated_by || "-";
+    const lastAt = it.updated_at || null;
 
     const memoText = (it.memo ? it.memo : "-");
     const stateLabel = it._state;
@@ -314,7 +317,9 @@ function render(){
 
       <div class="muted">Update: ${updMark} ${formatKST(updAt)} · ${updBy}</div>
       <div class="muted">DTC: ${dtcMark} ${formatKST(dtcAt)} · ${dtcBy}</div>
+      <div class="muted">Last change: ${formatKST(lastAt)} · ${lastBy}</div>
       <div class="muted">Memo: ${memoText}</div>
+
 
       <div class="row" style="margin-top:10px">
         <button onclick="setBaseStatus('${it.id}','${BASE_STATUS.NOT_STARTED}')">Not started</button>
@@ -440,6 +445,9 @@ async function toggleDtc(id){
     // legacy completion fields
     completed_by: nextDtc ? NICK : null,
     completed_at: nextDtc ? now : null,
+
+    updated_by: NICK,
+    updated_at: now,
   };
 
   const ok = await patchRow(id, payload);
