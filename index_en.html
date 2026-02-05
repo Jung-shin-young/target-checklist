@@ -22,27 +22,17 @@
 
     /* ✅ Bottom fixed tab bar */
     #bottomTabs{display:flex;width:100%;gap:8px}
-    #bottomTabs button{
-      flex:1;
-      text-align:center;
-      white-space:nowrap;
-    }
+    #bottomTabs button{flex:1;text-align:center;white-space:nowrap;}
     .bottomBar{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      background:#fff;
-      border-top:1px solid #ddd;
-      padding:10px 12px;
-      z-index:9999;
+      position:fixed;left:0; right:0; bottom:0;
+      background:#fff;border-top:1px solid #ddd;
+      padding:10px 12px;z-index:9999;
     }
     .bottomInner{
-      max-width:980px;
-      margin:0 auto;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
+      max-width:980px;margin:0 auto;
+      display:flex;gap:8px;flex-wrap:wrap;
     }
-    body{padding-bottom:86px;} /* prevent overlap by bottom bar */
+    body{padding-bottom:86px;}
 
     @media (max-width: 520px) {
       .summaryRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -55,65 +45,76 @@
 <body>
   <h2>QV CR RADAR VIN LIST</h2>
 
+  <!--
+  ✅ RUN ONCE in Supabase SQL Editor (TABLE_NAME = checklist_en)
+  -------------------------------------------------------------
+  alter table public.checklist_en
+    add column if not exists update_done boolean default false,
+    add column if not exists dtc_done boolean default false,
+    add column if not exists update_by text,
+    add column if not exists update_at timestamptz,
+    add column if not exists dtc_by text,
+    add column if not exists dtc_at timestamptz;
+  -->
+
   <div class="box">
     <div class="row" style="justify-content:space-between">
       <div>User: <b id="nickLabel">(not set)</b></div>
       <div class="row">
-        <button id="nickBtn">Change nickname</button>
-        <button id="downloadBtn">Download Excel (XLSX)</button>
+        <button id="nickBtn">Nickname</button>
+        <button id="downloadBtn">Excel (XLSX)</button>
       </div>
     </div>
 
     <div class="row summaryRow" style="margin-top:10px">
       <input id="search" placeholder="Search VIN (last 4 digits)" inputmode="numeric" style="width:210px"/>
       <span class="pill" id="cntTotal">Total -</span>
-      <span class="pill" id="cntDtc">DTC check -</span>
-      <span class="pill" id="cntUpd">Update completed -</span>
+      <span class="pill" id="cntUpd">Updated -</span>
+      <span class="pill" id="cntDtc">Checked -</span>
       <span class="pill" id="cntRemain">Remaining -</span>
 
-<div class="summaryPct" style="margin-top:10px;width:100%">
-  <div class="muted" style="margin-bottom:6px">
-    Update Completion Rate: <b id="pctUpdText">-</b>
-  </div>
-  <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
-    <div id="updBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2563eb);transition:width .25s ease"></div>
-  </div>
+      <div class="summaryPct" style="margin-top:10px;width:100%">
+        <div class="muted" style="margin-bottom:6px">
+          Update Rate: <b id="pctUpdText">-</b>
+        </div>
+        <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
+          <div id="updBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f8cff,#2563eb);transition:width .25s ease"></div>
+        </div>
 
-  <div style="height:10px"></div>
+        <div style="height:10px"></div>
 
-  <div class="muted" style="margin-bottom:6px">
-    DTC Check Rate (Final): <b id="pctText">-</b>
-  </div>
-  <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
-    <div id="pctBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#2e7d32);transition:width .25s ease"></div>
-  </div>
-</div>
-
+        <div class="muted" style="margin-bottom:6px">
+          DTC Check Rate (Final): <b id="pctText">-</b>
+        </div>
+        <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
+          <div id="pctBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#2e7d32);transition:width .25s ease"></div>
+        </div>
+      </div>
 
       <span class="muted" id="saving"></span>
       <span class="right muted" id="rt"></span>
     </div>
 
+    <!-- ✅ TOP TABS -->
     <div class="row tabs" style="margin-top:10px" id="topTabs">
       <button data-tab="all" class="active">All</button>
+      <!-- order: In progress / Updated / DTC / Other / Not started -->
       <button data-tab="In progress">In progress</button>
-      <button data-tab="DTC check">DTC check</button>
-      <button data-tab="Update completed">Update completed</button>
+      <button data-tab="Updated">Updated</button>
+      <button data-tab="Checked">DTC</button>
       <button data-tab="Other">Other</button>
-      <button data-tab="remain">Not started</button>
-      <button data-tab="mine">My work</button>
-      <button data-tab="recent">Recent changes</button>
+      <button data-tab="Not started">Not started</button>
     </div>
   </div>
 
   <div class="list" id="list"></div>
 
 <script>
-/* ======= CONFIG (required) ======= */
+/* ======= CONFIG ======= */
 const SUPABASE_URL = "https://gpdtgrbiyrgekjtgxpgf.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwZHRncmJpeXJnZWtqdGd4cGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODI3ODAsImV4cCI6MjA4NTE1ODc4MH0.tLZb3obtmHgWMTiKf4xhbsiOqmg80o2MPibQhB5Ywco";
 const TABLE_NAME = "checklist_en";
-/* =============================== */
+/* ====================== */
 
 let NICK = localStorage.getItem("checklist_nick") || "";
 let tab = "all";
@@ -154,39 +155,26 @@ function setSaving(v){
   $("nickBtn").disabled = false;
 }
 
-/* Normalize status values:
-   - Accept legacy KR values too (in case old data is copied)
-   - Store/display English status strings only
-*/
-const STATUS = {
+const BASE_STATUS = {
   NOT_STARTED: "Not started",
   IN_PROGRESS: "In progress",
-  UPDATE_DONE: "Update completed",
-  DTC_DONE: "DTC check",
   OTHER: "Other",
 };
 
-function normStatus(s){
+function normBaseStatus(s){
   s = (s || "").toString().trim();
+  if (s === "" || s === "remain" || s === "Not started" || s === "잔여" || s === "미완" || s === "미완료") return BASE_STATUS.NOT_STARTED;
+  if (s === "작업중") return BASE_STATUS.IN_PROGRESS;
+  if (s === "기타") return BASE_STATUS.OTHER;
 
-  // Legacy / empty => Not started
-  if (s === "" || s === "잔여" || s === "남음" || s === "remain" || s === "미완" || s === "미완료") return STATUS.NOT_STARTED;
+  // Old workflow strings (if any old rows exist)
+  if (s === "Update completed" || s === "업데이트 완료") return BASE_STATUS.IN_PROGRESS;
+  if (s === "DTC check" || s === "완료") return BASE_STATUS.IN_PROGRESS;
 
-  // Legacy KR -> EN
-  if (s === "작업중") return STATUS.IN_PROGRESS;
-  if (s === "완료") return STATUS.DTC_DONE;              // legacy "완료" treated as final DTC check
-  if (s === "업데이트 완료") return STATUS.UPDATE_DONE;   // if you used this before
-  if (s === "기타") return STATUS.OTHER;
-
-  // Already English / custom
-  if (s === STATUS.NOT_STARTED) return STATUS.NOT_STARTED;
-  if (s === STATUS.IN_PROGRESS) return STATUS.IN_PROGRESS;
-  if (s === STATUS.UPDATE_DONE) return STATUS.UPDATE_DONE;
-  if (s === STATUS.DTC_DONE) return STATUS.DTC_DONE;
-  if (s === STATUS.OTHER) return STATUS.OTHER;
-
-  // Unknown => Other
-  return STATUS.OTHER;
+  if (s === BASE_STATUS.NOT_STARTED) return BASE_STATUS.NOT_STARTED;
+  if (s === BASE_STATUS.IN_PROGRESS) return BASE_STATUS.IN_PROGRESS;
+  if (s === BASE_STATUS.OTHER) return BASE_STATUS.OTHER;
+  return BASE_STATUS.OTHER;
 }
 
 function formatKST(iso){
@@ -198,6 +186,30 @@ function formatKST(iso){
     hour: "2-digit", minute: "2-digit", second: "2-digit",
     hour12: false
   }).format(d);
+}
+
+/* Backward-compatible "effective" flags */
+function effUpdateDone(it){
+  if (typeof it.update_done === "boolean") return it.update_done;
+  const s = (it.status || "").toString().trim();
+  return (s === "Update completed" || s === "업데이트 완료" || s === "DTC check" || s === "완료");
+}
+function effDtcDone(it){
+  if (typeof it.dtc_done === "boolean") return it.dtc_done;
+  const s = (it.status || "").toString().trim();
+  return (s === "DTC check" || s === "완료");
+}
+
+function derivedState(it){
+  const base = normBaseStatus(it.status);
+  const upd = effUpdateDone(it);
+  const dtc = effDtcDone(it);
+
+  if (base === BASE_STATUS.OTHER) return "Other";
+  if (dtc) return "Checked";
+  if (upd) return "Updated";
+  if (base === BASE_STATUS.IN_PROGRESS) return "In progress";
+  return "Not started";
 }
 
 async function load(){
@@ -215,61 +227,67 @@ async function load(){
 
 function render(){
   const q = $("search").value.trim();
-  let view = items.map(x=>({...x, status:normStatus(x.status)}));
+
+  let view = items.map(x=>({
+    ...x,
+    _base: normBaseStatus(x.status),
+    _upd: effUpdateDone(x),
+    _dtc: effDtcDone(x),
+    _state: derivedState(x),
+  }));
 
   if(tab !== "all"){
-    if(tab === "remain"){
-      view = view.filter(x => normStatus(x.status) === STATUS.NOT_STARTED);
-    } else if(tab === "mine"){
+    if(tab === "mine"){
       view = view.filter(x =>
-        (x.updated_by || "") === NICK || (x.completed_by || "") === NICK
+        (x.update_by || x.updated_by || "") === NICK ||
+        (x.dtc_by || x.completed_by || "") === NICK
+      );
+      view.sort((a,b)=>
+        new Date((b.dtc_at || b.completed_at || b.update_at || b.updated_at || 0)).getTime() -
+        new Date((a.dtc_at || a.completed_at || a.update_at || a.updated_at || 0)).getTime()
       );
     } else if(tab === "recent"){
       const since = Date.now() - 30*60*1000;
-      view = view.filter(x =>
-        x.updated_at && (new Date(x.updated_at).getTime() >= since)
-      );
-      view.sort((a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      view = view.filter(x => {
+        const t = x.dtc_at || x.completed_at || x.update_at || x.updated_at || null;
+        return t && (new Date(t).getTime() >= since);
+      });
+      view.sort((a,b)=>
+        new Date((b.dtc_at || b.completed_at || b.update_at || b.updated_at)).getTime() -
+        new Date((a.dtc_at || a.completed_at || a.update_at || a.updated_at)).getTime()
       );
     } else {
-      // IN_PROGRESS / UPDATE_DONE / DTC_DONE / OTHER
-      view = view.filter(x => normStatus(x.status) === tab);
+      view = view.filter(x => x._state === tab);
     }
   }
 
   if(q) view = view.filter(x=>String(x.vin).includes(q));
 
-  // Default order: Not started -> In progress -> Update completed -> DTC check -> Other
-  const order = {
-    [STATUS.NOT_STARTED]: 1,
-    [STATUS.IN_PROGRESS]: 2,
-    [STATUS.UPDATE_DONE]: 3,
-    [STATUS.DTC_DONE]: 4,
-    [STATUS.OTHER]: 5,
-  };
+  const order = { "In progress": 1, "Updated": 2, "Checked": 3, "Other": 4, "Not started": 5 };
   view.sort((a,b)=>
-    (order[a.status]||9)-(order[b.status]||9) ||
+    (order[a._state]||9)-(order[b._state]||9) ||
     String(a.vin).localeCompare(String(b.vin))
   );
 
+  // ✅ Separate counts (Updated & Checked can overlap)
   const total = items.length;
-  const dtcDone = items.filter(x=>normStatus(x.status)===STATUS.DTC_DONE).length;
-  const updDone = items.filter(x=>normStatus(x.status)===STATUS.UPDATE_DONE).length;
+  const updatedCnt = items.filter(x => effUpdateDone(x)).length;
+  const checkedCnt = items.filter(x => effDtcDone(x)).length;
+  const remain = Math.max(0, total - checkedCnt);
 
   $("cntTotal").innerText = `Total ${total}`;
-  $("cntDtc").innerText   = `DTC check ${dtcDone}`;
-  $("cntUpd").innerText   = `Update completed ${updDone}`;
-  $("cntRemain").innerText= `Remaining ${Math.max(0, total - dtcDone)}`;
+  $("cntUpd").innerText   = `Updated ${updatedCnt}`;
+  $("cntDtc").innerText   = `Checked ${checkedCnt}`;
+  $("cntRemain").innerText= `Remaining ${remain}`;
 
-  const pctDtc = total ? Math.round((dtcDone / total) * 100) : 0;
-  const pctUpd = total ? Math.round((updDone / total) * 100) : 0;
+  const pctUpd = total ? Math.round((updatedCnt / total) * 100) : 0;
+  const pctDtc = total ? Math.round((checkedCnt / total) * 100) : 0;
 
-$("pctText").innerText = pctDtc + "%";
-$("pctBar").style.width = pctDtc + "%";
+  $("pctUpdText").innerText = pctUpd + "%";
+  $("updBar").style.width = pctUpd + "%";
 
-$("pctUpdText").innerText = pctUpd + "%";
-$("updBar").style.width = pctUpd + "%";
+  $("pctText").innerText = pctDtc + "%";
+  $("pctBar").style.width = pctDtc + "%";
 
   const box = $("list");
   box.innerHTML="";
@@ -278,99 +296,189 @@ $("updBar").style.width = pctUpd + "%";
     const d = document.createElement("div");
     d.className="card";
 
-    const completedText = formatKST(it.completed_at);
-    const completedBy = it.completed_by || "-";
-    const updatedText = formatKST(it.updated_at);
-    const updatedBy = it.updated_by || "-";
+    const updBy = it.update_by || it.updated_by || "-";
+    const updAt = it.update_at || it.updated_at || null;
+
+    const dtcBy = it.dtc_by || it.completed_by || "-";
+    const dtcAt = it.dtc_at || it.completed_at || null;
+
+    const memoText = (it.memo ? it.memo : "-");
+    const stateLabel = it._state;
+
+    const updMark = it._upd ? "✅" : "⬜";
+    const dtcMark = it._dtc ? "✅" : "⬜";
 
     d.innerHTML = `
       <div class="vin">${it.vin}</div>
-      <div class="muted">Status: <b>${normStatus(it.status)}</b></div>
-      <div class="muted">DTC checked: ${completedText} · ${completedBy}</div>
-      <div class="muted">Last updated: ${updatedText} · ${updatedBy}</div>
-      <div class="muted">Memo: ${it.memo ? it.memo : "-"}</div>
+      <div class="muted">State: <b>${stateLabel}</b></div>
+
+      <div class="muted">Update: ${updMark} ${formatKST(updAt)} · ${updBy}</div>
+      <div class="muted">DTC: ${dtcMark} ${formatKST(dtcAt)} · ${dtcBy}</div>
+      <div class="muted">Memo: ${memoText}</div>
+
       <div class="row" style="margin-top:10px">
-        <button onclick="setStatus('${it.id}','${STATUS.NOT_STARTED}')">${STATUS.NOT_STARTED}</button>
-        <button onclick="setStatus('${it.id}','${STATUS.IN_PROGRESS}')">${STATUS.IN_PROGRESS}</button>
-        <button onclick="setStatus('${it.id}','${STATUS.DTC_DONE}')">${STATUS.DTC_DONE}</button>
-        <button onclick="setStatus('${it.id}','${STATUS.UPDATE_DONE}')">${STATUS.UPDATE_DONE}</button>
-        <button onclick="setStatus('${it.id}','${STATUS.OTHER}')">${STATUS.OTHER}</button>
+        <button onclick="setBaseStatus('${it.id}','${BASE_STATUS.NOT_STARTED}')">Not started</button>
+        <button onclick="setBaseStatus('${it.id}','${BASE_STATUS.IN_PROGRESS}')">In progress</button>
+
+        <!-- ✅ Toggle buttons -->
+        <button onclick="toggleUpdate('${it.id}')">Toggle Update</button>
+        <button onclick="toggleDtc('${it.id}')">Toggle DTC</button>
+
+        <button onclick="setOther('${it.id}')">Other</button>
       </div>
     `;
     box.appendChild(d);
   });
 }
 
-async function setStatus(id, status){
-  mustNick();
-  setSaving(true);
-
-  let memoValue = null;
-
-  // Prompt memo when "Other"
-  if(status === STATUS.OTHER){
-    const cur = items.find(x => x.id === id);
-    const prevMemo = cur?.memo || "";
-    const m = prompt("Enter memo (Other)", prevMemo);
-    if(m === null){
-      setSaving(false);
-      return;
-    }
-    memoValue = m.trim();
-  }
-
-  const payload = {
-    status,
-    updated_by: NICK,
-    updated_at: new Date().toISOString()
-  };
-  if(status === STATUS.OTHER){
-    payload.memo = memoValue;
-  }
-
-  // ✅ Final completion is only when "DTC check"
-  if(status === STATUS.DTC_DONE){
-    payload.completed_by = NICK;
-    payload.completed_at = new Date().toISOString();
-  } else {
-    payload.completed_by = null;
-    payload.completed_at = null;
-  }
-
+// ---------- SAVE HELPERS ----------
+async function patchRow(id, payload){
   const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`;
   const r = await fetch(url, {method:"PATCH", headers: headers(true), body: JSON.stringify(payload)});
-  setSaving(false);
-
   if(!r.ok){
     alert("Save failed. Check console / permissions / RLS.");
     console.log(await r.text());
-    return;
+    return false;
   }
-  await load();
+  return true;
 }
 
-$("downloadBtn").onclick = ()=>{
-  // Build rows (KST string times)
-  const rows = items.map(r => ({
-    vin: r.vin,
-    status: normStatus(r.status),
-    memo: r.memo || "",
-    updated_by: r.updated_by || "",
-    updated_at: formatKST(r.updated_at),
-    completed_by: r.completed_by || "",
-    completed_at: formatKST(r.completed_at),
-  }));
+async function setBaseStatus(id, baseStatus){
+  mustNick();
+  setSaving(true);
 
-  const header = ["VIN","Status","Memo","Last Updated By","Last Updated Time (KST)","DTC Checked By","DTC Checked Time (KST)"];
+  const payload = {
+    status: baseStatus,
+    updated_by: NICK,
+    updated_at: new Date().toISOString()
+  };
+
+  const ok = await patchRow(id, payload);
+  setSaving(false);
+  if(ok) await load();
+}
+
+async function setOther(id){
+  mustNick();
+  const cur = items.find(x => x.id === id);
+  const prevMemo = cur?.memo || "";
+  const m = prompt("Enter memo (Other)", prevMemo);
+  if(m === null) return;
+
+  setSaving(true);
+  const payload = {
+    status: BASE_STATUS.OTHER,
+    memo: m.trim(),
+    updated_by: NICK,
+    updated_at: new Date().toISOString()
+  };
+  const ok = await patchRow(id, payload);
+  setSaving(false);
+  if(ok) await load();
+}
+
+/* ✅ Toggle Update: true <-> false (independent from DTC) */
+async function toggleUpdate(id){
+  mustNick();
+  const cur = items.find(x => x.id === id);
+  const currUpd = cur ? effUpdateDone(cur) : false;
+  const nextUpd = !currUpd;
+
+  setSaving(true);
+  const now = new Date().toISOString();
+
+  const payload = {
+    update_done: nextUpd,
+    update_by: nextUpd ? NICK : null,
+    update_at: nextUpd ? now : null,
+
+    // keep old fields for visibility / legacy
+    updated_by: NICK,
+    updated_at: now,
+  };
+
+  // If toggling ON and base is Not started -> bump to In progress
+  const base = normBaseStatus(cur?.status);
+  if(nextUpd && base === BASE_STATUS.NOT_STARTED) payload.status = BASE_STATUS.IN_PROGRESS;
+
+  const ok = await patchRow(id, payload);
+  setSaving(false);
+  if(ok) await load();
+}
+
+/* ✅ Toggle DTC:
+   - If turning ON: Update must be true, otherwise blocked + alert (English)
+   - If turning OFF: confirm popup, Update stays as-is (separate work)
+*/
+async function toggleDtc(id){
+  mustNick();
+  const cur = items.find(x => x.id === id);
+  const currDtc = cur ? effDtcDone(cur) : false;
+  const nextDtc = !currDtc;
+
+  // turning ON requires Update done
+  if(nextDtc){
+    const upd = cur ? effUpdateDone(cur) : false;
+    if(!upd){
+      alert("Update is not completed yet. Please complete Update first.");
+      return;
+    }
+  } else {
+    // turning OFF => confirm
+    const okConfirm = confirm("Are you sure you want to UNCHECK DTC?");
+    if(!okConfirm) return;
+  }
+
+  setSaving(true);
+  const now = new Date().toISOString();
+
+  const payload = {
+    dtc_done: nextDtc,
+    dtc_by: nextDtc ? NICK : null,
+    dtc_at: nextDtc ? now : null,
+
+    // legacy completion fields
+    completed_by: nextDtc ? NICK : null,
+    completed_at: nextDtc ? now : null,
+  };
+
+  const ok = await patchRow(id, payload);
+  setSaving(false);
+  if(ok) await load();
+}
+
+// ---------- DOWNLOAD ----------
+$("downloadBtn").onclick = ()=>{
+  const rows = items.map(r => {
+    const base = normBaseStatus(r.status);
+    const upd = effUpdateDone(r);
+    const dtc = effDtcDone(r);
+    const state = derivedState(r);
+
+    return ({
+      vin: r.vin,
+      state,
+      base_status: base,
+      update_done: upd ? "Y" : "N",
+      update_by: r.update_by || r.updated_by || "",
+      update_at: formatKST(r.update_at || r.updated_at),
+      dtc_done: dtc ? "Y" : "N",
+      dtc_by: r.dtc_by || r.completed_by || "",
+      dtc_at: formatKST(r.dtc_at || r.completed_at),
+      memo: r.memo || "",
+    });
+  });
+
+  const header = ["VIN","State","Base Status","Update(Y/N)","Update By","Update Time(KST)","DTC(Y/N)","DTC By","DTC Time(KST)","Memo"];
   const aoa = [header, ...rows.map(x => [
-    x.vin, x.status, x.memo, x.updated_by, x.updated_at, x.completed_by, x.completed_at
+    x.vin, x.state, x.base_status, x.update_done, x.update_by, x.update_at, x.dtc_done, x.dtc_by, x.dtc_at, x.memo
   ])];
 
   const ws = XLSX.utils.aoa_to_sheet(aoa);
 
   ws["!cols"] = [
-    { wch: 10 }, { wch: 18 }, { wch: 30 }, { wch: 16 },
-    { wch: 24 }, { wch: 16 }, { wch: 24 }
+    { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 16 },
+    { wch: 24 }, { wch: 10 }, { wch: 16 }, { wch: 24 }, { wch: 30 }
   ];
 
   // Header style
@@ -386,19 +494,18 @@ $("downloadBtn").onclick = ()=>{
     }
   }
 
-  // Row fill by status
-  const colorByStatus = {
-    [STATUS.DTC_DONE]: "C6EFCE",       // green
-    [STATUS.UPDATE_DONE]: "D9E1F2",    // light blue
-    [STATUS.IN_PROGRESS]: "FFF2CC",    // light yellow
-    [STATUS.NOT_STARTED]: "F2F2F2",    // light gray
-    [STATUS.OTHER]: "FCE4D6"           // light orange
+  const colorByState = {
+    "Checked": "C6EFCE",
+    "Updated": "D9E1F2",
+    "In progress": "FFF2CC",
+    "Not started": "F2F2F2",
+    "Other": "FCE4D6"
   };
 
   for(let R = 1; R <= range.e.r; ++R){
-    const sAddr = XLSX.utils.encode_cell({r:R, c:1}); // Status col (B)
-    const statusVal = ws[sAddr]?.v;
-    const fillColor = colorByStatus[statusVal];
+    const stateAddr = XLSX.utils.encode_cell({r:R, c:1}); // State col (B)
+    const stateVal = ws[stateAddr]?.v;
+    const fillColor = colorByState[stateVal];
     if(fillColor){
       for(let C = range.s.c; C <= range.e.c; ++C){
         const addr = XLSX.utils.encode_cell({r:R, c:C});
@@ -419,38 +526,31 @@ $("downloadBtn").onclick = ()=>{
 
 $("search").oninput = render;
 
+// ---------- TABS ----------
 function setActiveTabs(newTab){
   tab = newTab;
-
   document.querySelectorAll("#topTabs button, #bottomTabs button").forEach(btn=>{
     btn.classList.toggle("active", btn.dataset.tab === newTab);
   });
-
   render();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Bind both top & bottom tab clicks
   document.querySelectorAll('#topTabs button, #bottomTabs button').forEach(btn => {
     btn.onclick = () => setActiveTabs(btn.dataset.tab);
   });
-
   mustNick();
   load();
 });
 </script>
 
+  <!-- ✅ Bottom: only My work / Recent -->
   <div class="bottomBar">
     <div class="bottomInner tabs" id="bottomTabs">
-      <button data-tab="all" class="active">All</button>
-      <button data-tab="In progress">In progress</button>
-      <button data-tab="DTC check">DTC check</button>
-      <button data-tab="Update completed">Update completed</button>
-      <button data-tab="Other">Other</button>
-      <button data-tab="remain">Not started</button>
       <button data-tab="mine">My work</button>
-      <button data-tab="recent">Recent changes</button>
+      <button data-tab="recent">Recent</button>
     </div>
   </div>
+
 </body>
 </html>
