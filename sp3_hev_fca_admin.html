@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SP3 HEV FCA 관리자(Admin)</title>
+  <style>
+    body{font-family:system-ui,-apple-system;margin:18px;line-height:1.35}
+    .box{border:1px solid #ddd;border-radius:14px;padding:12px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input,button,textarea,select{border:1px solid #ccc;border-radius:12px;padding:10px;font-size:14px}
+    button{background:#f6f6f6}
+    button.primary{background:#111;color:#fff;border-color:#111}
+    button.danger{background:#b42318;color:#fff;border-color:#b42318}
+    button:disabled{opacity:.55}
+    .pill{border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-size:13px;background:#fff}
+    .muted{color:#666;font-size:13px}
+    .list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .card{border:1px solid #e3e3e3;border-radius:16px;padding:12px}
+    .vin{font-size:22px;font-weight:900}
+    .right{margin-left:auto}
+    .sectionTitle{margin:14px 0 6px;font-weight:900}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width: 680px){
+      .grid2{grid-template-columns:1fr}
+    }
+    .topbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .stickyBottom{
+      position:fixed;left:0;right:0;bottom:0;
+      background:#fff;border-top:1px solid #ddd;
+      padding:10px 12px;z-index:9999;
+    }
+    .stickyBottom .inner{max-width:980px;margin:0 auto;display:flex;gap:8px}
+    .stickyBottom button{flex:1;white-space:nowrap}
+    body{padding-bottom:92px}
+    textarea{width:100%;min-height:110px}
+  </style>
+</head>
+<body>
+
+<h2>SP3 HEV FCA 관리자(Admin)</h2>
+
+<div class="box" id="lockedBox" style="display:none">
+  <div class="muted">접근 불가: admin key가 필요합니다.</div>
+  <div class="muted">URL 뒤에 <b>?key=너가정한키</b> 형태로 접속하세요.</div>
+</div>
+
+<div id="app" style="display:none">
+
+  <div class="box">
+    <div class="topbar">
+      <div class="row">
+        <div>관리자: <b id="nickLabel">(미설정)</b></div>
+        <button id="nickBtn">닉네임 변경</button>
+      </div>
+      <div class="row">
+        <span class="pill" id="rt">-</span>
+        <button id="reloadBtn">새로고침</button>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <input id="search" placeholder="VIN 검색(4자리/전체)" style="width:220px"/>
+      <span class="pill">총 <b id="cntTotal">-</b></span>
+    </div>
+
+    <div class="sectionTitle">버전 설정(일반 화면 상단에도 반영됨)</div>
+    <div class="grid2">
+      <div class="box">
+        <div class="muted" style="margin-bottom:6px">카메라</div>
+        <div class="row">
+          <input id="camVer" placeholder="버전 (예: 1.03)" />
+          <input id="camPart" placeholder="품번 (예: 2621000)" />
+        </div>
+      </div>
+      <div class="box">
+        <div class="muted" style="margin-bottom:6px">DRV</div>
+        <div class="row">
+          <input id="drvVer" placeholder="버전 (예: 1.06)" />
+          <input id="drvPart" placeholder="품번 (예: 2622000)" />
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="saveSettingsBtn">버전 저장</button>
+      <span class="muted" id="settingsMsg"></span>
+    </div>
+
+    <div class="sectionTitle">VIN 추가(대량 붙여넣기)</div>
+    <div class="row">
+      <select id="bulkGrade">
+        <option value="F">카메라(F)</option>
+        <option value="F+">DRV(F+)</option>
+      </select>
+      <span class="muted">VIN 여러개를 공백/줄바꿈 섞어서 붙여넣기 가능</span>
+    </div>
+    <textarea id="bulkText" placeholder="예) 1234 5678&#10;9012 ..."></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="bulkAddBtn">VIN 대량 추가</button>
+      <button id="bulkClearBtn">입력 지우기</button>
+      <span class="muted" id="bulkMsg"></span>
+    </div>
+
+    <div class="sectionTitle">VIN 대량 삭제(주의)</div>
+    <textarea id="delText" placeholder="삭제할 VIN들을 붙여넣기"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="danger" id="bulkDelBtn">VIN 대량 삭제</button>
+      <span class="muted" id="delMsg"></span>
+    </div>
+  </div>
+
+  <div class="sectionTitle">VIN 목록(관리자 편집)</div>
+  <div class="list" id="list"></div>
+
+</div>
+
+<div class="stickyBottom" id="bottomBar" style="display:none">
+  <div class="inner">
+    <button class="primary" id="scrollTopBtn">위로</button>
+    <button id="scrollListBtn">목록</button>
+  </div>
+</div>
+
+<script>
+/* ======= 설정 ======= */
+const SUPABASE_URL = "https://gpdtgrbiyrgekjtgxpgf.supabase.co";
+const SUPABASE_ANON_KEY = "너꺼그대로"; // ✅ 기존 페이지에서 쓰던 키 그대로 넣어
+const TABLE_NAME = "checklist_sp3_hev_fca";
+const SETTINGS_TABLE = "sp3_hev_fca_settings";
+
+/* ✅ 아주 간단 admin 키(보안 강함 아님) */
+const ADMIN_KEY = "sp3_admin_2026"; // 원하는 값으로 바꿔
+/* ==================== */
+
+let NICK = localStorage.getItem("checklist_nick") || "";
+let items = [];
+let saving = false;
+
+const $ = (id)=>document.getElementById(id);
+
+function headers(preferReturn=true){
+  const h = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json",
+  };
+  if(preferReturn) h["Prefer"] = "return=representation";
+  return h;
+}
+
+function mustNick(){
+  while(!NICK){
+    const n = prompt("관리자 닉네임 입력 (예: 신영)");
+    if(!n) continue;
+    NICK = n.trim();
+    localStorage.setItem("checklist_nick", NICK);
+  }
+  $("nickLabel").innerText = NICK;
+}
+$("nickBtn").onclick = ()=>{
+  NICK = "";
+  localStorage.removeItem("checklist_nick");
+  mustNick();
+};
+
+function setSaving(v){
+  saving=v;
+  document.querySelectorAll("button,input,textarea,select").forEach(el=>{
+    if(el.id === "search") return;
+    el.disabled = v;
+  });
+  $("nickBtn").disabled = false;
+}
+
+function parseVINs(text){
+  return (text||"")
+    .split(/\s+/)
+    .map(s=>s.trim())
+    .filter(Boolean);
+}
+
+async function loadSettings(){
+  const url = `${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}?select=*&id=eq.main`;
+  const r = await fetch(url, {headers: headers(true)});
+  if(!r.ok){
+    console.log("settings load failed", await r.text());
+    return;
+  }
+  const rows = await r.json();
+  const s = rows?.[0];
+  if(!s) return;
+  $("camVer").value = s.cam_version || "";
+  $("camPart").value = s.cam_part || "";
+  $("drvVer").value = s.drv_version || "";
+  $("drvPart").value = s.drv_part || "";
+}
+
+async function saveSettings(){
+  mustNick();
+  setSaving(true);
+  $("settingsMsg").innerText = "저장중...";
+  const now = new Date().toISOString();
+
+  const payload = {
+    id: "main",
+    cam_version: $("camVer").value.trim(),
+    cam_part: $("camPart").value.trim(),
+    drv_version: $("drvVer").value.trim(),
+    drv_part: $("drvPart").value.trim(),
+    updated_by: NICK,
+    updated_at: now
+  };
+
+  const url = `${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}?id=eq.main`;
+  const r = await fetch(url, {method:"PATCH", headers: headers(true), body: JSON.stringify(payload)});
+  setSaving(false);
+
+  if(!r.ok){
+    $("settingsMsg").innerText = "저장 실패(콘솔 확인)";
+    console.log(await r.text());
+    return;
+  }
+  $("settingsMsg").innerText = "저장 완료 ✅";
+}
+$("saveSettingsBtn").onclick = saveSettings;
+
+async function load(){
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*`;
+  const r = await fetch(url, {headers: headers(true)});
+  if(!r.ok){
+    $("rt").innerText = "로드 실패";
+    console.log(await r.text());
+    return;
+  }
+  items = await r.json();
+  $("rt").innerText = "연결됨 ✅";
+  $("cntTotal").innerText = items.length;
+  render();
+}
+
+function gradeLabel(g){
+  if(g==="F") return "카메라(F)";
+  if(g==="F+") return "DRV(F+)";
+  return "-";
+}
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#39;");
+}
+
+function render(){
+  const q = ($("search").value || "").trim();
+  let view = [...items];
+  if(q) view = view.filter(x => String(x.vin).includes(q));
+
+  view.sort((a,b)=> String(a.vin).localeCompare(String(b.vin)));
+
+  const box = $("list");
+  box.innerHTML = "";
+
+  view.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = `
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="vin">${escapeHtml(it.vin)}</div>
+          <div class="muted">등급: <b>${gradeLabel((it.grade||"").trim())}</b></div>
+          <div class="muted">업데이트 완료(update_done): <b>${it.update_done ? "Y" : "N"}</b></div>
+        </div>
+        <button class="danger" onclick="deleteOne('${it.vin}')">삭제</button>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <select onchange="setGrade('${it.id}', this.value)">
+          <option value="F" ${(it.grade||"").trim()==="F"?"selected":""}>카메라(F)</option>
+          <option value="F+" ${(it.grade||"").trim()==="F+"?"selected":""}>DRV(F+)</option>
+        </select>
+
+        <button onclick="forceUpdateDone('${it.id}', ${it.update_done ? "true" : "false"})">
+          ${it.update_done ? "완료 해제(강제)" : "완료 처리(강제)"}
+        </button>
+      </div>
+    `;
+    box.appendChild(d);
+  });
+}
+
+$("search").oninput = render;
+$("reloadBtn").onclick = async ()=>{ await loadSettings(); await load(); };
+
+async function setGrade(id, grade){
+  mustNick();
+  setSaving(true);
+  const now = new Date().toISOString();
+  const payload = {
+    grade,
+    updated_by: NICK,
+    updated_at: now
+  };
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`;
+  const r = await fetch(url, {method:"PATCH", headers: headers(true), body: JSON.stringify(payload)});
+  setSaving(false);
+  if(!r.ok){
+    alert("등급 변경 실패(콘솔 확인)");
+    console.log(await r.text());
+    return;
+  }
+  await load();
+}
+
+async function forceUpdateDone(id, curr){
+  mustNick();
+  const next = !curr;
+  const ok = confirm(next ? "정말 완료 처리(강제) 할까요?" : "정말 완료를 해제(강제) 할까요?");
+  if(!ok) return;
+
+  setSaving(true);
+  const now = new Date().toISOString();
+  const payload = {
+    update_done: next,
+    update_by: next ? NICK : null,
+    update_at: next ? now : null,
+    updated_by: NICK,
+    updated_at: now
+  };
+
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`;
+  const r = await fetch(url, {method:"PATCH", headers: headers(true), body: JSON.stringify(payload)});
+  setSaving(false);
+  if(!r.ok){
+    alert("완료 강제 변경 실패(콘솔 확인)");
+    console.log(await r.text());
+    return;
+  }
+  await load();
+}
+
+async function bulkAdd(){
+  mustNick();
+  const vins = parseVINs($("bulkText").value);
+  if(vins.length === 0){
+    $("bulkMsg").innerText = "VIN이 없습니다.";
+    return;
+  }
+
+  const grade = $("bulkGrade").value;
+  const now = new Date().toISOString();
+
+  const rows = vins.map(v => ({
+    vin: v,
+    grade,
+    status: "미완료",
+    update_done: false,
+    updated_by: NICK,
+    updated_at: now
+  }));
+
+  setSaving(true);
+  $("bulkMsg").innerText = "추가중...";
+
+  // on_conflict=vin + Prefer resolution=ignore-duplicates
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?on_conflict=vin`;
+  const h = headers(true);
+  h["Prefer"] = "resolution=ignore-duplicates,return=representation";
+
+  const r = await fetch(url, {method:"POST", headers: h, body: JSON.stringify(rows)});
+  setSaving(false);
+
+  if(!r.ok){
+    $("bulkMsg").innerText = "추가 실패(콘솔 확인)";
+    console.log(await r.text());
+    return;
+  }
+  $("bulkMsg").innerText = `추가 완료 ✅ (입력 ${vins.length}개)`;
+  await load();
+}
+$("bulkAddBtn").onclick = bulkAdd;
+$("bulkClearBtn").onclick = ()=>{ $("bulkText").value=""; $("bulkMsg").innerText=""; };
+
+async function deleteOne(vin){
+  mustNick();
+  const ok = confirm(`정말 VIN ${vin} 을(를) 삭제할까요?`);
+  if(!ok) return;
+
+  setSaving(true);
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?vin=eq.${encodeURIComponent(vin)}`;
+  const r = await fetch(url, {method:"DELETE", headers: headers(false)});
+  setSaving(false);
+
+  if(!r.ok){
+    alert("삭제 실패(콘솔 확인)");
+    console.log(await r.text());
+    return;
+  }
+  await load();
+}
+
+async function bulkDelete(){
+  mustNick();
+  const vins = parseVINs($("delText").value);
+  if(vins.length === 0){
+    $("delMsg").innerText = "삭제할 VIN이 없습니다.";
+    return;
+  }
+  const ok = confirm(`정말 ${vins.length}개 VIN을 삭제할까요? (되돌릴 수 없음)`);
+  if(!ok) return;
+
+  setSaving(true);
+  $("delMsg").innerText = "삭제중...";
+
+  // REST: in.(...) 지원
+  const list = vins.map(v=>`"${v}"`).join(",");
+  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?vin=in.(${encodeURIComponent(list)})`;
+
+  const r = await fetch(url, {method:"DELETE", headers: headers(false)});
+  setSaving(false);
+
+  if(!r.ok){
+    $("delMsg").innerText = "삭제 실패(콘솔 확인)";
+    console.log(await r.text());
+    return;
+  }
+  $("delMsg").innerText = `삭제 완료 ✅ (${vins.length}개 요청)`;
+  await load();
+}
+$("bulkDelBtn").onclick = bulkDelete;
+
+function initAdminGate(){
+  const params = new URLSearchParams(location.search);
+  const key = params.get("key") || "";
+  if(key !== ADMIN_KEY){
+    $("lockedBox").style.display = "block";
+    return false;
+  }
+  $("app").style.display = "block";
+  $("bottomBar").style.display = "block";
+  return true;
+}
+
+$("scrollTopBtn").onclick = ()=> window.scrollTo({top:0, behavior:"smooth"});
+$("scrollListBtn").onclick = ()=> document.getElementById("list").scrollIntoView({behavior:"smooth"});
+
+document.addEventListener("DOMContentLoaded", async ()=>{
+  if(!initAdminGate()) return;
+  mustNick();
+  await loadSettings();
+  await load();
+});
+</script>
+</body>
+</html>
