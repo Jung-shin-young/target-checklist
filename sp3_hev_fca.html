@@ -22,6 +22,34 @@
       color:#111;
     }
     .pillStat b{font-weight:800}
+    /* ========================= */
+/* 카메라 / DRV 색상 구분 */
+/* ========================= */
+
+.pillBtn.camera{
+  border-color:#cfe3ff;
+  background:#eef6ff;
+  color:#0b3a75;
+}
+
+.pillBtn.drv{
+  border-color:#e6d7ff;
+  background:#f6f0ff;
+  color:#3b1b7a;
+}
+
+/* 선택(active) 상태 */
+.pillBtn.camera.active{
+  background:#1d4ed8;
+  border-color:#1d4ed8;
+  color:#fff;
+}
+
+.pillBtn.drv.active{
+  background:#6d28d9;
+  border-color:#6d28d9;
+  color:#fff;
+}
     .list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
     .card{border:1px solid #e3e3e3;border-radius:16px;padding:12px}
     .vin{font-size:26px;font-weight:800}
