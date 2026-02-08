@@ -14,6 +14,14 @@
     .pill{border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-size:13px;background:#fff}
     .pillBtn{cursor:pointer}
     .pillBtn.active{background:#111;color:#fff;border-color:#111}
+    /* ✅ 클릭 불가(현황 표시) pill */
+    .pillStat{
+      cursor:default;
+      background:#f6f6f6;
+      border-color:#eee;
+      color:#111;
+    }
+    .pillStat b{font-weight:800}
     .list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
     .card{border:1px solid #e3e3e3;border-radius:16px;padding:12px}
     .vin{font-size:26px;font-weight:800}
@@ -74,9 +82,9 @@
       <span class="pill pillBtn" id="gF">카메라</span>
       <span class="pill pillBtn" id="gFp">DRV</span>
 
-      <span class="pill" id="cntTotal">총 -</span>
-      <span class="pill" id="cntDone">완료 -</span>
-      <span class="pill" id="cntRemain">잔여 -</span>
+      <span class="pill pillStat" id="cntTotal">총 -</span>
+      <span class="pill pillStat" id="cntDone">완료 -</span>
+      <span class="pill pillStat" id="cntRemain">잔여 -</span>
 
       <div class="summaryPct" style="margin-top:10px;width:100%">
         <div class="muted">완료율: <b id="pctText">-</b></div>
@@ -244,6 +252,48 @@ async function load(){
   items = await r.json();
   $("rt").innerText = "연결됨 ✅";
   render();
+}
+function renderMine(){
+  mustNick();
+  const q = $("search").value.trim();
+
+  let view = items.filter(x =>
+    (x.updated_by||"") === NICK ||
+    (x.update_by||"") === NICK ||
+    (x.region_by||"") === NICK
+  );
+
+  view = applyGradeFilter(view);
+  view = applyRegionFilter(view);
+
+  if(q) view = view.filter(x=>String(x.vin).includes(q));
+
+  view.sort((a,b)=> new Date(b.updated_at||0).getTime() - new Date(a.updated_at||0).getTime());
+
+  // 상단 상태탭 active 해제(내작업 모드)
+  document.querySelectorAll("#topTabs button").forEach(btn=>btn.classList.remove("active"));
+
+  renderListInBatches(view);
+}
+
+function renderRecent(){
+  const q = $("search").value.trim();
+  const since = Date.now() - 30*60*1000; // 30분
+
+  let view = items.filter(x =>
+    x.updated_at && (new Date(x.updated_at).getTime() >= since)
+  );
+
+  view = applyGradeFilter(view);
+  view = applyRegionFilter(view);
+
+  if(q) view = view.filter(x=>String(x.vin).includes(q));
+
+  view.sort((a,b)=> new Date(b.updated_at||0).getTime() - new Date(a.updated_at||0).getTime());
+
+  document.querySelectorAll("#topTabs button").forEach(btn=>btn.classList.remove("active"));
+
+  renderListInBatches(view);
 }
 
 function applyGradeFilter(view){
@@ -662,13 +712,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   mustNick();
   load();
+  $("btnMine").onclick = renderMine;
+  $("btnRecent").onclick = renderRecent;
 });
 </script>
 
 <!-- 하단바는 일단 유지(원하면 내작업/최근변경 버전도 다시 붙여줄게) -->
 <div class="bottomBar">
   <div class="bottomInner tabs" id="bottomTabs">
-    <button onclick="alert('하단바는 필요하면 내작업/최근변경만 남기는 버전으로 다시 정리해줄게!')">하단바</button>
+    <button id="btnMine">내 작업</button>
+    <button id="btnRecent">최근 변경</button>
   </div>
 </div>
 
