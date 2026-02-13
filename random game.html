@@ -287,4 +287,269 @@
   function checkLanding(ball){
     const yFloor = H - bottomH + 20;
     if(ball.y + ball.r >= yFloor){
-      // determ
+      // determine slot by x
+      const s = slots.find(sl => ball.x >= sl.x0 && ball.x < sl.x1) || slots[slots.length-1];
+      ball.done = true;
+      ball.landedSlot = s;
+
+      // snap for nice look
+      ball.y = yFloor - ball.r;
+      ball.vx = 0; ball.vy = 0;
+    }
+  }
+
+  function step(){
+    if(!running){
+      draw();
+      requestAnimationFrame(step);
+      return;
+    }
+
+    for(const b of balls){
+      if(b.done) continue;
+
+      // physics
+      b.vy += gravity;
+      b.vx += shakeVX * 0.03;
+
+      b.x += b.vx;
+      b.y += b.vy;
+
+      b.vx *= friction;
+      b.vy *= air;
+
+      wallCollision(b);
+
+      // collide with pins
+      for(const p of pins){
+        circleCollision(b,p);
+      }
+
+      checkLanding(b);
+    }
+
+    // all landed?
+    if(balls.length && balls.every(b => b.done)){
+      running = false;
+      finalizeResult();
+    }
+
+    draw();
+    requestAnimationFrame(step);
+  }
+
+  function finalizeResult(){
+    // if multiple balls: choose "worst luck" = random among landed slots? (more fun: pick first ball landed)
+    // We'll do: pick the ball that landed LAST (most suspense) -> last in time, but we didn't record time.
+    // Alternative: pick random among landed slots for fairness. Let's do: random among balls' landed slots.
+    const picked = balls[randInt(0, balls.length-1)].landedSlot;
+    const rule = $("rule").value;
+
+    const text = (rule === "lose")
+      ? `💥 ${picked.name} 패배! (맞음)`
+      : `🎉 ${picked.name} 당첨! (맞음)`;
+
+    setResult(text);
+
+    // small shake celebration
+    applyMiniFlash();
+  }
+
+  function applyMiniFlash(){
+    let t = 0;
+    const id = setInterval(()=>{
+      t++;
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0,W,H);
+      ctx.restore();
+      if(t>=6) clearInterval(id);
+    }, 60);
+  }
+
+  function draw(){
+    // background
+    ctx.clearRect(0,0,W,H);
+
+    // title area
+    ctx.save();
+    ctx.fillStyle = "#0e1522";
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+
+    // playfield frame
+    ctx.save();
+    ctx.strokeStyle = "#223049";
+    ctx.lineWidth = 4;
+    roundRect(ctx, side-10, 20, W - (side-10)*2, H-40, 18);
+    ctx.stroke();
+    ctx.restore();
+
+    // top funnel
+    ctx.save();
+    ctx.strokeStyle = "#2a3a57";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(W/2 - 140, topMargin);
+    ctx.lineTo(W/2 - 40, 20);
+    ctx.moveTo(W/2 + 140, topMargin);
+    ctx.lineTo(W/2 + 40, 20);
+    ctx.stroke();
+    ctx.restore();
+
+    // pins
+    ctx.save();
+    ctx.fillStyle = "#cfe3ff";
+    for(const p of pins){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // bottom slots area
+    const yTop = H - bottomH;
+    ctx.save();
+    ctx.fillStyle = "#0b0f14";
+    ctx.fillRect(0, yTop, W, bottomH);
+    ctx.restore();
+
+    // slot dividers + names
+    ctx.save();
+    ctx.strokeStyle = "#223049";
+    ctx.lineWidth = 3;
+    ctx.fillStyle = "#e9eef6";
+    ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for(let i=0;i<slots.length;i++){
+      const sl = slots[i];
+      ctx.beginPath();
+      ctx.moveTo(sl.x0, yTop);
+      ctx.lineTo(sl.x0, H-20);
+      ctx.stroke();
+
+      // name
+      const cx = (sl.x0 + sl.x1) / 2;
+      const cy = yTop + 90;
+      // small pill behind name
+      drawNamePill(cx, cy, sl.name);
+    }
+    // last divider
+    const last = slots[slots.length-1];
+    ctx.beginPath();
+    ctx.moveTo(last.x1, yTop);
+    ctx.lineTo(last.x1, H-20);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // balls
+    ctx.save();
+    for(const b of balls){
+      ctx.beginPath();
+      ctx.fillStyle = b.done ? "#2d5bff" : "#ffffff";
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fill();
+
+      // highlight
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.arc(b.x - 6, b.y - 7, b.r*0.55, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+
+    // hint if not ready
+    if(!ready){
+      ctx.save();
+      ctx.fillStyle = "rgba(0,0,0,.35)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#e9eef6";
+      ctx.font = "34px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("이름 입력 → 보드 준비", W/2, H/2);
+      ctx.restore();
+    } else if(!running && balls.length===0){
+      ctx.save();
+      ctx.fillStyle = "#a9b6cc";
+      ctx.font = "26px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("DROP을 눌러 시작!", W/2, topMargin + 40);
+      ctx.restore();
+    }
+  }
+
+  function drawNamePill(cx, cy, text){
+    ctx.save();
+    const padX = 18;
+    const padY = 12;
+    // measure
+    const w = ctx.measureText(text).width + padX*2;
+    const h = 44;
+    ctx.fillStyle = "#0e1522";
+    ctx.strokeStyle = "#2a3a57";
+    ctx.lineWidth = 2;
+    roundRect(ctx, cx - w/2, cy - h/2, w, h, 999);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#e9eef6";
+    ctx.fillText(text, cx, cy+1);
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  // buttons
+  $("startBtn").addEventListener("click", () => {
+    buildBoard();
+  });
+
+  $("dropBtn").addEventListener("click", () => {
+    if(!ready) return;
+    if(running) return;
+    spawnBalls();
+  });
+
+  $("shakeBtn").addEventListener("click", () => {
+    if(!ready) return;
+    applyShake();
+  });
+
+  $("resetBtn").addEventListener("click", () => {
+    names = [];
+    slots = [];
+    pins = [];
+    balls = [];
+    running = false;
+    ready = false;
+    $("dropBtn").disabled = true;
+    $("shakeBtn").disabled = true;
+    setMsg("");
+    setResult("-");
+    draw();
+  });
+
+  // start loop
+  draw();
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>
