@@ -3,190 +3,185 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>☕ 커피내기 아레나</title>
+<title>☕ 운명의 제단</title>
 <style>
 :root{
---bg1:#0a0f1f;
---bg2:#101a35;
---card:rgba(255,255,255,.08);
---stroke:rgba(255,255,255,.15);
---text:#f2f6ff;
---accent1:#4ea3ff;
---accent2:#b388ff;
---danger:#ff4d6d;
---good:#40f99b;
---r:18px;
+  --bg1:#060814;
+  --bg2:#0d1530;
+  --card:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.18);
+  --text:#f2f5ff;
+  --muted:rgba(242,245,255,.7);
+  --danger:#ff4d6d;
+  --life:#40f99b;
+  --accent:#7aa2ff;
+  --r:18px;
 }
 body{
-margin:0;
-font-family:system-ui,-apple-system;
-color:var(--text);
-background:
-radial-gradient(1000px 600px at 10% 10%,rgba(78,163,255,.25),transparent 60%),
-radial-gradient(800px 600px at 90% 20%,rgba(179,136,255,.25),transparent 60%),
-linear-gradient(180deg,var(--bg1),var(--bg2));
+  margin:0;
+  font-family:system-ui,-apple-system;
+  color:var(--text);
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(122,162,255,.25), transparent 60%),
+    radial-gradient(800px 600px at 80% 20%, rgba(255,77,109,.22), transparent 60%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
 }
 .wrap{max-width:900px;margin:auto;padding:16px;}
 .card{
-background:var(--card);
-border:1px solid var(--stroke);
-border-radius:var(--r);
-padding:14px;
-margin-bottom:14px;
-backdrop-filter:blur(8px);
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:var(--r);
+  padding:16px;
+  backdrop-filter:blur(8px);
 }
-h1{margin:0 0 8px;font-size:18px}
-button{
-padding:10px 14px;
-border-radius:12px;
-border:1px solid var(--stroke);
-background:rgba(255,255,255,.1);
-color:white;
-cursor:pointer;
-}
-button.primary{
-background:linear-gradient(90deg,var(--accent1),var(--accent2));
-border:none;
-}
-button.danger{
-background:linear-gradient(90deg,var(--danger),orange);
-border:none;
-}
+h1{margin:0 0 8px;font-size:20px;text-align:center;}
 textarea{
-width:100%;
-min-height:80px;
-border-radius:12px;
-border:1px solid var(--stroke);
-background:rgba(0,0,0,.3);
-color:white;
-padding:8px;
+  width:100%;min-height:80px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(0,0,0,.35);
+  color:white;padding:10px;
 }
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
+button{
+  padding:10px 16px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  font-size:15px;
 }
-.big{font-size:28px;font-weight:900;text-align:center;margin:10px 0;}
-.hidden{display:none;}
-.mapBtn{
-height:80px;
-font-size:16px;
+button.start{
+  width:100%;
+  background:linear-gradient(90deg,var(--accent),#b388ff);
+  color:white;
+  font-weight:700;
 }
-.center{text-align:center;}
-.sep{height:1px;background:rgba(255,255,255,.2);margin:10px 0;}
+.stage{
+  margin-top:16px;
+  text-align:center;
+}
+.names{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+.name{
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid var(--stroke);
+  transition:all .4s ease;
+}
+.dead{
+  opacity:.25;
+  filter:blur(2px);
+  text-decoration:line-through;
+}
+.revive{
+  background:rgba(64,249,155,.25);
+  border-color:var(--life);
+}
+.final{
+  font-size:30px;
+  font-weight:900;
+  color:var(--danger);
+  text-shadow:0 0 18px rgba(255,77,109,.6);
+}
+.status{
+  margin:14px 0;
+  font-size:18px;
+  color:var(--muted);
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-
-<div id="mapScreen" class="card">
-<h1>🎮 커피내기 아레나</h1>
-<div class="grid">
-<button class="mapBtn primary" onclick="startGame(1)">🎰 배신 슬롯</button>
-<button class="mapBtn primary" onclick="startGame(2)">🧨 러시안 서바이벌</button>
-<button class="mapBtn primary" onclick="startGame(3)">🃏 배신 카드</button>
-<button class="mapBtn primary" onclick="startGame(4)">💥 단계 압축</button>
-</div>
-</div>
-
-<div id="gameScreen" class="card hidden">
-<h1 id="gameTitle"></h1>
-<textarea id="names" placeholder="이름 입력 (줄바꿈)
+  <div class="card">
+    <h1>☕ 운명의 제단</h1>
+    <textarea id="namesInput" placeholder="이름 입력 (줄바꿈)
 철수
 영희
 민수"></textarea>
-<div class="sep"></div>
-<button class="primary" onclick="runGame()">START</button>
-<button onclick="back()">← 맵으로</button>
-<div id="result" class="big"></div>
-</div>
+    <button class="start" onclick="start()">의식 시작</button>
 
+    <div class="stage">
+      <div class="status" id="status"></div>
+      <div class="names" id="names"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-let currentGame=0;
-
-function startGame(n){
-currentGame=n;
-document.getElementById("mapScreen").classList.add("hidden");
-document.getElementById("gameScreen").classList.remove("hidden");
-
-const titles={
-1:"🎰 배신 슬롯",
-2:"🧨 러시안 서바이벌",
-3:"🃏 배신 카드",
-4:"💥 단계 압축"
-};
-document.getElementById("gameTitle").textContent=titles[n];
-document.getElementById("result").textContent="";
-}
-
-function back(){
-document.getElementById("mapScreen").classList.remove("hidden");
-document.getElementById("gameScreen").classList.add("hidden");
-}
-
-function parseNames(){
-return document.getElementById("names").value
-.split("\n")
-.map(x=>x.trim())
-.filter(Boolean);
-}
-
-function rand(arr){
-return arr[Math.floor(Math.random()*arr.length)];
-}
-
-async function runGame(){
-const names=parseNames();
-if(names.length<2){
-alert("최소 2명 이상!");
-return;
-}
-
-const result=document.getElementById("result");
-result.textContent="";
-
-if(currentGame===1){
-let temp=[...names];
-for(let i=0;i<3;i++){
-result.textContent="🎰 돌리는 중...";
-await sleep(800);
-}
-let loser=rand(names);
-result.textContent="☕ 커피는... "+loser;
-}
-
-if(currentGame===2){
-let temp=[...names];
-while(temp.length>1){
-result.textContent="🧨 탈락자 선정...";
-await sleep(800);
-temp.splice(Math.floor(Math.random()*temp.length),1);
-}
-result.textContent="💀 최종 패배: "+temp[0];
-}
-
-if(currentGame===3){
-let bombIndex=Math.floor(Math.random()*names.length);
-result.textContent="🃏 카드 섞는 중...";
-await sleep(800);
-result.textContent="💣 폭탄은... "+names[bombIndex];
-}
-
-if(currentGame===4){
-let temp=[...names];
-while(temp.length>1){
-await sleep(700);
-temp=temp.filter(()=>Math.random()>0.5);
-if(temp.length===0) temp=[rand(names)];
-}
-result.textContent="☕ 당첨: "+temp[0];
-}
-}
+let all=[], alive=[], dead=[];
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-</script>
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
+function render(){
+  const box=document.getElementById("names");
+  box.innerHTML="";
+  all.forEach(n=>{
+    const d=document.createElement("div");
+    d.className="name";
+    d.textContent=n;
+    if(dead.includes(n)) d.classList.add("dead");
+    if(alive.includes(n) && dead.length>0 && !dead.includes(n)){}
+    box.appendChild(d);
+  });
+}
+
+async function start(){
+  const input=document.getElementById("namesInput").value
+    .split("\n").map(x=>x.trim()).filter(Boolean);
+  if(input.length<3){alert("최소 3명");return;}
+  all=[...input];
+  alive=[...input];
+  dead=[];
+  render();
+
+  const status=document.getElementById("status");
+
+  status.textContent="의식이 시작됩니다…";
+  await sleep(1500);
+
+  // 1차 숙청
+  status.textContent="🔥 1차 숙청";
+  await sleep(1000);
+  while(alive.length > Math.ceil(all.length/2)){
+    const v=rand(alive);
+    alive=alive.filter(x=>x!==v);
+    dead.push(v);
+    render();
+    await sleep(700);
+  }
+
+  // 부활
+  status.textContent="✨ 부활의 기회";
+  await sleep(1200);
+  const revive=rand(dead);
+  dead=dead.filter(x=>x!==revive);
+  alive.push(revive);
+  render();
+  await sleep(1200);
+
+  // 2차 숙청
+  status.textContent="🔪 2차 숙청";
+  await sleep(1000);
+  while(alive.length>2){
+    const v=rand(alive);
+    alive=alive.filter(x=>x!==v);
+    dead.push(v);
+    render();
+    await sleep(800);
+  }
+
+  // 최후
+  status.textContent="⏳ 최후의 2인…";
+  await sleep(2500);
+
+  const loser=rand(alive);
+  status.innerHTML=`☕ <span class="final">${loser}</span> 커피 쏘기`;
+}
+</script>
 </body>
 </html>
