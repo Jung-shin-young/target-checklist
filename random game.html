@@ -228,4 +228,168 @@
     $("keepBtn").disabled = state.ended;
     $("swapLeftBtn").disabled = state.ended || state.alive.length < 2;
     $("swapRightBtn").disabled = state.ended || state.alive.length < 2;
-    $("swapDeckBtn").disabled = state.
+    $("swapDeckBtn").disabled = state.ended || !state.deckSwapOn;
+
+    $("swapDeckBtn").style.display = state.deckSwapOn ? "inline-block" : "none";
+    updateStatusList();
+  }
+
+  function startTimer(){
+    const [a,b] = $("timerRange").value.split("-").map(Number);
+    state.timeLeft = randInt(a,b);
+    $("timeLeft").textContent = state.timeLeft;
+    state.timer = setInterval(()=>{
+      if(state.ended) return;
+      state.timeLeft--;
+      $("timeLeft").textContent = state.timeLeft;
+      if(state.timeLeft <= 0){
+        endGameByTimer();
+      }
+    }, 1000);
+  }
+
+  function stopTimer(){
+    if(state.timer){
+      clearInterval(state.timer);
+      state.timer = null;
+    }
+  }
+
+  function endGameByTimer(){
+    state.ended = true;
+    stopTimer();
+
+    // find bomb holder
+    const bombIdx = state.cards.findIndex(c=>c==="BOMB");
+    const loser = bombIdx >= 0 ? state.alive[bombIdx] : "(없음?)";
+
+    $("gameMsg").textContent = `⏱ 타이머 종료! 💣 가진 사람: ${loser}`;
+    alert(`타이머 종료!\n💣 폭탄 보유자: ${loser}\n\n벌칙/내기 집행 ㄱㄱ`);
+
+    // show status card (debug) after end
+    statusCard.style.display = "block";
+    setTurnUI();
+  }
+
+  function nextTurn(){
+    if(state.ended) return;
+    state.turnIndex = (state.turnIndex + 1) % state.alive.length;
+    setTurnUI();
+  }
+
+  function swap(i,j){
+    [state.cards[i], state.cards[j]] = [state.cards[j], state.cards[i]];
+  }
+
+  function swapWithDeck(i){
+    if(state.deck.length === 0) state.deck.push("SAFE");
+    const deckIdx = randInt(0, state.deck.length-1);
+    const tmp = state.cards[i];
+    state.cards[i] = state.deck[deckIdx];
+    state.deck[deckIdx] = tmp;
+  }
+
+  function validateStart(){
+    const names = parseNames();
+    const bombCount = Number($("bombCount").value);
+    if(names.length < 3) return "최소 3명은 있어야 재밌음!";
+    if(bombCount >= names.length) return "폭탄 개수가 인원보다 많으면 게임이 터져요 ㅋㅋ";
+    return null;
+  }
+
+  function startRound(){
+    const err = validateStart();
+    if(err){ $("setupMsg").textContent = err; return; }
+    $("setupMsg").textContent = "";
+
+    const names = parseNames();
+    state.round = 1;
+    state.names = names;
+    state.alive = [...names];
+    state.turnIndex = randInt(0, state.alive.length-1);
+    state.ended = false;
+    state.deckSwapOn = ($("deckSwapMode").value === "on");
+
+    // build cards: bombs + safes
+    const bombCount = Number($("bombCount").value);
+    const cards = Array(state.alive.length).fill("SAFE");
+    // place bombs
+    const idxs = shuffle([...Array(state.alive.length).keys()]);
+    for(let k=0;k<bombCount;k++) cards[idxs[k]] = "BOMB";
+    state.cards = cards;
+
+    // deck starts as safes
+    state.deck = Array(Math.max(3, state.alive.length)).fill("SAFE");
+
+    // UI show
+    setupCard.style.display = "none";
+    gameCard.style.display = "block";
+    statusCard.style.display = "none";
+    $("roundNo").textContent = state.round;
+    $("gameMsg").textContent = "";
+    setTurnUI();
+    startTimer();
+  }
+
+  // --- UI handlers
+  $("startBtn").addEventListener("click", startRound);
+
+  $("resetBtn").addEventListener("click", ()=>{
+    stopTimer();
+    state = {
+      round: 1, names: [], alive: [], cards: [], deck: [],
+      turnIndex: 0, timer: null, timeLeft: null,
+      revealedThisTurn: false, deckSwapOn: true, ended: false
+    };
+    setupCard.style.display = "block";
+    gameCard.style.display = "none";
+    statusCard.style.display = "none";
+    $("setupMsg").textContent = "";
+  });
+
+  $("revealBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    state.revealedThisTurn = true;
+    $("cardBox").style.display = "inline-flex";
+    $("myCard").textContent = (state.cards[state.turnIndex] === "BOMB") ? "💣 폭탄" : "✅ 안전";
+  });
+
+  $("keepBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    $("cardBox").style.display = "none";
+    nextTurn();
+  });
+
+  $("swapLeftBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    const i = state.turnIndex;
+    const j = (i - 1 + state.alive.length) % state.alive.length;
+    swap(i,j);
+    $("cardBox").style.display = "none";
+    nextTurn();
+  });
+
+  $("swapRightBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    const i = state.turnIndex;
+    const j = (i + 1) % state.alive.length;
+    swap(i,j);
+    $("cardBox").style.display = "none";
+    nextTurn();
+  });
+
+  $("swapDeckBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    const i = state.turnIndex;
+    swapWithDeck(i);
+    $("cardBox").style.display = "none";
+    nextTurn();
+  });
+
+  $("forceEndBtn").addEventListener("click", ()=>{
+    if(state.ended) return;
+    endGameByTimer();
+  });
+</script>
+</body>
+</html>
