@@ -1,665 +1,192 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>랜덤 제로게임 룰 생성기</title>
-  <style>
-    :root{
-      --bg1:#070A16;
-      --bg2:#071B2E;
-      --card: rgba(255,255,255,.07);
-      --stroke: rgba(255,255,255,.12);
-      --text: #EEF3FF;
-      --muted: rgba(238,243,255,.72);
-      --good:#40f99b;
-      --bad:#ff4d6d;
-      --blue:#4ea3ff;
-      --purple:#b388ff;
-      --glow: 0 0 18px rgba(78,163,255,.25), 0 0 40px rgba(179,136,255,.14);
-      --r: 18px;
-    }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0; color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
-      background:
-        radial-gradient(1100px 700px at 15% 15%, rgba(179,136,255,.26), transparent 60%),
-        radial-gradient(900px 650px at 90% 20%, rgba(78,163,255,.22), transparent 58%),
-        radial-gradient(900px 700px at 40% 95%, rgba(255,77,109,.12), transparent 60%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      -webkit-tap-highlight-color: transparent;
-    }
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px; }
-    .top{
-      border:1px solid var(--stroke);
-      border-radius: var(--r);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-      box-shadow: var(--glow);
-      padding: 14px;
-      backdrop-filter: blur(10px);
-    }
-    h1{ margin:0; font-size:18px; letter-spacing:.4px; }
-    .sub{ margin-top:6px; color:var(--muted); font-size:13px; line-height:1.35; }
-    .grid{ display:grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
-    @media (min-width: 920px){ .grid{ grid-template-columns: 1.05fr .95fr; } }
-
-    .card{
-      border:1px solid var(--stroke);
-      border-radius: var(--r);
-      background: var(--card);
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
-      padding: 12px;
-      backdrop-filter: blur(10px);
-    }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    textarea, select, button, input{
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.26);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-    }
-    textarea{ width:100%; min-height: 90px; resize: vertical; }
-    button{ cursor:pointer; transition: transform .05s ease, filter .15s ease; }
-    button:active{ transform: scale(0.98); }
-    button.primary{
-      background: linear-gradient(90deg, rgba(78,163,255,.95), rgba(179,136,255,.90));
-      border-color: rgba(255,255,255,.14);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset, 0 0 18px rgba(78,163,255,.22);
-    }
-    button.secondary{
-      background: rgba(0,0,0,.18);
-      border-color: rgba(255,255,255,.14);
-    }
-    button.danger{
-      background: linear-gradient(90deg, rgba(255,77,109,.95), rgba(255,140,0,.70));
-      border-color: rgba(255,255,255,.10);
-      box-shadow: 0 0 18px rgba(255,77,109,.18);
-    }
-    button:disabled{ opacity:.55; cursor:not-allowed; filter: grayscale(.2); }
-
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.22);
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .sep{ height:1px; background: rgba(255,255,255,.10); margin: 10px 0; }
-    .big{
-      font-size: 30px;
-      font-weight: 900;
-      letter-spacing: .6px;
-      text-shadow: 0 0 14px rgba(78,163,255,.22);
-    }
-    .timer{
-      font-size: 52px;
-      font-weight: 950;
-      letter-spacing: 1px;
-      text-shadow: 0 0 16px rgba(179,136,255,.20);
-    }
-    .muted{ color: var(--muted); font-size: 13px; }
-    .hint{ color: rgba(255,255,255,.65); font-size: 12px; }
-    .ruleBox{
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: 16px;
-      padding: 12px;
-      background: rgba(0,0,0,.20);
-    }
-    .ruleTitle{
-      display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
-    }
-    .tag{
-      display:inline-flex; align-items:center; gap:6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .ruleList{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
-    .ruleItem{
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      display:flex; gap:10px; align-items:flex-start;
-    }
-    .dot{
-      width:10px; height:10px; border-radius:999px; margin-top:5px;
-      box-shadow: 0 0 10px rgba(255,255,255,.10);
-      flex: 0 0 10px;
-    }
-    .dot.good{ background: var(--good); box-shadow: 0 0 12px rgba(64,249,155,.25); }
-    .dot.bad{ background: var(--bad); box-shadow: 0 0 12px rgba(255,77,109,.25); }
-    .dot.blue{ background: var(--blue); box-shadow: 0 0 12px rgba(78,163,255,.25); }
-    .dot.purple{ background: var(--purple); box-shadow: 0 0 12px rgba(179,136,255,.25); }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.25);
-      color: rgba(238,243,255,.85);
-    }
-    .center{ text-align:center; }
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.16);
-      color: rgba(238,243,255,.92);
-      padding: 10px 12px;
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      display:none;
-      max-width: calc(100vw - 24px);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>☕ 커피내기 아레나</title>
+<style>
+:root{
+--bg1:#0a0f1f;
+--bg2:#101a35;
+--card:rgba(255,255,255,.08);
+--stroke:rgba(255,255,255,.15);
+--text:#f2f6ff;
+--accent1:#4ea3ff;
+--accent2:#b388ff;
+--danger:#ff4d6d;
+--good:#40f99b;
+--r:18px;
+}
+body{
+margin:0;
+font-family:system-ui,-apple-system;
+color:var(--text);
+background:
+radial-gradient(1000px 600px at 10% 10%,rgba(78,163,255,.25),transparent 60%),
+radial-gradient(800px 600px at 90% 20%,rgba(179,136,255,.25),transparent 60%),
+linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+.wrap{max-width:900px;margin:auto;padding:16px;}
+.card{
+background:var(--card);
+border:1px solid var(--stroke);
+border-radius:var(--r);
+padding:14px;
+margin-bottom:14px;
+backdrop-filter:blur(8px);
+}
+h1{margin:0 0 8px;font-size:18px}
+button{
+padding:10px 14px;
+border-radius:12px;
+border:1px solid var(--stroke);
+background:rgba(255,255,255,.1);
+color:white;
+cursor:pointer;
+}
+button.primary{
+background:linear-gradient(90deg,var(--accent1),var(--accent2));
+border:none;
+}
+button.danger{
+background:linear-gradient(90deg,var(--danger),orange);
+border:none;
+}
+textarea{
+width:100%;
+min-height:80px;
+border-radius:12px;
+border:1px solid var(--stroke);
+background:rgba(0,0,0,.3);
+color:white;
+padding:8px;
+}
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+.big{font-size:28px;font-weight:900;text-align:center;margin:10px 0;}
+.hidden{display:none;}
+.mapBtn{
+height:80px;
+font-size:16px;
+}
+.center{text-align:center;}
+.sep{height:1px;background:rgba(255,255,255,.2);margin:10px 0;}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div class="row" style="justify-content:space-between; align-items:flex-end;">
-      <div>
-        <h1>🎲 랜덤 제로게임 룰 생성기</h1>
-        <div class="sub">
-          게임 자체는 단순 “0부터 카운트”인데, 매 라운드 룰이 랜덤으로 꼬여서 터지는 용도.<br/>
-          폰 1대로 돌려가며: <span class="kbd">새 룰</span> → <span class="kbd">3-2-1 시작</span> → 진행.
-        </div>
-      </div>
-      <div class="pill">☕ 커피내기 / 회식게임 / 제로게임용</div>
-    </div>
-  </div>
 
-  <div class="grid">
-    <!-- Left: setup -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div class="muted">1) 참가자</div>
-        <div class="tag">최대 10명 · 최소 3명</div>
-      </div>
+<div id="mapScreen" class="card">
+<h1>🎮 커피내기 아레나</h1>
+<div class="grid">
+<button class="mapBtn primary" onclick="startGame(1)">🎰 배신 슬롯</button>
+<button class="mapBtn primary" onclick="startGame(2)">🧨 러시안 서바이벌</button>
+<button class="mapBtn primary" onclick="startGame(3)">🃏 배신 카드</button>
+<button class="mapBtn primary" onclick="startGame(4)">💥 단계 압축</button>
+</div>
+</div>
 
-      <div class="row">
-        <textarea id="names" placeholder="이름을 줄바꿈으로 입력
-예:
+<div id="gameScreen" class="card hidden">
+<h1 id="gameTitle"></h1>
+<textarea id="names" placeholder="이름 입력 (줄바꿈)
 철수
 영희
 민수"></textarea>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row" style="justify-content:space-between;">
-        <div class="muted">2) 난이도 / 옵션</div>
-        <div class="tag">룰이 너무 빡세면 난이도 낮추기</div>
-      </div>
-
-      <div class="row">
-        <span class="pill">난이도
-          <select id="level">
-            <option value="mild">순한맛</option>
-            <option value="normal" selected>보통</option>
-            <option value="hell">지옥</option>
-          </select>
-        </span>
-        <span class="pill">라운드 시간(초)
-          <select id="roundSec">
-            <option value="15">15</option>
-            <option value="25" selected>25</option>
-            <option value="35">35</option>
-          </select>
-        </span>
-        <span class="pill">룰 개수
-          <select id="ruleCount">
-            <option value="3">3개</option>
-            <option value="4" selected>4개</option>
-            <option value="5">5개</option>
-          </select>
-        </span>
-      </div>
-
-      <div class="row">
-        <span class="pill">사운드(선택)
-          <select id="sound">
-            <option value="off" selected>OFF</option>
-            <option value="on">ON</option>
-          </select>
-        </span>
-        <span class="pill">진동(선택)
-          <select id="vibe">
-            <option value="off" selected>OFF</option>
-            <option value="on">ON</option>
-          </select>
-        </span>
-        <span class="pill">금지 숫자(선택)
-          <input id="banNumCustom" inputmode="numeric" placeholder="예: 4" style="width:110px"/>
-        </span>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row">
-        <button class="primary" id="genBtn">🎲 새 룰 생성</button>
-        <button class="secondary" id="startBtn" disabled>▶ 3-2-1 시작</button>
-        <button class="danger" id="resetBtn">리셋</button>
-        <span class="muted" id="msg"></span>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="ruleBox">
-        <div class="ruleTitle">
-          <div>
-            <div class="muted">현재 룰 세트</div>
-            <div class="hint">라운드 시작 전: 룰 읽고, 모두 동의하면 시작</div>
-          </div>
-          <div class="tag">Round <span id="roundNo">0</span></div>
-        </div>
-        <div class="ruleList" id="rules">
-          <div class="ruleItem">
-            <span class="dot blue"></span>
-            <div>아직 룰이 없어요. <b>새 룰 생성</b>을 눌러주세요.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: play -->
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div class="muted">3) 진행 화면</div>
-        <div class="tag">폰 돌려가며 보기</div>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="center">
-        <div class="muted">현재 턴</div>
-        <div class="big" id="turnName">-</div>
-        <div class="muted" style="margin-top:6px;">남은 시간</div>
-        <div class="timer" id="timeLeft">--</div>
-        <div class="muted" id="statusText" style="margin-top:6px;">룰 생성 후 시작하세요.</div>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row">
-        <button class="secondary" id="prevBtn" disabled>← 이전</button>
-        <button class="secondary" id="nextBtn" disabled>다음 →</button>
-        <button class="primary" id="failBtn" disabled>🚫 실수(벌칙자)</button>
-      </div>
-
-      <div class="sep"></div>
-      <div class="muted">
-        팁: “실수(벌칙자)” 버튼은 실제 판정이 애매할 때만 누르고, 보통은 말로 판정하면 됨 ㅋㅋ
-      </div>
-    </div>
-  </div>
+<div class="sep"></div>
+<button class="primary" onclick="runGame()">START</button>
+<button onclick="back()">← 맵으로</button>
+<div id="result" class="big"></div>
 </div>
 
-<div class="toast" id="toast"></div>
+</div>
 
 <script>
-window.addEventListener("DOMContentLoaded", () => {
-  const $ = (id)=>document.getElementById(id);
-  const msg = $("msg");
+let currentGame=0;
 
-  // ======= UX helpers =======
-  function setMsg(t=""){ msg.textContent = t; }
-  function toast(t){
-    const el = $("toast");
-    el.textContent = t;
-    el.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=>{ el.style.display="none"; }, 1400);
-  }
+function startGame(n){
+currentGame=n;
+document.getElementById("mapScreen").classList.add("hidden");
+document.getElementById("gameScreen").classList.remove("hidden");
 
-  // ======= crypto random =======
-  function rand01(){
-    const u = new Uint32Array(1);
-    crypto.getRandomValues(u);
-    return u[0] / 0xFFFFFFFF;
-  }
-  function randInt(min, maxInc){
-    return min + Math.floor(rand01() * (maxInc - min + 1));
-  }
-  function pick(arr){ return arr[randInt(0, arr.length-1)]; }
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-      const j = randInt(0,i);
-      [arr[i],arr[j]] = [arr[j],arr[i]];
-    }
-    return arr;
-  }
+const titles={
+1:"🎰 배신 슬롯",
+2:"🧨 러시안 서바이벌",
+3:"🃏 배신 카드",
+4:"💥 단계 압축"
+};
+document.getElementById("gameTitle").textContent=titles[n];
+document.getElementById("result").textContent="";
+}
 
-  // ======= optional sound/vibe =======
-  let audioCtx = null;
-  function beep(freq=520, ms=90, gain=0.05){
-    if($("sound").value !== "on") return;
-    try{
-      audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = "sine";
-      o.frequency.value = freq;
-      g.gain.value = gain;
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start();
-      setTimeout(()=>{ o.stop(); }, ms);
-    }catch(e){}
-  }
-  function vibe(ms=40){
-    if($("vibe").value !== "on") return;
-    if(navigator.vibrate) navigator.vibrate(ms);
-  }
+function back(){
+document.getElementById("mapScreen").classList.remove("hidden");
+document.getElementById("gameScreen").classList.add("hidden");
+}
 
-  // ======= parsing =======
-  function parseNames(){
-    const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
-    const seen = new Set();
-    const out = [];
-    for(const n of raw){
-      if(!seen.has(n)){ seen.add(n); out.push(n); }
-    }
-    return out.slice(0,10);
-  }
+function parseNames(){
+return document.getElementById("names").value
+.split("\n")
+.map(x=>x.trim())
+.filter(Boolean);
+}
 
-  // ======= rule engine =======
-  // We generate a "rule set" that makes zero game chaotic but still playable.
-  // Keep it funny, not mean, and not too impossible.
-  const baseRules = [
-    () => ({ kind:"flow", dot:"blue", text:`진행 방향: ${pick(["정방향(왼→오)", "역방향(오→왼)"])} 로만 진행` }),
-    () => ({ kind:"tempo", dot:"purple", text:`리듬 룰: 매 숫자 말하기 전에 ${pick(["손뼉 1번", "탁자 1번 톡", "손가락 스냅(가능하면)", "고개 끄덕 1번"])} 하기` }),
-    () => ({ kind:"voice", dot:"blue", text:`말투 룰: ${pick(["존댓말만", "반말만", "끝에 '요' 붙이기", "끝에 '네' 붙이기"])} (실수하면 OUT)` }),
-    () => ({ kind:"silence", dot:"bad", text:`금지어: "${pick(["아", "어", "음", "잠깐", "미안"])}" 말하면 OUT` }),
-    () => ({ kind:"skip", dot:"purple", text:`스킬 카드: ${pick(["한 번은 '패스' 가능", "한 번은 내 숫자 1 증가/감소 선택 가능", "한 번은 다음 사람 스킵 가능(랜덤으로만)"])} (라운드당 1회)` }),
-    () => ({ kind:"swap", dot:"blue", text:`지목 룰: ${pick(["'7'을 말한 사람은 다음 사람을 랜덤 지목", "'3'을 말한 사람은 방향 반전", "'0'을 말한 사람은 바로 다음 사람에게 '고마워' 강제"])} ` }),
-  ];
+function rand(arr){
+return arr[Math.floor(Math.random()*arr.length)];
+}
 
-  const spicyRules = [
-    () => ({ kind:"banNum", dot:"bad", text:`금지 숫자: ${pick([4,6,7,8,9])} (그 숫자 말하면 OUT, 대신 '땡'으로 대체)` , banNum: true }),
-    () => ({ kind:"double", dot:"purple", text:`변칙: ${pick(["짝수는 두 번 말하고 넘기기", "홀수는 속삭이듯 말하기", "자기 차례마다 숫자 +1을 한 번 더 말하기(예: 3,4)"])} ` }),
-    () => ({ kind:"reverse", dot:"blue", text:`트리거: ${pick(["누군가 웃으면 방향 반전", "누군가 머뭇거리면 다음 사람 스킵", "누군가 박수 타이밍 틀리면 2칸 점프"])} ` }),
-    () => ({ kind:"gesture", dot:"purple", text:`제스처: 숫자 말할 때마다 ${pick(["손가락으로 V", "엄지척", "양손 주먹 쥐기", "가슴에 손 얹기"])} ` }),
-  ];
+async function runGame(){
+const names=parseNames();
+if(names.length<2){
+alert("최소 2명 이상!");
+return;
+}
 
-  const hellRules = [
-    () => ({ kind:"banNum2", dot:"bad", text:`금지 숫자 2개: ${pick([2,3,4,5])} & ${pick([6,7,8,9])} (둘 다 '땡'으로 대체)` , banNum: true }),
-    () => ({ kind:"speed", dot:"bad", text:`속도: 각 턴 ${pick(["1.2초 안에", "1.0초 안에", "0.8초 안에"])} 말해야 함 (넘으면 OUT)` }),
-    () => ({ kind:"chain", dot:"purple", text:`연쇄: ${pick(["'5' 나오면 다음 사람은 바로 2칸 진행", "10의 배수 직전은 숨 들이쉬고 말하기", "'1'을 말하면 다음 사람은 웃음 금지"])} ` }),
-    () => ({ kind:"ruleFlip", dot:"blue", text:`룰 반전: 라운드 중간(남은 시간 절반)부터 ${pick(["방향이 반대로 바뀜", "금지어가 바뀜(운영자 랜덤)", "박수 대신 탁자 톡으로 변경"])} ` }),
-  ];
+const result=document.getElementById("result");
+result.textContent="";
 
-  function uniqueByKind(arr){
-    const seen = new Set();
-    const out = [];
-    for(const r of arr){
-      if(seen.has(r.kind)) continue;
-      seen.add(r.kind);
-      out.push(r);
-    }
-    return out;
-  }
+if(currentGame===1){
+let temp=[...names];
+for(let i=0;i<3;i++){
+result.textContent="🎰 돌리는 중...";
+await sleep(800);
+}
+let loser=rand(names);
+result.textContent="☕ 커피는... "+loser;
+}
 
-  function generateRuleSet(level, count){
-    let pool = [...baseRules];
-    if(level === "normal") pool = pool.concat(spicyRules);
-    if(level === "hell") pool = pool.concat(spicyRules, hellRules);
+if(currentGame===2){
+let temp=[...names];
+while(temp.length>1){
+result.textContent="🧨 탈락자 선정...";
+await sleep(800);
+temp.splice(Math.floor(Math.random()*temp.length),1);
+}
+result.textContent="💀 최종 패배: "+temp[0];
+}
 
-    let chosen = [];
-    while(chosen.length < count){
-      const r = pick(pool)();
-      chosen.push(r);
-      chosen = uniqueByKind(chosen);
-      if(chosen.length > count) chosen = chosen.slice(0, count);
-    }
+if(currentGame===3){
+let bombIndex=Math.floor(Math.random()*names.length);
+result.textContent="🃏 카드 섞는 중...";
+await sleep(800);
+result.textContent="💣 폭탄은... "+names[bombIndex];
+}
 
-    // apply custom banned number if user typed
-    const custom = String($("banNumCustom").value || "").trim();
-    if(custom && /^\d+$/.test(custom)){
-      // replace any banNum rule or add one at top
-      const num = Number(custom);
-      const banRule = { kind:"banNumCustom", dot:"bad", text:`금지 숫자: ${num} (말하면 OUT, 대신 '땡')`, banNum:true, value:num };
-      let replaced = false;
-      chosen = chosen.map(r => {
-        if(!replaced && r.banNum){ replaced=true; return banRule; }
-        return r;
-      });
-      if(!replaced){
-        // force include by replacing last rule
-        chosen[chosen.length-1] = banRule;
-      }
-    }
+if(currentGame===4){
+let temp=[...names];
+while(temp.length>1){
+await sleep(700);
+temp=temp.filter(()=>Math.random()>0.5);
+if(temp.length===0) temp=[rand(names)];
+}
+result.textContent="☕ 당첨: "+temp[0];
+}
+}
 
-    // Always include a "start/goal" context
-    const max = pick([15, 20, 25, 30, 35, 40]);
-    const startAt = 0;
-    const direction = chosen.find(r=>r.kind==="flow") ? "룰을 따르세요" : "정방향";
-    return {
-      startAt,
-      goal: max,
-      chosen
-    };
-  }
-
-  function renderRules(ruleSet, roundNo){
-    $("roundNo").textContent = String(roundNo);
-    const container = $("rules");
-    container.innerHTML = "";
-
-    const header = document.createElement("div");
-    header.className = "ruleItem";
-    header.innerHTML = `
-      <span class="dot good"></span>
-      <div>
-        <b>기본:</b> 0부터 시작해서 목표 숫자 <b>${ruleSet.goal}</b>까지 진행 (실수/위반 시 OUT)
-        <div class="hint">* 목표는 랜덤. 너무 빡세면 “순한맛”으로 내려.</div>
-      </div>
-    `;
-    container.appendChild(header);
-
-    ruleSet.chosen.forEach(r=>{
-      const item = document.createElement("div");
-      item.className = "ruleItem";
-      item.innerHTML = `<span class="dot ${r.dot}"></span><div>${r.text}</div>`;
-      container.appendChild(item);
-    });
-
-    const footer = document.createElement("div");
-    footer.className = "ruleItem";
-    footer.innerHTML = `
-      <span class="dot good"></span>
-      <div>
-        <b>판정 팁:</b> 애매하면 “다시 한 번” 기회 1회 주고, 두 번째 실수면 OUT (분위기용)
-      </div>
-    `;
-    container.appendChild(footer);
-  }
-
-  // ======= game state =======
-  let roundNo = 0;
-  let ruleSet = null;
-  let names = [];
-  let turn = 0;
-  let running = false;
-  let timeLeft = 0;
-  let timer = null;
-
-  function updateTurnUI(){
-    $("turnName").textContent = names.length ? names[turn] : "-";
-  }
-  function updateTimeUI(){
-    $("timeLeft").textContent = running ? String(timeLeft) : "--";
-  }
-  function setStatus(t){ $("statusText").textContent = t; }
-
-  function stopTimer(){
-    if(timer){ clearInterval(timer); timer=null; }
-  }
-
-  function enablePlayButtons(on){
-    $("prevBtn").disabled = !on;
-    $("nextBtn").disabled = !on;
-    $("failBtn").disabled = !on;
-  }
-
-  function genRules(){
-    names = parseNames();
-    if(names.length < 3){
-      setMsg("최소 3명부터 가능!");
-      return;
-    }
-    setMsg("");
-    roundNo += 1;
-
-    const level = $("level").value;
-    const count = Number($("ruleCount").value);
-    ruleSet = generateRuleSet(level, count);
-
-    renderRules(ruleSet, roundNo);
-
-    // random first turn each round
-    turn = randInt(0, names.length-1);
-    updateTurnUI();
-
-    // enable start
-    $("startBtn").disabled = false;
-    enablePlayButtons(false);
-    running = false;
-    stopTimer();
-    updateTimeUI();
-    setStatus("룰 확인 후, 3-2-1 시작을 누르세요.");
-    toast("새 룰 생성!");
-    beep(640, 70); vibe(25);
-  }
-
-  async function countdownAndStart(){
-    if(!ruleSet || !names.length) return;
-
-    // try to resume audio context on user gesture
-    if($("sound").value === "on"){
-      try{
-        audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
-        await audioCtx.resume();
-      }catch(e){}
-    }
-
-    running = false;
-    enablePlayButtons(false);
-    setMsg("");
-    setStatus("준비…");
-    $("startBtn").disabled = true;
-
-    const hud = ["3", "2", "1", "GO!"];
-    for(let i=0;i<hud.length;i++){
-      setStatus(`시작 ${hud[i]}`);
-      beep(520 + i*90, 90, 0.06);
-      vibe(20 + i*10);
-      await new Promise(r=>setTimeout(r, 650));
-    }
-
-    // start round
-    running = true;
-    timeLeft = Number($("roundSec").value);
-    updateTimeUI();
-    enablePlayButtons(true);
-    setStatus("진행! (실수하면 OUT)");
-    beep(880, 120, 0.05); vibe(40);
-
-    stopTimer();
-    timer = setInterval(()=>{
-      if(!running) return;
-      timeLeft--;
-      updateTimeUI();
-
-      // drama at end
-      if(timeLeft === 5){ beep(740, 110, 0.05); vibe(35); toast("5초 남음!"); }
-      if(timeLeft <= 0){
-        running = false;
-        stopTimer();
-        enablePlayButtons(false);
-        setStatus("라운드 종료! (아직 안 끝났으면 다음 라운드로)");
-        $("startBtn").disabled = false;
-        toast("라운드 종료");
-        beep(420, 140, 0.06); vibe(60);
-      }
-    }, 1000);
-  }
-
-  function prevTurn(){
-    if(!names.length || !running) return;
-    turn = (turn - 1 + names.length) % names.length;
-    updateTurnUI();
-    beep(520, 50, 0.03);
-  }
-  function nextTurn(){
-    if(!names.length || !running) return;
-    turn = (turn + 1) % names.length;
-    updateTurnUI();
-    beep(560, 50, 0.03);
-  }
-
-  function fail(){
-    if(!names.length) return;
-    const who = names[turn];
-    beep(200, 180, 0.07); vibe(120);
-    toast(`OUT: ${who}`);
-    setStatus(`🚫 OUT: ${who} (커피/벌칙 후보!)`);
-    // advance turn so game continues
-    turn = (turn + 1) % names.length;
-    updateTurnUI();
-  }
-
-  function reset(){
-    stopTimer();
-    roundNo = 0;
-    ruleSet = null;
-    names = [];
-    turn = 0;
-    running = false;
-    timeLeft = 0;
-    updateTurnUI();
-    updateTimeUI();
-    $("roundNo").textContent = "0";
-    $("rules").innerHTML = `
-      <div class="ruleItem">
-        <span class="dot blue"></span>
-        <div>아직 룰이 없어요. <b>새 룰 생성</b>을 눌러주세요.</div>
-      </div>
-    `;
-    $("startBtn").disabled = true;
-    enablePlayButtons(false);
-    setStatus("룰 생성 후 시작하세요.");
-    setMsg("");
-    toast("리셋");
-    beep(360, 90, 0.05); vibe(40);
-  }
-
-  // ======= events =======
-  $("genBtn").addEventListener("click", genRules);
-  $("startBtn").addEventListener("click", countdownAndStart);
-  $("prevBtn").addEventListener("click", prevTurn);
-  $("nextBtn").addEventListener("click", nextTurn);
-  $("failBtn").addEventListener("click", fail);
-  $("resetBtn").addEventListener("click", reset);
-
-  // initial
-  setStatus("룰 생성 후 시작하세요.");
-});
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
+
 </body>
 </html>
