@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>🎯 랜덤 드롭 서바이벌</title>
+  <title>랜덤 드롭 서바이벌 (Plinko)</title>
   <style>
     :root { --r: 16px; }
     body{
@@ -23,23 +23,25 @@
       border:1px solid #2a3a57;background:#0e1522;color:#e9eef6;
       border-radius:12px;padding:10px 12px;font-size:14px;outline:none;
     }
-    textarea{width:100%;resize:vertical;min-height:86px}
+    textarea{width:100%;resize:vertical;min-height:90px}
     button{cursor:pointer;background:#1a2a46}
     button.primary{background:#2d5bff;border-color:#2d5bff}
     button.danger{background:#ff3b3b;border-color:#ff3b3b;color:#fff}
     button:disabled{opacity:.55;cursor:not-allowed}
     .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid #2a3a57;padding:8px 10px;border-radius:999px;background:#0e1522}
+    .sep{height:1px;background:#223049;margin:10px 0}
+    .center{text-align:center}
+    .big{font-size:22px;font-weight:800}
+
+    /* ✅ 클릭 씹힘 방지: 버튼이 캔버스보다 무조건 위 */
+    .controls{position:relative; z-index:10;}
+    canvas{position:relative; z-index:1;}
+
     canvas{
       width:100%; height:auto; display:block;
       border-radius:14px; border:1px solid #223049; background:#0e1522;
       touch-action: manipulation;
     }
-    button { position: relative; z-index: 10; }
-    canvas { position: relative; z-index: 1; }
-
-    .big{font-size:22px;font-weight:800}
-    .center{text-align:center}
-    .sep{height:1px;background:#223049;margin:10px 0}
   </style>
 </head>
 <body>
@@ -47,19 +49,19 @@
   <div class="card">
     <h1>🎯 랜덤 드롭 서바이벌 (Plinko)</h1>
     <div class="muted">
-      이름 넣고 <b>DROP</b> 누르면 공이 핀에 튕기며 내려와서 <b>랜덤으로 한 명</b>에게 떨어짐 → 그 사람이 패배(내기/벌칙).<br/>
-      핀볼처럼 “마지막에 딱 걸리는” 맛이 있음 😈
+      이름 입력 → <b>보드 준비</b> → <b>DROP</b><br/>
+      공이 핀에 튕기며 내려와서 마지막에 딱 한 칸에 떨어짐 → 결과 확정.
     </div>
 
     <div class="row">
       <textarea id="names" placeholder="이름을 줄바꿈으로 입력 (최대 10명)
-예: 신영
-와이프
+예:
 철수
-영희"></textarea>
+영희
+민수"></textarea>
     </div>
 
-    <div class="row">
+    <div class="row controls">
       <span class="pill">공 개수
         <select id="ballCount">
           <option value="1" selected>1개 (기본)</option>
@@ -84,10 +86,10 @@
       </span>
     </div>
 
-    <div class="row">
-      <button class="primary" id="startBtn">보드 준비</button>
+    <div class="row controls">
+      <button class="primary" id="prepBtn">보드 준비</button>
       <button class="primary" id="dropBtn" disabled>DROP 🎱</button>
-      <button id="shakeBtn" disabled>흔들기(난수↑)</button>
+      <button id="shakeBtn" disabled>흔들기(난수)</button>
       <button class="danger" id="resetBtn">리셋</button>
       <span class="muted" id="msg"></span>
     </div>
@@ -103,17 +105,17 @@
     </div>
   </div>
 </div>
-<script>
-  // ✅ 화면에 JS 에러를 표시 (콘솔 없어도 원인 보이게)
-  window.onerror = function (msg, src, line, col, err) {
-    const el = document.getElementById("msg");
-    if (el) el.textContent = `JS 오류: ${msg} (line ${line}:${col})`;
-  };
-</script>
 
 <script>
-(() => {
-  const $ = (id)=>document.getElementById(id);
+window.addEventListener("DOMContentLoaded", () => {
+  const $ = (id) => document.getElementById(id);
+  const msgEl = $("msg");
+  const resultEl = $("result");
+
+  // ✅ 에러가 나면 화면에 바로 표시
+  window.onerror = function (m, s, line, col) {
+    msgEl.textContent = `JS 오류: ${m} (line ${line}:${col})`;
+  };
 
   // crypto random
   function rand01(){
@@ -127,32 +129,37 @@
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
       const j = randInt(0,i);
-      [arr[i],arr[j]]=[arr[j],arr[i]];
+      [arr[i],arr[j]] = [arr[j],arr[i]];
     }
     return arr;
   }
 
+  function setMsg(t=""){ msgEl.textContent = t; }
+  function setResult(t="-"){ resultEl.textContent = t; }
+
   const cv = $("cv");
   const ctx = cv.getContext("2d");
 
-  // board state
+  const W = cv.width, H = cv.height;
+  const topMargin = 90;
+  const side = 40;
+  const bottomH = 190;
+
+  // state
+  let ready = false;
+  let running = false;
+
   let names = [];
   let slots = [];
   let pins = [];
   let balls = [];
-  let running = false;
-  let ready = false;
-  let gravity = 0.22;
-  let restitution = 0.78; // bounciness
-  let friction = 0.998;
-  let air = 0.999;
-  let shakeVX = 0;
 
-  // geometry
-  const W = cv.width, H = cv.height;
-  const topMargin = 90;
-  const side = 40;
-  const bottomH = 170;
+  // physics params
+  const gravity = 0.24;
+  const restitution = 0.78;
+  const friction = 0.998;
+  const air = 0.999;
+  let shakeVX = 0;
 
   function parseNames(){
     const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
@@ -164,16 +171,50 @@
     return out.slice(0,10);
   }
 
-  function setMsg(t){ $("msg").textContent = t || ""; }
-  function setResult(t){ $("result").textContent = t || "-"; }
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  function drawNamePill(cx, cy, text){
+    ctx.save();
+    ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const padX = 18;
+    const w = ctx.measureText(text).width + padX*2;
+    const h = 44;
+
+    ctx.fillStyle = "#0e1522";
+    ctx.strokeStyle = "#2a3a57";
+    ctx.lineWidth = 2;
+    roundRect(ctx, cx - w/2, cy - h/2, w, h, 999);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#e9eef6";
+    ctx.fillText(text, cx, cy+1);
+    ctx.restore();
+  }
 
   function buildBoard(){
     names = parseNames();
     if(names.length < 3){
+      ready = false;
+      $("dropBtn").disabled = true;
+      $("shakeBtn").disabled = true;
       setMsg("최소 3명부터 가능!");
+      draw();
       return;
     }
-    setMsg("");
+
+    setMsg(`보드 준비 완료: ${names.length}명`);
     setResult("-");
 
     // slots
@@ -191,19 +232,18 @@
 
     // pins
     pins = [];
-    const density = $("pinDensity").value; // low/mid/high
-    const gapY = density==="low" ? 95 : density==="high" ? 62 : 78;
-    const gapX = density==="low" ? 95 : density==="high" ? 62 : 78;
+    const density = $("pinDensity").value;
+    const gapY = density==="low" ? 98 : density==="high" ? 62 : 78;
+    const gapX = density==="low" ? 98 : density==="high" ? 62 : 78;
     const pinR = density==="high" ? 10 : density==="low" ? 12 : 11;
 
     const startY = topMargin + 70;
-    const endY = H - bottomH - 60;
+    const endY = H - bottomH - 70;
 
     let row = 0;
     for(let y = startY; y <= endY; y += gapY){
       const offset = (row % 2) ? gapX/2 : 0;
-      for(let x = side + 40 + offset; x <= W - side - 40; x += gapX){
-        // slight jitter to avoid symmetry
+      for(let x = side + 50 + offset; x <= W - side - 50; x += gapX){
         const jx = (rand01()-0.5) * 10;
         const jy = (rand01()-0.5) * 6;
         pins.push({ x: x + jx, y: y + jy, r: pinR });
@@ -211,24 +251,35 @@
       row++;
     }
 
-    // balls reset
     balls = [];
-    running = false;
     ready = true;
+    running = false;
+
+    // ✅ DROP 버튼 활성화 확실하게
     $("dropBtn").disabled = false;
     $("shakeBtn").disabled = false;
+    $("dropBtn").textContent = "DROP 🎱";
+
     draw();
   }
 
-  function spawnBalls(){
-    if(!ready || running) return;
-    setResult("-");
-    setMsg("");
-    const k = Number($("ballCount").value);
-    balls = [];
-    running = true;
+  function applyShake(){
+    if(!ready) return;
+    shakeVX = (rand01() < 0.5 ? -1 : 1) * (2.2 + rand01()*2.2);
+    setMsg("보드 흔들림! ㅋㅋ");
+    setTimeout(()=>{ shakeVX = 0; setMsg(""); }, 500);
+  }
 
-    // spawn near top center with slight spread
+  function spawnBalls(){
+    if(!ready){ setMsg("먼저 보드 준비!"); return; }
+    if(running){ setMsg("진행중! 잠깐만"); return; }
+
+    setMsg("");
+    setResult("-");
+    running = true;
+    balls = [];
+
+    const k = Number($("ballCount").value);
     for(let i=0;i<k;i++){
       const r = 16;
       const x = W/2 + (i-(k-1)/2)*36 + (rand01()-0.5)*18;
@@ -243,20 +294,12 @@
     }
   }
 
-  function applyShake(){
-    // transient wind left/right
-    shakeVX = (rand01() < 0.5 ? -1 : 1) * (2.2 + rand01()*2.2);
-    setMsg("보드 흔들림! ㅋㅋ");
-    setTimeout(()=>{ shakeVX = 0; setMsg(""); }, 500);
-  }
-
   function circleCollision(ball, pin){
     const dx = ball.x - pin.x;
     const dy = ball.y - pin.y;
     const dist = Math.hypot(dx, dy);
     const minDist = ball.r + pin.r;
     if(dist < minDist && dist > 0.0001){
-      // push out
       const nx = dx / dist;
       const ny = dy / dist;
       const overlap = (minDist - dist);
@@ -264,21 +307,19 @@
       ball.x += nx * overlap;
       ball.y += ny * overlap;
 
-      // reflect velocity (simple elastic)
       const vn = ball.vx*nx + ball.vy*ny;
       if(vn < 0){
         ball.vx -= (1 + restitution) * vn * nx;
         ball.vy -= (1 + restitution) * vn * ny;
       }
 
-      // add slight randomness to avoid deterministic loops
+      // tiny randomness
       ball.vx += (rand01()-0.5)*0.25;
       ball.vy += (rand01()-0.5)*0.12;
     }
   }
 
   function wallCollision(ball){
-    // left/right walls
     if(ball.x - ball.r < side){
       ball.x = side + ball.r;
       ball.vx = Math.abs(ball.vx) * restitution;
@@ -287,7 +328,6 @@
       ball.x = W - side - ball.r;
       ball.vx = -Math.abs(ball.vx) * restitution;
     }
-    // ceiling
     if(ball.y - ball.r < 20){
       ball.y = 20 + ball.r;
       ball.vy = Math.abs(ball.vy) * restitution;
@@ -297,76 +337,25 @@
   function checkLanding(ball){
     const yFloor = H - bottomH + 20;
     if(ball.y + ball.r >= yFloor){
-      // determine slot by x
       const s = slots.find(sl => ball.x >= sl.x0 && ball.x < sl.x1) || slots[slots.length-1];
       ball.done = true;
       ball.landedSlot = s;
-
-      // snap for nice look
       ball.y = yFloor - ball.r;
       ball.vx = 0; ball.vy = 0;
     }
   }
 
-  function step(){
-    if(!running){
-      draw();
-      requestAnimationFrame(step);
-      return;
-    }
-
-    for(const b of balls){
-      if(b.done) continue;
-
-      // physics
-      b.vy += gravity;
-      b.vx += shakeVX * 0.03;
-
-      b.x += b.vx;
-      b.y += b.vy;
-
-      b.vx *= friction;
-      b.vy *= air;
-
-      wallCollision(b);
-
-      // collide with pins
-      for(const p of pins){
-        circleCollision(b,p);
-      }
-
-      checkLanding(b);
-    }
-
-    // all landed?
-    if(balls.length && balls.every(b => b.done)){
-      running = false;
-      finalizeResult();
-    }
-
-    draw();
-    requestAnimationFrame(step);
-  }
-
   function finalizeResult(){
-    // if multiple balls: choose "worst luck" = random among landed slots? (more fun: pick first ball landed)
-    // We'll do: pick the ball that landed LAST (most suspense) -> last in time, but we didn't record time.
-    // Alternative: pick random among landed slots for fairness. Let's do: random among balls' landed slots.
+    if(!balls.length) return;
     const picked = balls[randInt(0, balls.length-1)].landedSlot;
     const rule = $("rule").value;
-
     const text = (rule === "lose")
-      ? `💥 ${picked.name} 패배! (맞음)`
-      : `🎉 ${picked.name} 당첨! (맞음)`;
-
+      ? `💥 ${picked.name} 패배!`
+      : `🎉 ${picked.name} 당첨!`;
     setResult(text);
 
-    // small shake celebration
-    applyMiniFlash();
-  }
-
-  function applyMiniFlash(){
-    let t = 0;
+    // mini flash
+    let t=0;
     const id = setInterval(()=>{
       t++;
       ctx.save();
@@ -379,16 +368,15 @@
   }
 
   function draw(){
-    // background
     ctx.clearRect(0,0,W,H);
 
-    // title area
+    // base
     ctx.save();
     ctx.fillStyle = "#0e1522";
     ctx.fillRect(0,0,W,H);
     ctx.restore();
 
-    // playfield frame
+    // frame
     ctx.save();
     ctx.strokeStyle = "#223049";
     ctx.lineWidth = 4;
@@ -429,31 +417,24 @@
     ctx.save();
     ctx.strokeStyle = "#223049";
     ctx.lineWidth = 3;
-    ctx.fillStyle = "#e9eef6";
-    ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
 
-    for(let i=0;i<slots.length;i++){
-      const sl = slots[i];
+    for(const sl of slots){
       ctx.beginPath();
       ctx.moveTo(sl.x0, yTop);
       ctx.lineTo(sl.x0, H-20);
       ctx.stroke();
 
-      // name
       const cx = (sl.x0 + sl.x1) / 2;
-      const cy = yTop + 90;
-      // small pill behind name
+      const cy = yTop + 95;
       drawNamePill(cx, cy, sl.name);
     }
-    // last divider
-    const last = slots[slots.length-1];
-    ctx.beginPath();
-    ctx.moveTo(last.x1, yTop);
-    ctx.lineTo(last.x1, H-20);
-    ctx.stroke();
-
+    if(slots.length){
+      const last = slots[slots.length-1];
+      ctx.beginPath();
+      ctx.moveTo(last.x1, yTop);
+      ctx.lineTo(last.x1, H-20);
+      ctx.stroke();
+    }
     ctx.restore();
 
     // balls
@@ -464,7 +445,6 @@
       ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
       ctx.fill();
 
-      // highlight
       ctx.globalAlpha = 0.25;
       ctx.beginPath();
       ctx.fillStyle = "#ffffff";
@@ -474,7 +454,7 @@
     }
     ctx.restore();
 
-    // hint if not ready
+    // hint overlay
     if(!ready){
       ctx.save();
       ctx.fillStyle = "rgba(0,0,0,.35)";
@@ -496,59 +476,51 @@
     }
   }
 
-  function drawNamePill(cx, cy, text){
-    ctx.save();
-    const padX = 18;
-    const padY = 12;
-    // measure
-    const w = ctx.measureText(text).width + padX*2;
-    const h = 44;
-    ctx.fillStyle = "#0e1522";
-    ctx.strokeStyle = "#2a3a57";
-    ctx.lineWidth = 2;
-    roundRect(ctx, cx - w/2, cy - h/2, w, h, 999);
-    ctx.fill();
-    ctx.stroke();
+  function loop(){
+    if(running){
+      for(const b of balls){
+        if(b.done) continue;
 
-    ctx.fillStyle = "#e9eef6";
-    ctx.fillText(text, cx, cy+1);
-    ctx.restore();
+        b.vy += gravity;
+        b.vx += shakeVX * 0.03;
+
+        b.x += b.vx;
+        b.y += b.vy;
+
+        b.vx *= friction;
+        b.vy *= air;
+
+        wallCollision(b);
+
+        for(const p of pins){
+          circleCollision(b,p);
+        }
+
+        checkLanding(b);
+      }
+
+      if(balls.length && balls.every(b => b.done)){
+        running = false;
+        finalizeResult();
+      }
+    }
+
+    draw();
+    requestAnimationFrame(loop);
   }
 
-  function roundRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
-
-  // buttons
-  $("startBtn").addEventListener("click", () => {
-    buildBoard();
-  });
-
-  $("dropBtn").addEventListener("click", () => {
-    if(!ready) return;
-    if(running) return;
-    spawnBalls();
-  });
-
-  $("shakeBtn").addEventListener("click", () => {
-    if(!ready) return;
-    applyShake();
-  });
-
+  // handlers
+  $("prepBtn").addEventListener("click", buildBoard);
+  $("dropBtn").addEventListener("click", spawnBalls);
+  $("shakeBtn").addEventListener("click", applyShake);
   $("resetBtn").addEventListener("click", () => {
+    ready = false;
+    running = false;
     names = [];
     slots = [];
     pins = [];
     balls = [];
-    running = false;
-    ready = false;
+    shakeVX = 0;
     $("dropBtn").disabled = true;
     $("shakeBtn").disabled = true;
     setMsg("");
@@ -556,10 +528,10 @@
     draw();
   });
 
-  // start loop
+  // first draw + start loop
   draw();
-  requestAnimationFrame(step);
-})();
+  requestAnimationFrame(loop);
+});
 </script>
 </body>
 </html>
