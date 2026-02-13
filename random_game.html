@@ -2,186 +2,1055 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>☕ 운명의 제단</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>☄ CHAOS PINBALL ARENA</title>
 <style>
-:root{
-  --bg1:#060814;
-  --bg2:#0d1530;
-  --card:rgba(255,255,255,.08);
-  --stroke:rgba(255,255,255,.18);
-  --text:#f2f5ff;
-  --muted:rgba(242,245,255,.7);
-  --danger:#ff4d6d;
-  --life:#40f99b;
-  --accent:#7aa2ff;
-  --r:18px;
-}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system;
-  color:var(--text);
-  background:
-    radial-gradient(900px 600px at 20% 10%, rgba(122,162,255,.25), transparent 60%),
-    radial-gradient(800px 600px at 80% 20%, rgba(255,77,109,.22), transparent 60%),
-    linear-gradient(180deg,var(--bg1),var(--bg2));
-}
-.wrap{max-width:900px;margin:auto;padding:16px;}
-.card{
-  background:var(--card);
-  border:1px solid var(--stroke);
-  border-radius:var(--r);
-  padding:16px;
-  backdrop-filter:blur(8px);
-}
-h1{margin:0 0 8px;font-size:20px;text-align:center;}
-textarea{
-  width:100%;min-height:80px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(0,0,0,.35);
-  color:white;padding:10px;
-}
-button{
-  padding:10px 16px;
-  border-radius:14px;
-  border:none;
-  cursor:pointer;
-  font-size:15px;
-}
-button.start{
-  width:100%;
-  background:linear-gradient(90deg,var(--accent),#b388ff);
-  color:white;
-  font-weight:700;
-}
-.stage{
-  margin-top:16px;
-  text-align:center;
-}
-.names{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-}
-.name{
-  padding:10px 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  border:1px solid var(--stroke);
-  transition:all .4s ease;
-}
-.dead{
-  opacity:.25;
-  filter:blur(2px);
-  text-decoration:line-through;
-}
-.revive{
-  background:rgba(64,249,155,.25);
-  border-color:var(--life);
-}
-.final{
-  font-size:30px;
-  font-weight:900;
-  color:var(--danger);
-  text-shadow:0 0 18px rgba(255,77,109,.6);
-}
-.status{
-  margin:14px 0;
-  font-size:18px;
-  color:var(--muted);
-}
+  :root{
+    --bg1:#050714;
+    --bg2:#071b2e;
+    --card:rgba(255,255,255,.07);
+    --stroke:rgba(255,255,255,.14);
+    --text:#eef3ff;
+    --muted:rgba(238,243,255,.72);
+    --a1:#4ea3ff;
+    --a2:#b388ff;
+    --danger:#ff4d6d;
+    --good:#40f99b;
+    --gold:#ffd166;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;
+    background:
+      radial-gradient(1100px 700px at 15% 15%, rgba(179,136,255,.25), transparent 60%),
+      radial-gradient(900px 650px at 90% 20%, rgba(78,163,255,.22), transparent 58%),
+      radial-gradient(900px 700px at 40% 95%, rgba(255,77,109,.12), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:14px}
+  .top{
+    border:1px solid var(--stroke);
+    border-radius:var(--r);
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+    box-shadow: 0 0 18px rgba(78,163,255,.25), 0 0 44px rgba(179,136,255,.14);
+    padding:14px;
+    backdrop-filter: blur(10px);
+  }
+  h1{margin:0;font-size:18px;letter-spacing:.4px}
+  .sub{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.35}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+  @media(min-width:980px){.grid{grid-template-columns: 1.0fr 1.2fr}}
+  .card{
+    border:1px solid var(--stroke);
+    border-radius:var(--r);
+    background:var(--card);
+    box-shadow:0 18px 60px rgba(0,0,0,.35);
+    padding:12px;
+    backdrop-filter: blur(10px);
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  textarea,select,button,input{
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(0,0,0,.26);
+    color:var(--text);
+    border-radius:14px;
+    padding:10px 12px;
+    font-size:14px;
+    outline:none;
+  }
+  textarea{width:100%;min-height:90px;resize:vertical}
+  button{cursor:pointer;transition:transform .05s ease, filter .15s ease; user-select:none}
+  button:active{transform:scale(0.98)}
+  button:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.7)}
+  .primary{
+    background:linear-gradient(90deg, rgba(78,163,255,.95), rgba(179,136,255,.90));
+    border:none;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 0 18px rgba(78,163,255,.18);
+  }
+  .danger{
+    background:linear-gradient(90deg, rgba(255,77,109,.95), rgba(255,140,0,.70));
+    border:none;
+    box-shadow:0 0 18px rgba(255,77,109,.18);
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.22);
+    color:var(--muted);font-size:12px;
+  }
+  .sep{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
+  canvas{
+    width:100%;
+    height:auto;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(0,0,0,.22);
+    box-shadow: 0 0 30px rgba(78,163,255,.15);
+    touch-action: manipulation;
+  }
+  .big{font-size:26px;font-weight:950;letter-spacing:.6px;text-align:center}
+  .muted{color:var(--muted);font-size:13px}
+  .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .line{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 12px;border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.18);
+  }
+  .name{font-weight:900}
+  .count{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#cfe3ff; font-weight:900}
+  .bar{flex:1;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);overflow:hidden}
+  .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg, rgba(78,163,255,.95), rgba(179,136,255,.90))}
+  .toast{
+    position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.16);
+    padding:10px 12px;border-radius:999px;
+    color:rgba(238,243,255,.92);
+    backdrop-filter: blur(8px);
+    display:none;
+    max-width:calc(100vw - 24px);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="card">
-    <h1>☕ 운명의 제단</h1>
-    <textarea id="namesInput" placeholder="이름 입력 (줄바꿈)
+  <div class="top">
+    <h1>☄ CHAOS PINBALL ARENA</h1>
+    <div class="sub">
+      회전 원판 + 블랙홀 흡입 + 슬롯 섞기 이벤트까지… 끝까지 결과 모르게 미쳐돌게 만든 랜덤 핀볼.<br/>
+      <b>결과:</b> 모든 공이 떨어진 뒤 “가장 많이 맞은(슬롯에 가장 많이 떨어진) 사람” = 커피.
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div class="pill">👥 참가자 (최소 2명, 최대 10명)</div>
+        <div class="pill">⚙ 옵션</div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <textarea id="names" placeholder="이름을 줄바꿈으로 입력
+예:
 철수
 영희
 민수"></textarea>
-    <button class="start" onclick="start()">의식 시작</button>
+      </div>
 
-    <div class="stage">
-      <div class="status" id="status"></div>
-      <div class="names" id="names"></div>
+      <div class="row">
+        <span class="pill">인당 공 개수
+          <select id="ballsPer">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </span>
+
+        <span class="pill">동시 멀티볼
+          <select id="multi">
+            <option value="2">2개</option>
+            <option value="3" selected>3개</option>
+            <option value="5">5개</option>
+          </select>
+        </span>
+
+        <span class="pill">카오스 강도
+          <select id="chaos">
+            <option value="1">보통</option>
+            <option value="2" selected>미침</option>
+            <option value="3">극악</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="row">
+        <span class="pill">맵 이벤트(섞기/뒤집기)
+          <select id="events">
+            <option value="on" selected>ON</option>
+            <option value="off">OFF</option>
+          </select>
+        </span>
+        <span class="pill">잔상/네온
+          <select id="glow">
+            <option value="on" selected>ON</option>
+            <option value="off">OFF</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <button class="primary" id="startBtn">▶ DROP & CHAOS</button>
+        <button id="rerollBtn">🎲 보드 리셋</button>
+        <button class="danger" id="resetBtn">리셋</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="muted">슬롯 적중(맞은 횟수)</div>
+      <div class="list" id="scoreList"></div>
+
+      <div class="sep"></div>
+      <div class="big" id="result">-</div>
+    </div>
+
+    <div class="card">
+      <canvas id="cv" width="800" height="1100"></canvas>
+      <div class="muted" style="margin-top:10px">
+        팁: <b>미침/극악</b>에서 진짜 재밌는 건 “블랙홀 연속흡입 + 슬롯 뒤집기” 터질 때임 ㅋㅋ
+      </div>
     </div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-let all=[], alive=[], dead=[];
+window.addEventListener("DOMContentLoaded", () => {
+  const $ = (id)=>document.getElementById(id);
 
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  // ====== helpers ======
+  function toast(t){
+    const el = $("toast");
+    el.textContent = t;
+    el.style.display = "block";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>el.style.display="none", 1200);
+  }
 
-function render(){
-  const box=document.getElementById("names");
-  box.innerHTML="";
-  all.forEach(n=>{
-    const d=document.createElement("div");
-    d.className="name";
-    d.textContent=n;
-    if(dead.includes(n)) d.classList.add("dead");
-    if(alive.includes(n) && dead.length>0 && !dead.includes(n)){}
-    box.appendChild(d);
+  // crypto RNG
+  function rand01(){
+    const u = new Uint32Array(1);
+    crypto.getRandomValues(u);
+    return u[0] / 0xFFFFFFFF;
+  }
+  function randInt(min, maxInc){
+    return min + Math.floor(rand01() * (maxInc - min + 1));
+  }
+  function pick(arr){ return arr[randInt(0, arr.length-1)]; }
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = randInt(0,i);
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  // ====== canvas ======
+  const cv = $("cv");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+
+  // ====== state ======
+  let running = false;
+  let players = [];
+  let slots = [];         // {x,w,name,color}
+  let scores = [];        // counts per slot index
+  let pegs = [];          // {x,y,r}
+  let spinners = [];      // {x,y,r,ang,omega}
+  let holes = [];         // {x,y,r,core}
+  let balls = [];         // active balls {x,y,vx,vy,r,color,alive,trail}
+  let queue = [];         // balls to spawn [{color}]
+  let particles = [];     // {x,y,vx,vy,life,ttl,size,color,add}
+  let frame = 0;
+
+  // physics params (will be set by chaos)
+  let G = 0.34;           // gravity
+  let DRAG = 0.995;       // air drag
+  let BOUNCE = 0.94;
+  let JITTER = 0.10;
+  let HOLE_PULL = 0.85;
+
+  // layout
+  const topSpawnY = 70;
+  const leftWall = 40;
+  const rightWall = W - 40;
+  const floorY = H - 120;
+  let slotY = H - 110;
+
+  // colors
+  const palette = [
+    "#4ea3ff", "#b388ff", "#40f99b", "#ffd166", "#ff4d6d",
+    "#22d3ee", "#fb7185", "#a3e635", "#f472b6", "#f97316"
+  ];
+
+  function parseNames(){
+    const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    const seen = new Set();
+    const out = [];
+    for(const n of raw){
+      if(!seen.has(n)){ seen.add(n); out.push(n); }
+    }
+    return out.slice(0,10);
+  }
+
+  function buildScoreList(){
+    const wrap = $("scoreList");
+    wrap.innerHTML = "";
+    const max = Math.max(1, ...scores);
+    for(let i=0;i<slots.length;i++){
+      const line = document.createElement("div");
+      line.className = "line";
+      line.innerHTML = `
+        <div class="name" style="min-width:92px">${slots[i].name}</div>
+        <div class="bar"><i style="width:${Math.round((scores[i]/max)*100)}%"></i></div>
+        <div class="count">${scores[i]}</div>
+      `;
+      // tint bar by slot color
+      const bar = line.querySelector(".bar i");
+      bar.style.background = `linear-gradient(90deg, ${slots[i].color}, rgba(179,136,255,.9))`;
+      wrap.appendChild(line);
+    }
+  }
+
+  function emitBurst(x,y,color,amount=24, power=3.8){
+    for(let i=0;i<amount;i++){
+      const a = rand01() * Math.PI*2;
+      const sp = power * (0.3 + rand01());
+      particles.push({
+        x, y,
+        vx: Math.cos(a)*sp,
+        vy: Math.sin(a)*sp,
+        life: 0,
+        ttl: 35 + randInt(0,25),
+        size: 1.6 + rand01()*2.8,
+        color,
+        add: rand01() < 0.35
+      });
+    }
+  }
+
+  function emitSparkLine(x,y,color,amount=16){
+    for(let i=0;i<amount;i++){
+      particles.push({
+        x: x + (rand01()-0.5)*6,
+        y: y + (rand01()-0.5)*6,
+        vx: (rand01()-0.5)*5,
+        vy: (rand01()-0.5)*5,
+        life: 0,
+        ttl: 20 + randInt(0,18),
+        size: 0.9 + rand01()*1.6,
+        color,
+        add: true
+      });
+    }
+  }
+
+  function resetAll(hard=false){
+    running = false;
+    balls = [];
+    queue = [];
+    particles = [];
+    frame = 0;
+    $("result").textContent = "-";
+    if(hard){
+      players = [];
+      slots = [];
+      scores = [];
+      $("scoreList").innerHTML = "";
+    }
+    draw();
+  }
+
+  function rerollBoard(){
+    // pegs / spinners / holes regenerated, slots remain
+    pegs = [];
+    spinners = [];
+    holes = [];
+
+    const chaos = Number($("chaos").value);
+
+    // pegs grid with jitter
+    const pegRows = 9 + chaos*2;
+    const pegCols = 7 + chaos;
+    const startY = 140;
+    const endY = floorY - 170;
+    const spanY = endY - startY;
+    for(let r=0;r<pegRows;r++){
+      const y = startY + (r/(pegRows-1))*spanY;
+      for(let c=0;c<pegCols;c++){
+        const xSpan = (rightWall - leftWall);
+        const x = leftWall + (c/(pegCols-1))*xSpan + (rand01()-0.5)*16;
+        pegs.push({ x, y: y + (rand01()-0.5)*10, r: 8 + rand01()*2.5 });
+      }
+    }
+
+    // spinners (rotating discs)
+    const spinnerCount = 4 + chaos*2;
+    for(let i=0;i<spinnerCount;i++){
+      spinners.push({
+        x: leftWall + 60 + rand01()*(rightWall-leftWall-120),
+        y: 210 + rand01()*(floorY-320),
+        r: 26 + rand01()*18,
+        ang: rand01()*Math.PI*2,
+        omega: (rand01()<0.5?-1:1) * (0.015 + rand01()*(0.02 + chaos*0.01))
+      });
+    }
+
+    // black holes
+    const holeCount = 2 + chaos;
+    for(let i=0;i<holeCount;i++){
+      holes.push({
+        x: leftWall + 80 + rand01()*(rightWall-leftWall-160),
+        y: 260 + rand01()*(floorY-420),
+        r: 34 + rand01()*22,
+        core: 10 + rand01()*10
+      });
+    }
+  }
+
+  function buildSlotsAndQueue(){
+    players = parseNames();
+    if(players.length < 2){
+      toast("2명 이상!");
+      return false;
+    }
+
+    const n = players.length;
+    slots = [];
+    scores = Array(n).fill(0);
+
+    // slot widths
+    const slotLeft = leftWall;
+    const slotRight = rightWall;
+    const totalW = slotRight - slotLeft;
+    const w = totalW / n;
+
+    for(let i=0;i<n;i++){
+      const color = palette[i % palette.length];
+      slots.push({
+        x: slotLeft + i*w,
+        w,
+        name: players[i],
+        color
+      });
+    }
+
+    // ball queue: per player ballsPer
+    const ballsPer = Number($("ballsPer").value);
+    queue = [];
+    for(let i=0;i<n;i++){
+      for(let k=0;k<ballsPer;k++){
+        queue.push({ color: slots[i].color });
+      }
+    }
+    shuffle(queue);
+
+    buildScoreList();
+    return true;
+  }
+
+  function spawnBall(){
+    if(queue.length === 0) return;
+
+    const item = queue.pop();
+    const chaos = Number($("chaos").value);
+
+    const r = 10 + rand01()*2.5;
+    const x = (leftWall+rightWall)/2 + (rand01()-0.5)*(70 + chaos*10);
+    const y = topSpawnY + rand01()*10;
+    const vx = (rand01()-0.5) * (2.0 + chaos*0.8);
+    const vy = 1.0 + rand01()*1.0;
+
+    balls.push({
+      x,y,vx,vy,r,
+      color: item.color,
+      alive:true,
+      trail:[]
+    });
+
+    emitSparkLine(x,y,item.color, 10);
+  }
+
+  function setChaosParams(){
+    const chaos = Number($("chaos").value);
+    if(chaos === 1){
+      G = 0.32; DRAG = 0.996; BOUNCE = 0.94; JITTER = 0.07; HOLE_PULL = 0.75;
+    } else if(chaos === 2){
+      G = 0.36; DRAG = 0.995; BOUNCE = 0.945; JITTER = 0.11; HOLE_PULL = 0.92;
+    } else {
+      G = 0.40; DRAG = 0.993; BOUNCE = 0.955; JITTER = 0.16; HOLE_PULL = 1.15;
+    }
+  }
+
+  function collideCircle(b, px, py, pr, bounce=1.0, push=1.0){
+    const dx = b.x - px;
+    const dy = b.y - py;
+    const dist = Math.hypot(dx,dy);
+    const minD = b.r + pr;
+    if(dist < minD && dist > 0.0001){
+      const nx = dx / dist;
+      const ny = dy / dist;
+
+      // resolve overlap
+      const overlap = (minD - dist);
+      b.x += nx * overlap * push;
+      b.y += ny * overlap * push;
+
+      // reflect velocity
+      const vn = b.vx*nx + b.vy*ny;
+      if(vn < 0){
+        b.vx -= (1 + bounce) * vn * nx;
+        b.vy -= (1 + bounce) * vn * ny;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  function collideSpinner(b, s){
+    // treat spinner as circle; add tangential velocity based on omega
+    const hit = collideCircle(b, s.x, s.y, s.r, 1.05, 1.0);
+    if(hit){
+      // tangential component
+      const dx = b.x - s.x;
+      const dy = b.y - s.y;
+      const dist = Math.hypot(dx,dy) || 1;
+      const tx = -dy / dist;
+      const ty = dx / dist;
+      const tang = s.omega * (s.r * 8.0);
+      b.vx += tx * tang;
+      b.vy += ty * tang;
+
+      // spinner reacts a bit
+      s.omega += (rand01()-0.5)*0.004;
+      emitBurst(b.x, b.y, "#ffd166", 12, 3.0);
+      return true;
+    }
+    return false;
+  }
+
+  function applyBlackHole(b, h){
+    const dx = h.x - b.x;
+    const dy = h.y - b.y;
+    const dist = Math.hypot(dx,dy);
+    const pullR = h.r * 2.0;
+
+    if(dist < pullR && dist > 0.001){
+      const nx = dx / dist;
+      const ny = dy / dist;
+      const strength = HOLE_PULL * (1 - dist/pullR);
+      b.vx += nx * strength;
+      b.vy += ny * strength;
+
+      // swirl
+      b.vx += -ny * strength * 0.45;
+      b.vy += nx * strength * 0.45;
+      emitSparkLine(b.x, b.y, "#22d3ee", 2);
+    }
+
+    // event horizon → teleport/reinsert
+    if(dist < h.core + b.r){
+      emitBurst(h.x, h.y, "#22d3ee", 36, 4.4);
+      // teleport to top with random x; keep color
+      b.x = leftWall + 40 + rand01()*(rightWall-leftWall-80);
+      b.y = topSpawnY + rand01()*10;
+      b.vx = (rand01()-0.5)*6;
+      b.vy = 1.2 + rand01()*2.0;
+      b.trail = [];
+      return true;
+    }
+    return false;
+  }
+
+  function maybeMapEvent(){
+    if($("events").value !== "on") return;
+    const chaos = Number($("chaos").value);
+
+    // roughly every ~2 seconds with small chance
+    const p = (chaos===1)?0.004 : (chaos===2)?0.007 : 0.010;
+    if(rand01() > p) return;
+
+    const type = pick(["flipSlots","shuffleSlots","spinBoost","holeShift","pegJolt"]);
+    if(type === "flipSlots"){
+      slots.reverse();
+      toast("🌀 슬롯 뒤집힘!");
+      emitBurst((leftWall+rightWall)/2, floorY, "#b388ff", 40, 4.0);
+    } else if(type === "shuffleSlots"){
+      shuffle(slots);
+      toast("🎲 슬롯 섞임!");
+      emitBurst((leftWall+rightWall)/2, floorY, "#4ea3ff", 40, 4.0);
+    } else if(type === "spinBoost"){
+      spinners.forEach(s=> s.omega *= (1.15 + rand01()*0.35));
+      toast("⚙ 스피너 과부하!");
+      emitBurst(W/2, H/2, "#ffd166", 42, 4.2);
+    } else if(type === "holeShift"){
+      holes.forEach(h=>{
+        h.x = leftWall + 80 + rand01()*(rightWall-leftWall-160);
+        h.y = 240 + rand01()*(floorY-420);
+      });
+      toast("🕳 블랙홀 이동!");
+      emitBurst(W/2, H/2, "#22d3ee", 42, 4.2);
+    } else if(type === "pegJolt"){
+      pegs.forEach(p=>{ p.x += (rand01()-0.5)*8; p.y += (rand01()-0.5)*6; });
+      toast("⚡ 보드 흔들림!");
+      emitBurst(W/2, H/2, "#ff4d6d", 36, 4.0);
+    }
+  }
+
+  function slotIndexFromX(x){
+    // slots are dynamic order; locate by x in current layout positions (we re-layout each draw)
+    // We'll compute on the fly during draw: slots have x,w already; just find containing x.
+    for(let i=0;i<slots.length;i++){
+      if(x >= slots[i].x && x < slots[i].x + slots[i].w) return i;
+    }
+    return Math.max(0, Math.min(slots.length-1, Math.floor((x-leftWall)/((rightWall-leftWall)/slots.length))));
+  }
+
+  function finalizeIfDone(){
+    if(queue.length === 0 && balls.length === 0 && running){
+      running = false;
+
+      // find max score
+      const max = Math.max(...scores);
+      const idxs = [];
+      for(let i=0;i<scores.length;i++) if(scores[i]===max) idxs.push(i);
+      const loserIdx = idxs[randInt(0, idxs.length-1)];
+      const loser = slots[loserIdx]?.name ?? "누군가";
+
+      $("result").textContent = `☕ 커피는… ${loser} ! (맞은 공 ${max})`;
+      toast(`패배: ${loser}`);
+    }
+  }
+
+  // ===== draw =====
+  function drawBackground(){
+    ctx.fillStyle = "rgba(0,0,0,.18)";
+    ctx.fillRect(0,0,W,H);
+
+    if($("glow").value === "on"){
+      // faint vignette
+      const g = ctx.createRadialGradient(W*0.5, H*0.35, 120, W*0.5, H*0.35, 900);
+      g.addColorStop(0, "rgba(78,163,255,.08)");
+      g.addColorStop(0.55, "rgba(179,136,255,.05)");
+      g.addColorStop(1, "rgba(0,0,0,.35)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+
+  function drawWalls(){
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(leftWall, 60);
+    ctx.lineTo(leftWall, floorY);
+    ctx.lineTo(rightWall, floorY);
+    ctx.lineTo(rightWall, 60);
+    ctx.stroke();
+
+    // top guide
+    ctx.strokeStyle = "rgba(78,163,255,.18)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(leftWall, 110);
+    ctx.lineTo(rightWall, 110);
+    ctx.stroke();
+  }
+
+  function drawPegs(){
+    for(const p of pegs){
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+
+      if($("glow").value === "on"){
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(78,163,255,.7)";
+        ctx.arc(p.x, p.y, p.r*1.8, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  function drawSpinners(){
+    for(const s of spinners){
+      // body
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.ang);
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,209,102,.14)";
+      ctx.strokeStyle = "rgba(255,209,102,.40)";
+      ctx.lineWidth = 3;
+      ctx.arc(0,0,s.r,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      // blades
+      for(let i=0;i<4;i++){
+        ctx.rotate(Math.PI/2);
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(255,209,102,.55)";
+        ctx.lineWidth = 4;
+        ctx.moveTo(0,0);
+        ctx.lineTo(s.r*0.92,0);
+        ctx.stroke();
+      }
+
+      if($("glow").value === "on"){
+        ctx.globalAlpha = 0.28;
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,209,102,.25)";
+        ctx.arc(0,0,s.r*1.8,0,Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.restore();
+    }
+  }
+
+  function drawHoles(){
+    for(const h of holes){
+      // outer field
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(34,211,238,.10)";
+      ctx.strokeStyle = "rgba(34,211,238,.35)";
+      ctx.lineWidth = 2;
+      ctx.arc(h.x, h.y, h.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+
+      // core
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(0,0,0,.65)";
+      ctx.arc(h.x, h.y, h.core, 0, Math.PI*2);
+      ctx.fill();
+
+      // swirl ring
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(34,211,238,.55)";
+      ctx.lineWidth = 2;
+      ctx.arc(h.x, h.y, h.core+10, 0, Math.PI*2);
+      ctx.stroke();
+    }
+  }
+
+  function drawSlots(){
+    // compute slot positions each frame from current order
+    const n = slots.length;
+    if(n === 0) return;
+    const slotLeft = leftWall;
+    const slotRight = rightWall;
+    const totalW = slotRight - slotLeft;
+    const w = totalW / n;
+
+    for(let i=0;i<n;i++){
+      slots[i].x = slotLeft + i*w;
+      slots[i].w = w;
+    }
+
+    // bar
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.fillRect(slotLeft, slotY, totalW, 90);
+
+    for(let i=0;i<n;i++){
+      const s = slots[i];
+      ctx.strokeStyle = "rgba(255,255,255,.14)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(s.x, slotY, s.w, 90);
+
+      // neon top
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = 0.18;
+      ctx.fillRect(s.x, slotY, s.w, 10);
+      ctx.globalAlpha = 1;
+
+      // name
+      ctx.fillStyle = "rgba(238,243,255,.90)";
+      ctx.font = "bold 18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(s.name, s.x + s.w/2, slotY + 44);
+
+      // count
+      const idx = i;
+      ctx.fillStyle = "rgba(207,227,255,.88)";
+      ctx.font = "bold 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+      ctx.fillText(String(scores[idx] ?? 0), s.x + s.w/2, slotY + 70);
+    }
+  }
+
+  function drawParticles(){
+    for(const p of particles){
+      const t = p.life / p.ttl;
+      const a = Math.max(0, 1 - t);
+      ctx.globalAlpha = a * (p.add ? 0.95 : 0.75);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * (0.9 + (1-t)*0.6), 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawBalls(){
+    for(const b of balls){
+      // trail
+      if($("glow").value === "on"){
+        ctx.globalAlpha = 0.20;
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        for(let i=0;i<b.trail.length;i++){
+          const pt = b.trail[i];
+          if(i===0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // body
+      ctx.beginPath();
+      ctx.fillStyle = b.color;
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fill();
+
+      // highlight
+      ctx.globalAlpha = 0.28;
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.arc(b.x - b.r*0.25, b.y - b.r*0.35, b.r*0.45, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function draw(){
+    // pseudo motion blur
+    if($("glow").value === "on"){
+      ctx.fillStyle = "rgba(0,0,0,.22)";
+      ctx.fillRect(0,0,W,H);
+    } else {
+      ctx.clearRect(0,0,W,H);
+    }
+
+    drawBackground();
+    drawWalls();
+    drawHoles();
+    drawSpinners();
+    drawPegs();
+    drawSlots();
+    drawParticles();
+    drawBalls();
+
+    // overlay hint if idle
+    if(!running && balls.length===0 && queue.length===0){
+      ctx.fillStyle = "rgba(0,0,0,.35)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "rgba(238,243,255,.92)";
+      ctx.font = "900 34px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("DROP & CHAOS", W/2, H/2 - 18);
+      ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+      ctx.fillStyle = "rgba(238,243,255,.70)";
+      ctx.fillText("이름 입력 → 시작", W/2, H/2 + 24);
+    }
+  }
+
+  // ===== update =====
+  function update(){
+    frame++;
+
+    // spawn balls up to multi limit
+    if(running){
+      const multi = Number($("multi").value);
+      const targetActive = Math.min(multi, 8);
+      if(balls.length < targetActive && queue.length > 0){
+        // spawn bursty
+        const spawnCount = Math.min(targetActive - balls.length, 2);
+        for(let i=0;i<spawnCount;i++) spawnBall();
+      }
+
+      // map chaos events
+      maybeMapEvent();
+    }
+
+    // animate spinners
+    for(const s of spinners){
+      s.ang += s.omega;
+      // slowly drift omega
+      s.omega += (rand01()-0.5)*0.0007;
+      // clamp
+      s.omega = Math.max(-0.07, Math.min(0.07, s.omega));
+    }
+
+    // update particles
+    particles = particles.filter(p => {
+      p.life++;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.985;
+      p.vy = p.vy*0.985 + 0.02;
+      return p.life < p.ttl;
+    });
+
+    // update balls
+    const newBalls = [];
+    for(const b of balls){
+      // trail
+      b.trail.push({x:b.x, y:b.y});
+      if(b.trail.length > 12) b.trail.shift();
+
+      // forces
+      b.vy += G;
+      b.vx *= DRAG;
+      b.vy *= DRAG;
+
+      // mild random jitter (chaos)
+      b.vx += (rand01()-0.5) * JITTER;
+      b.vy += (rand01()-0.5) * (JITTER*0.5);
+
+      // move
+      b.x += b.vx;
+      b.y += b.vy;
+
+      // walls
+      if(b.x < leftWall + b.r){
+        b.x = leftWall + b.r;
+        b.vx = Math.abs(b.vx) * BOUNCE;
+        emitSparkLine(b.x, b.y, b.color, 6);
+      }
+      if(b.x > rightWall - b.r){
+        b.x = rightWall - b.r;
+        b.vx = -Math.abs(b.vx) * BOUNCE;
+        emitSparkLine(b.x, b.y, b.color, 6);
+      }
+      if(b.y < 60 + b.r){
+        b.y = 60 + b.r;
+        b.vy = Math.abs(b.vy) * BOUNCE;
+      }
+
+      // pegs collisions (cheap: sample subset for performance)
+      for(let i=0;i<pegs.length;i+=2){
+        const p = pegs[i];
+        if(collideCircle(b, p.x, p.y, p.r, 1.02, 1.0)){
+          // add random bounce spice
+          b.vx += (rand01()-0.5)*2.2;
+          b.vy += (rand01()-0.5)*1.3;
+          emitSparkLine(b.x, b.y, b.color, 5);
+        }
+      }
+
+      // spinners collisions
+      for(const s of spinners){
+        collideSpinner(b, s);
+      }
+
+      // black holes pull/teleport
+      for(const h of holes){
+        applyBlackHole(b, h);
+      }
+
+      // floor / slot landing
+      if(b.y > slotY){
+        // count which slot
+        const idx = slotIndexFromX(b.x);
+        scores[idx] = (scores[idx]||0) + 1;
+        buildScoreList();
+
+        // landing explosion
+        emitBurst(b.x, slotY+20, slots[idx]?.color ?? b.color, 46, 4.6);
+        emitBurst(b.x, slotY+20, "#ffffff", 10, 3.0);
+
+        // remove ball
+        continue;
+      }
+
+      // clamp speed
+      const sp = Math.hypot(b.vx,b.vy);
+      const maxSp = 18;
+      if(sp > maxSp){
+        b.vx = (b.vx/sp)*maxSp;
+        b.vy = (b.vy/sp)*maxSp;
+      }
+
+      newBalls.push(b);
+    }
+    balls = newBalls;
+
+    // finalize?
+    finalizeIfDone();
+  }
+
+  function loop(){
+    if(running){
+      update();
+    } else {
+      // keep particles animating a bit
+      if(particles.length){
+        update();
+      }
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ===== buttons =====
+  $("startBtn").addEventListener("click", ()=>{
+    if(running) return;
+
+    // build slots & queue
+    if(!buildSlotsAndQueue()) return;
+
+    // board
+    setChaosParams();
+    rerollBoard();
+
+    // reset counts/particles/balls
+    balls = [];
+    particles = [];
+    frame = 0;
+
+    // start
+    running = true;
+    $("result").textContent = "떨어지는 중… (끝까지 모름)";
+    toast("DROP!");
   });
-}
 
-async function start(){
-  const input=document.getElementById("namesInput").value
-    .split("\n").map(x=>x.trim()).filter(Boolean);
-  if(input.length<3){alert("최소 3명");return;}
-  all=[...input];
-  alive=[...input];
-  dead=[];
-  render();
+  $("rerollBtn").addEventListener("click", ()=>{
+    if(running) return;
+    // if players already parsed, keep slots; else build when start
+    const names = parseNames();
+    if(names.length >= 2){
+      buildSlotsAndQueue();
+    }
+    setChaosParams();
+    rerollBoard();
+    particles = [];
+    balls = [];
+    queue = [];
+    $("result").textContent = "-";
+    toast("보드 리셋!");
+  });
 
-  const status=document.getElementById("status");
+  $("resetBtn").addEventListener("click", ()=>{
+    resetAll(true);
+    $("result").textContent = "-";
+    toast("리셋");
+  });
 
-  status.textContent="의식이 시작됩니다…";
-  await sleep(1500);
-
-  // 1차 숙청
-  status.textContent="🔥 1차 숙청";
-  await sleep(1000);
-  while(alive.length > Math.ceil(all.length/2)){
-    const v=rand(alive);
-    alive=alive.filter(x=>x!==v);
-    dead.push(v);
-    render();
-    await sleep(700);
-  }
-
-  // 부활
-  status.textContent="✨ 부활의 기회";
-  await sleep(1200);
-  const revive=rand(dead);
-  dead=dead.filter(x=>x!==revive);
-  alive.push(revive);
-  render();
-  await sleep(1200);
-
-  // 2차 숙청
-  status.textContent="🔪 2차 숙청";
-  await sleep(1000);
-  while(alive.length>2){
-    const v=rand(alive);
-    alive=alive.filter(x=>x!==v);
-    dead.push(v);
-    render();
-    await sleep(800);
-  }
-
-  // 최후
-  status.textContent="⏳ 최후의 2인…";
-  await sleep(2500);
-
-  const loser=rand(alive);
-  status.innerHTML=`☕ <span class="final">${loser}</span> 커피 쏘기`;
-}
+  // initial board
+  setChaosParams();
+  rerollBoard();
+  draw();
+  requestAnimationFrame(loop);
+});
 </script>
 </body>
 </html>
