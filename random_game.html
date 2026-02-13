@@ -3,54 +3,53 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>랜덤 드롭 서바이벌 (Plinko)</title>
+  <title>💣 와이어 컷 디퓨즈</title>
   <style>
-    :root { --r: 16px; }
-    body{
-      margin:0; background:#0b0f14; color:#e9eef6;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;
-      -webkit-tap-highlight-color: transparent;
+    :root{ --r:16px; }
+    body{ margin:0; background:#0b0f14; color:#e9eef6; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif; }
+    .wrap{ max-width:980px; margin:0 auto; padding:14px; }
+    .card{ background:#111826; border:1px solid #223049; border-radius:var(--r); padding:12px; box-shadow:0 8px 22px rgba(0,0,0,.35); }
+    h1{ font-size:18px; margin:0 0 8px; }
+    .muted{ color:#a9b6cc; font-size:13px; line-height:1.35; }
+    .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+    textarea,select,button{ border:1px solid #2a3a57; background:#0e1522; color:#e9eef6; border-radius:12px; padding:10px 12px; font-size:14px; outline:none; }
+    textarea{ width:100%; min-height:86px; resize:vertical; }
+    button{ cursor:pointer; background:#1a2a46; }
+    button.primary{ background:#2d5bff; border-color:#2d5bff; }
+    button.danger{ background:#ff3b3b; border-color:#ff3b3b; color:#fff; }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
+    .pill{ display:inline-flex; gap:8px; align-items:center; border:1px solid #2a3a57; padding:8px 10px; border-radius:999px; background:#0e1522; }
+    .sep{ height:1px; background:#223049; margin:10px 0; }
+    .center{ text-align:center; }
+    .big{ font-size:28px; font-weight:900; letter-spacing:.4px; }
+    .timer{ font-size:44px; font-weight:900; letter-spacing:1px; }
+    .panel{ background:#0e1522; border:1px solid #223049; border-radius:14px; padding:12px; }
+    .wires{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:10px; }
+    @media (min-width:720px){ .wires{ grid-template-columns:1fr 1fr; } }
+    .wireBtn{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 14px; border-radius:14px; border:1px solid #2a3a57;
+      background:#0b1220; font-weight:800;
+      user-select:none;
     }
-    .wrap{max-width:980px;margin:0 auto;padding:14px;}
-    .card{
-      background:#111826;border:1px solid #223049;border-radius:var(--r);
-      padding:12px; box-shadow:0 8px 22px rgba(0,0,0,.35);
+    .wireBtn:hover{ border-color:#4f7cff; }
+    .wireCut{ opacity:.55; text-decoration:line-through; }
+    .flash{ animation: flash 0.15s linear 0s 6; }
+    @keyframes flash { 0%{filter:brightness(1);} 50%{filter:brightness(1.8);} 100%{filter:brightness(1);} }
+    .shake{ animation: shake 0.12s linear 0s 10; }
+    @keyframes shake{
+      0%{transform:translateX(0)} 25%{transform:translateX(-4px)} 50%{transform:translateX(4px)} 75%{transform:translateX(-3px)} 100%{transform:translateX(0)}
     }
-    h1{font-size:18px;margin:0 0 8px;}
-    .muted{color:#a9b6cc;font-size:13px;line-height:1.35}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
-    input,textarea,select,button{
-      border:1px solid #2a3a57;background:#0e1522;color:#e9eef6;
-      border-radius:12px;padding:10px 12px;font-size:14px;outline:none;
-    }
-    textarea{width:100%;resize:vertical;min-height:90px}
-    button{cursor:pointer;background:#1a2a46}
-    button.primary{background:#2d5bff;border-color:#2d5bff}
-    button.danger{background:#ff3b3b;border-color:#ff3b3b;color:#fff}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid #2a3a57;padding:8px 10px;border-radius:999px;background:#0e1522}
-    .sep{height:1px;background:#223049;margin:10px 0}
-    .center{text-align:center}
-    .big{font-size:22px;font-weight:800}
-
-    /* ✅ 클릭 씹힘 방지: 버튼이 캔버스보다 무조건 위 */
-    .controls{position:relative; z-index:10;}
-    canvas{position:relative; z-index:1;}
-
-    canvas{
-      width:100%; height:auto; display:block;
-      border-radius:14px; border:1px solid #223049; background:#0e1522;
-      touch-action: manipulation;
-    }
+    .log{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; color:#cfe3ff; white-space:pre-wrap; }
   </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>🎯 랜덤 드롭 서바이벌 (Plinko)</h1>
+    <h1>💣 와이어 컷 디퓨즈 (커피내기용)</h1>
     <div class="muted">
-      이름 입력 → <b>보드 준비</b> → <b>DROP</b><br/>
-      공이 핀에 튕기며 내려와서 마지막에 딱 한 칸에 떨어짐 → 결과 확정.
+      한 폰으로 돌려가며: <b>현재 차례</b> 사람이 와이어 하나를 “자르기”.<br/>
+      운빨 100%지만 카운트다운+페이크로 박진감 있음. (룰렛보다 훨씬 쫄림)
     </div>
 
     <div class="row">
@@ -61,105 +60,101 @@
 민수"></textarea>
     </div>
 
-    <div class="row controls">
-      <span class="pill">공 개수
-        <select id="ballCount">
-          <option value="1" selected>1개 (기본)</option>
-          <option value="2">2개 (더 박진감)</option>
-          <option value="3">3개 (난장판)</option>
+    <div class="row">
+      <span class="pill">와이어 개수
+        <select id="wireCount">
+          <option value="6" selected>6개 (추천)</option>
+          <option value="8">8개</option>
+          <option value="10">10개</option>
         </select>
       </span>
-
-      <span class="pill">핀 밀도
-        <select id="pinDensity">
+      <span class="pill">타이머(초)
+        <select id="timerRange">
+          <option value="12-22" selected>12~22</option>
+          <option value="15-30">15~30</option>
+          <option value="20-40">20~40</option>
+        </select>
+      </span>
+      <span class="pill">페이크 이벤트
+        <select id="fakeLevel">
           <option value="low">낮음</option>
           <option value="mid" selected>보통</option>
           <option value="high">높음</option>
         </select>
       </span>
-
-      <span class="pill">결과 규칙
-        <select id="rule">
-          <option value="lose" selected>맞은 사람 패배</option>
-          <option value="win">맞은 사람 당첨</option>
-        </select>
-      </span>
     </div>
 
-    <div class="row controls">
-      <button class="primary" id="prepBtn">보드 준비</button>
-      <button class="primary" id="dropBtn" disabled>DROP 🎱</button>
-      <button id="shakeBtn" disabled>흔들기(난수)</button>
+    <div class="row">
+      <button class="primary" id="startBtn">게임 시작</button>
+      <button id="nextRoundBtn" disabled>다음 라운드</button>
       <button class="danger" id="resetBtn">리셋</button>
       <span class="muted" id="msg"></span>
     </div>
 
     <div class="sep"></div>
 
-    <canvas id="cv" width="900" height="1200"></canvas>
+    <div class="panel center" id="hud" style="display:none">
+      <div class="muted">현재 차례</div>
+      <div class="big" id="turnName">-</div>
+      <div class="sep"></div>
+      <div class="muted">남은 시간</div>
+      <div class="timer" id="timeLeft">--</div>
+      <div class="muted" id="statusText" style="margin-top:6px">와이어를 하나 자르세요.</div>
+    </div>
+
+    <div class="wires" id="wires" style="display:none"></div>
 
     <div class="sep"></div>
-    <div class="center">
-      <div class="muted">결과</div>
-      <div class="big" id="result">-</div>
+    <div class="panel">
+      <div class="muted">진행 로그</div>
+      <div class="log" id="log">-</div>
     </div>
   </div>
 </div>
 
 <script>
 window.addEventListener("DOMContentLoaded", () => {
-  const $ = (id) => document.getElementById(id);
-  const msgEl = $("msg");
-  const resultEl = $("result");
+  const $ = (id)=>document.getElementById(id);
 
-  // ✅ 에러가 나면 화면에 바로 표시
-  window.onerror = function (m, s, line, col) {
-    msgEl.textContent = `JS 오류: ${m} (line ${line}:${col})`;
+  // 에러를 화면에 표시
+  window.onerror = (m, s, line, col) => {
+    $("msg").textContent = `JS 오류: ${m} (line ${line}:${col})`;
   };
 
-  // crypto random
+  function setMsg(t=""){ $("msg").textContent = t; }
+  function setLog(t){ $("log").textContent = t; }
+  function addLog(line){
+    const cur = $("log").textContent;
+    $("log").textContent = (cur === "-" ? "" : cur) + line + "\n";
+  }
+
   function rand01(){
     const u = new Uint32Array(1);
     crypto.getRandomValues(u);
     return u[0] / 0xFFFFFFFF;
   }
-  function randInt(min, maxInclusive){
-    return min + Math.floor(rand01() * (maxInclusive - min + 1));
+  function randInt(min, maxInc){
+    return min + Math.floor(rand01() * (maxInc - min + 1));
   }
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
       const j = randInt(0,i);
-      [arr[i],arr[j]] = [arr[j],arr[i]];
+      [arr[i],arr[j]]=[arr[j],arr[i]];
     }
     return arr;
   }
 
-  function setMsg(t=""){ msgEl.textContent = t; }
-  function setResult(t="-"){ resultEl.textContent = t; }
-
-  const cv = $("cv");
-  const ctx = cv.getContext("2d");
-
-  const W = cv.width, H = cv.height;
-  const topMargin = 90;
-  const side = 40;
-  const bottomH = 190;
-
-  // state
-  let ready = false;
-  let running = false;
-
   let names = [];
-  let slots = [];
-  let pins = [];
-  let balls = [];
+  let turn = 0;
+  let running = false;
+  let ended = false;
+  let timer = null;
+  let timeLeft = 0;
 
-  // physics params
-  const gravity = 0.24;
-  const restitution = 0.78;
-  const friction = 0.998;
-  const air = 0.999;
-  let shakeVX = 0;
+  // wires state
+  // outcome types: "BOOM"(즉사), "DEFUSE"(해체), "SAFE"(그냥 넘어감)
+  let wireOutcomes = [];
+  let wireCut = [];
 
   function parseNames(){
     const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
@@ -171,366 +166,201 @@ window.addEventListener("DOMContentLoaded", () => {
     return out.slice(0,10);
   }
 
-  function roundRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
+  function updateTurnUI(){
+    $("turnName").textContent = names[turn] ?? "-";
   }
 
-  function drawNamePill(cx, cy, text){
-    ctx.save();
-    ctx.font = "24px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    const padX = 18;
-    const w = ctx.measureText(text).width + padX*2;
-    const h = 44;
-
-    ctx.fillStyle = "#0e1522";
-    ctx.strokeStyle = "#2a3a57";
-    ctx.lineWidth = 2;
-    roundRect(ctx, cx - w/2, cy - h/2, w, h, 999);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "#e9eef6";
-    ctx.fillText(text, cx, cy+1);
-    ctx.restore();
+  function stopTimer(){
+    if(timer){ clearInterval(timer); timer = null; }
   }
 
-  function buildBoard(){
-    names = parseNames();
-    if(names.length < 3){
-      ready = false;
-      $("dropBtn").disabled = true;
-      $("shakeBtn").disabled = true;
-      setMsg("최소 3명부터 가능!");
-      draw();
+  function endGame(reason, loserName){
+    ended = true;
+    running = false;
+    stopTimer();
+    $("nextRoundBtn").disabled = false;
+
+    const hud = $("hud");
+    hud.classList.add("flash","shake");
+    setTimeout(()=>hud.classList.remove("flash","shake"), 1200);
+
+    if(reason === "boom"){
+      $("statusText").textContent = `💥 폭발! ${loserName} 패배`;
+      addLog(`💥 폭발! 패배: ${loserName}`);
+      alert(`💥 폭발!\n패배: ${loserName}\n\n커피 쏘기 ㄱㄱ`);
+    } else if(reason === "timeout"){
+      $("statusText").textContent = `⏱ 타임아웃! ${loserName} 패배`;
+      addLog(`⏱ 타임아웃 패배: ${loserName}`);
+      alert(`⏱ 타임아웃!\n패배: ${loserName}\n\n커피 쏘기 ㄱㄱ`);
+    } else if(reason === "defuse"){
+      $("statusText").textContent = `🧰 해체 성공! (${loserName}가 살림)`;
+      addLog(`🧰 해체 성공! 마지막 컷: ${loserName}`);
+      alert(`🧰 해체 성공!\n마지막으로 자른 사람: ${loserName}\n\n이번 라운드는 무효로 할지, 당첨으로 할지 룰 정해도 됨`);
+    }
+
+    // disable wire buttons
+    [...$("wires").querySelectorAll("button")].forEach(b=>b.disabled = true);
+  }
+
+  function maybeFakeEvent(){
+    const lvl = $("fakeLevel").value;
+    const p = (lvl==="high") ? 0.22 : (lvl==="mid") ? 0.14 : 0.08;
+    if(rand01() > p) return;
+
+    const hud = $("hud");
+    hud.classList.add("flash");
+    $("statusText").textContent = "⚠ 경고음… (페이크)";
+    setTimeout(()=>{
+      hud.classList.remove("flash");
+      if(!ended) $("statusText").textContent = "와이어를 하나 자르세요.";
+    }, 650);
+  }
+
+  function startTimer(){
+    const [a,b] = $("timerRange").value.split("-").map(Number);
+    timeLeft = randInt(a,b);
+    $("timeLeft").textContent = timeLeft;
+
+    stopTimer();
+    timer = setInterval(()=>{
+      if(ended) return;
+      timeLeft--;
+      $("timeLeft").textContent = timeLeft;
+
+      // 페이크 이벤트
+      if(timeLeft % 3 === 0) maybeFakeEvent();
+
+      if(timeLeft <= 0){
+        endGame("timeout", names[turn] ?? "누군가");
+      }
+    }, 1000);
+  }
+
+  function nextTurn(){
+    if(ended) return;
+    turn = (turn + 1) % names.length;
+    updateTurnUI();
+  }
+
+  function buildWires(){
+    const n = Number($("wireCount").value);
+
+    // outcomes: 1 boom, 1 defuse, rest safe
+    wireOutcomes = Array(n).fill("SAFE");
+    wireOutcomes[0] = "BOOM";
+    wireOutcomes[1] = "DEFUSE";
+    shuffle(wireOutcomes);
+
+    wireCut = Array(n).fill(false);
+
+    const container = $("wires");
+    container.innerHTML = "";
+    const colors = ["RED","BLUE","GREEN","YELLOW","PURPLE","ORANGE","WHITE","BLACK","CYAN","PINK"];
+
+    for(let i=0;i<n;i++){
+      const btn = document.createElement("button");
+      btn.className = "wireBtn";
+      btn.type = "button";
+      btn.innerHTML = `<span>🔌 WIRE ${i+1}</span><span class="muted">${colors[i % colors.length]}</span>`;
+      btn.addEventListener("click", () => cutWire(i, btn));
+      container.appendChild(btn);
+    }
+  }
+
+  function cutWire(i, btn){
+    if(ended) return;
+    if(wireCut[i]) return;
+
+    wireCut[i] = true;
+    btn.classList.add("wireCut");
+    btn.disabled = true;
+
+    const actor = names[turn] ?? "누군가";
+    addLog(`- ${actor} : WIRE ${i+1} 컷`);
+
+    // 작은 연출
+    $("hud").classList.add("flash");
+    setTimeout(()=>$("hud").classList.remove("flash"), 250);
+
+    const out = wireOutcomes[i];
+    if(out === "BOOM"){
+      endGame("boom", actor);
+      return;
+    }
+    if(out === "DEFUSE"){
+      endGame("defuse", actor);
       return;
     }
 
-    setMsg(`보드 준비 완료: ${names.length}명`);
-    setResult("-");
-
-    // slots
-    slots = [];
-    const n = names.length;
-    const slotW = (W - side*2) / n;
-    for(let i=0;i<n;i++){
-      slots.push({
-        i,
-        name: names[i],
-        x0: side + i*slotW,
-        x1: side + (i+1)*slotW
-      });
-    }
-
-    // pins
-    pins = [];
-    const density = $("pinDensity").value;
-    const gapY = density==="low" ? 98 : density==="high" ? 62 : 78;
-    const gapX = density==="low" ? 98 : density==="high" ? 62 : 78;
-    const pinR = density==="high" ? 10 : density==="low" ? 12 : 11;
-
-    const startY = topMargin + 70;
-    const endY = H - bottomH - 70;
-
-    let row = 0;
-    for(let y = startY; y <= endY; y += gapY){
-      const offset = (row % 2) ? gapX/2 : 0;
-      for(let x = side + 50 + offset; x <= W - side - 50; x += gapX){
-        const jx = (rand01()-0.5) * 10;
-        const jy = (rand01()-0.5) * 6;
-        pins.push({ x: x + jx, y: y + jy, r: pinR });
+    // safe
+    $("statusText").textContent = "✅ 세이프… 다음 사람!";
+    setTimeout(()=>{
+      if(!ended){
+        $("statusText").textContent = "와이어를 하나 자르세요.";
+        nextTurn();
       }
-      row++;
+    }, 450);
+  }
+
+  function startGame(){
+    names = parseNames();
+    if(names.length < 3){
+      setMsg("최소 3명부터 가능!");
+      return;
     }
-
-    balls = [];
-    ready = true;
-    running = false;
-
-    // ✅ DROP 버튼 활성화 확실하게
-    $("dropBtn").disabled = false;
-    $("shakeBtn").disabled = false;
-    $("dropBtn").textContent = "DROP 🎱";
-
-    draw();
-  }
-
-  function applyShake(){
-    if(!ready) return;
-    shakeVX = (rand01() < 0.5 ? -1 : 1) * (2.2 + rand01()*2.2);
-    setMsg("보드 흔들림! ㅋㅋ");
-    setTimeout(()=>{ shakeVX = 0; setMsg(""); }, 500);
-  }
-
-  function spawnBalls(){
-    if(!ready){ setMsg("먼저 보드 준비!"); return; }
-    if(running){ setMsg("진행중! 잠깐만"); return; }
-
     setMsg("");
-    setResult("-");
+    setLog("-");
+    turn = randInt(0, names.length-1);
+    ended = false;
     running = true;
-    balls = [];
 
-    const k = Number($("ballCount").value);
-    for(let i=0;i<k;i++){
-      const r = 16;
-      const x = W/2 + (i-(k-1)/2)*36 + (rand01()-0.5)*18;
-      const y = topMargin;
-      balls.push({
-        x, y, r,
-        vx: (rand01()-0.5)*2.2,
-        vy: 0,
-        done: false,
-        landedSlot: null
-      });
-    }
+    $("hud").style.display = "block";
+    $("wires").style.display = "grid";
+    $("nextRoundBtn").disabled = true;
+
+    updateTurnUI();
+    buildWires();
+    $("statusText").textContent = "와이어를 하나 자르세요.";
+    addLog(`🎬 시작! (첫 턴: ${names[turn]})`);
+
+    startTimer();
   }
 
-  function circleCollision(ball, pin){
-    const dx = ball.x - pin.x;
-    const dy = ball.y - pin.y;
-    const dist = Math.hypot(dx, dy);
-    const minDist = ball.r + pin.r;
-    if(dist < minDist && dist > 0.0001){
-      const nx = dx / dist;
-      const ny = dy / dist;
-      const overlap = (minDist - dist);
+  function nextRound(){
+    if(!names.length) return;
+    ended = false;
+    running = true;
 
-      ball.x += nx * overlap;
-      ball.y += ny * overlap;
+    $("nextRoundBtn").disabled = true;
+    updateTurnUI();
+    buildWires();
+    $("statusText").textContent = "와이어를 하나 자르세요.";
+    addLog(`\n🔁 다음 라운드 시작! (첫 턴: ${names[turn]})`);
 
-      const vn = ball.vx*nx + ball.vy*ny;
-      if(vn < 0){
-        ball.vx -= (1 + restitution) * vn * nx;
-        ball.vy -= (1 + restitution) * vn * ny;
-      }
-
-      // tiny randomness
-      ball.vx += (rand01()-0.5)*0.25;
-      ball.vy += (rand01()-0.5)*0.12;
-    }
+    startTimer();
+    [...$("wires").querySelectorAll("button")].forEach(b=>b.disabled = false);
   }
 
-  function wallCollision(ball){
-    if(ball.x - ball.r < side){
-      ball.x = side + ball.r;
-      ball.vx = Math.abs(ball.vx) * restitution;
-    }
-    if(ball.x + ball.r > W - side){
-      ball.x = W - side - ball.r;
-      ball.vx = -Math.abs(ball.vx) * restitution;
-    }
-    if(ball.y - ball.r < 20){
-      ball.y = 20 + ball.r;
-      ball.vy = Math.abs(ball.vy) * restitution;
-    }
-  }
-
-  function checkLanding(ball){
-    const yFloor = H - bottomH + 20;
-    if(ball.y + ball.r >= yFloor){
-      const s = slots.find(sl => ball.x >= sl.x0 && ball.x < sl.x1) || slots[slots.length-1];
-      ball.done = true;
-      ball.landedSlot = s;
-      ball.y = yFloor - ball.r;
-      ball.vx = 0; ball.vy = 0;
-    }
-  }
-
-  function finalizeResult(){
-    if(!balls.length) return;
-    const picked = balls[randInt(0, balls.length-1)].landedSlot;
-    const rule = $("rule").value;
-    const text = (rule === "lose")
-      ? `💥 ${picked.name} 패배!`
-      : `🎉 ${picked.name} 당첨!`;
-    setResult(text);
-
-    // mini flash
-    let t=0;
-    const id = setInterval(()=>{
-      t++;
-      ctx.save();
-      ctx.globalAlpha = 0.08;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0,0,W,H);
-      ctx.restore();
-      if(t>=6) clearInterval(id);
-    }, 60);
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-
-    // base
-    ctx.save();
-    ctx.fillStyle = "#0e1522";
-    ctx.fillRect(0,0,W,H);
-    ctx.restore();
-
-    // frame
-    ctx.save();
-    ctx.strokeStyle = "#223049";
-    ctx.lineWidth = 4;
-    roundRect(ctx, side-10, 20, W - (side-10)*2, H-40, 18);
-    ctx.stroke();
-    ctx.restore();
-
-    // top funnel
-    ctx.save();
-    ctx.strokeStyle = "#2a3a57";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(W/2 - 140, topMargin);
-    ctx.lineTo(W/2 - 40, 20);
-    ctx.moveTo(W/2 + 140, topMargin);
-    ctx.lineTo(W/2 + 40, 20);
-    ctx.stroke();
-    ctx.restore();
-
-    // pins
-    ctx.save();
-    ctx.fillStyle = "#cfe3ff";
-    for(const p of pins){
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.restore();
-
-    // bottom slots area
-    const yTop = H - bottomH;
-    ctx.save();
-    ctx.fillStyle = "#0b0f14";
-    ctx.fillRect(0, yTop, W, bottomH);
-    ctx.restore();
-
-    // slot dividers + names
-    ctx.save();
-    ctx.strokeStyle = "#223049";
-    ctx.lineWidth = 3;
-
-    for(const sl of slots){
-      ctx.beginPath();
-      ctx.moveTo(sl.x0, yTop);
-      ctx.lineTo(sl.x0, H-20);
-      ctx.stroke();
-
-      const cx = (sl.x0 + sl.x1) / 2;
-      const cy = yTop + 95;
-      drawNamePill(cx, cy, sl.name);
-    }
-    if(slots.length){
-      const last = slots[slots.length-1];
-      ctx.beginPath();
-      ctx.moveTo(last.x1, yTop);
-      ctx.lineTo(last.x1, H-20);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // balls
-    ctx.save();
-    for(const b of balls){
-      ctx.beginPath();
-      ctx.fillStyle = b.done ? "#2d5bff" : "#ffffff";
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-      ctx.fill();
-
-      ctx.globalAlpha = 0.25;
-      ctx.beginPath();
-      ctx.fillStyle = "#ffffff";
-      ctx.arc(b.x - 6, b.y - 7, b.r*0.55, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-    ctx.restore();
-
-    // hint overlay
-    if(!ready){
-      ctx.save();
-      ctx.fillStyle = "rgba(0,0,0,.35)";
-      ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = "#e9eef6";
-      ctx.font = "34px system-ui";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("이름 입력 → 보드 준비", W/2, H/2);
-      ctx.restore();
-    } else if(!running && balls.length===0){
-      ctx.save();
-      ctx.fillStyle = "#a9b6cc";
-      ctx.font = "26px system-ui";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("DROP을 눌러 시작!", W/2, topMargin + 40);
-      ctx.restore();
-    }
-  }
-
-  function loop(){
-    if(running){
-      for(const b of balls){
-        if(b.done) continue;
-
-        b.vy += gravity;
-        b.vx += shakeVX * 0.03;
-
-        b.x += b.vx;
-        b.y += b.vy;
-
-        b.vx *= friction;
-        b.vy *= air;
-
-        wallCollision(b);
-
-        for(const p of pins){
-          circleCollision(b,p);
-        }
-
-        checkLanding(b);
-      }
-
-      if(balls.length && balls.every(b => b.done)){
-        running = false;
-        finalizeResult();
-      }
-    }
-
-    draw();
-    requestAnimationFrame(loop);
-  }
-
-  // handlers
-  $("prepBtn").addEventListener("click", buildBoard);
-  $("dropBtn").addEventListener("click", spawnBalls);
-  $("shakeBtn").addEventListener("click", applyShake);
-  $("resetBtn").addEventListener("click", () => {
-    ready = false;
-    running = false;
+  function resetAll(){
+    stopTimer();
     names = [];
-    slots = [];
-    pins = [];
-    balls = [];
-    shakeVX = 0;
-    $("dropBtn").disabled = true;
-    $("shakeBtn").disabled = true;
+    turn = 0;
+    ended = false;
+    running = false;
+    $("hud").style.display = "none";
+    $("wires").style.display = "none";
+    $("nextRoundBtn").disabled = true;
     setMsg("");
-    setResult("-");
-    draw();
-  });
+    setLog("-");
+    $("timeLeft").textContent = "--";
+    $("turnName").textContent = "-";
+    $("statusText").textContent = "";
+  }
 
-  // first draw + start loop
-  draw();
-  requestAnimationFrame(loop);
+  $("startBtn").addEventListener("click", startGame);
+  $("nextRoundBtn").addEventListener("click", nextRound);
+  $("resetBtn").addEventListener("click", resetAll);
+
 });
 </script>
 </body>
