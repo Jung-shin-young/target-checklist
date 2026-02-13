@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>💣 미스터리 타이머 박스</title>
+  <style>
+    :root { --r: 16px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; margin: 0; background:#0b0f14; color:#e9eef6;}
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 18px; }
+    .card{ background:#111826; border:1px solid #223049; border-radius: var(--r); padding: 14px; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+    h1{ font-size: 20px; margin: 0 0 10px; }
+    h2{ font-size: 16px; margin: 12px 0 8px; color:#cfe3ff; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input, select, button, textarea{
+      border:1px solid #2a3a57; background:#0e1522; color:#e9eef6;
+      border-radius: 12px; padding: 10px 12px; font-size: 14px;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus{ border-color:#4f7cff; box-shadow: 0 0 0 3px rgba(79,124,255,.18); }
+    button{ cursor:pointer; background:#1a2a46; }
+    button.primary{ background:#2d5bff; border-color:#2d5bff; }
+    button.danger{ background:#ff3b3b; border-color:#ff3b3b; color:#fff; }
+    button:disabled{ opacity:.5; cursor:not-allowed; }
+    .muted{ color:#a9b6cc; font-size: 13px; }
+    .pill{ display:inline-flex; gap:8px; align-items:center; border:1px solid #2a3a57; padding:8px 10px; border-radius:999px; background:#0e1522; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap:12px; }
+    @media (min-width:820px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
+    .big{ font-size: 42px; font-weight: 800; letter-spacing: .5px; }
+    .center{ text-align:center; }
+    .sep{ height:1px; background:#223049; margin: 12px 0; }
+    .list{ display:flex; flex-direction:column; gap:8px; }
+    .playerLine{ display:flex; justify-content:space-between; gap:10px; align-items:center; padding:10px 12px; border:1px solid #223049; border-radius:12px; background:#0e1522;}
+    .tag{ font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #2a3a57; color:#cfe3ff; }
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; padding:2px 6px; border-radius:6px; border:1px solid #2a3a57; background:#0e1522; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>💣 미스터리 타이머 박스 (운빨+심리, 실력 0에 가깝게)</h1>
+      <div class="muted">
+        한 폰/한 화면으로 돌릴 때: <span class="kbd">내 차례</span>에만 카드 확인 → 행동 선택 → 바로 숨김 → 다음 사람에게 폰 넘기기.
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid">
+      <!-- Setup -->
+      <div class="card" id="setupCard">
+        <h2>1) 참가자 설정 (최대 10명)</h2>
+        <div class="row">
+          <textarea id="names" rows="6" style="width:100%" placeholder="이름을 줄바꿈으로 입력 (예: 신영&#10;와이프&#10;철수&#10;영희)"></textarea>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="pill">
+            💣 폭탄 개수
+            <select id="bombCount">
+              <option value="1">1개 (기본)</option>
+              <option value="2">2개 (더 살벌)</option>
+              <option value="3">3개 (지옥)</option>
+            </select>
+          </div>
+          <div class="pill">
+            ⏱ 타이머 범위(초)
+            <select id="timerRange">
+              <option value="8-18">8~18</option>
+              <option value="10-25" selected>10~25</option>
+              <option value="15-35">15~35</option>
+            </select>
+          </div>
+          <div class="pill">
+            🎯 중앙덱 교환
+            <select id="deckSwapMode">
+              <option value="on" selected>가능</option>
+              <option value="off">불가</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="startBtn">라운드 시작</button>
+          <button id="resetBtn">초기화</button>
+          <span class="muted" id="setupMsg"></span>
+        </div>
+
+        <div class="sep"></div>
+        <div class="muted">
+          추천 내기 룰: <b>탈락자 = 벌칙</b> or <b>1,000원</b> / 라운드.  
+          라운드가 빨리 끝나면 폭탄 개수 올리면 됨.
+        </div>
+      </div>
+
+      <!-- Game -->
+      <div class="card" id="gameCard" style="display:none">
+        <h2>2) 진행</h2>
+        <div class="row" style="justify-content:space-between">
+          <div class="pill">라운드 <b id="roundNo">1</b></div>
+          <div class="pill">남은시간 <b id="timeLeft">--</b>초</div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="center">
+          <div class="muted">현재 차례</div>
+          <div class="big" id="currentPlayer">-</div>
+          <div class="muted" id="turnHint">폰을 해당 사람에게 넘기고 진행하세요.</div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="center">
+          <button id="revealBtn">내 카드 확인</button>
+          <div style="height:10px"></div>
+          <div class="pill" id="cardBox" style="display:none; justify-content:center; font-size:18px;">
+            내 카드: <b id="myCard">?</b>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>행동 선택</h2>
+        <div class="row">
+          <button id="keepBtn">유지</button>
+          <button id="swapLeftBtn">왼쪽과 교환</button>
+          <button id="swapRightBtn">오른쪽과 교환</button>
+          <button id="swapDeckBtn">중앙덱과 교환</button>
+        </div>
+        <div class="muted" style="margin-top:8px">
+          * 교환은 실제로 카드가 바뀝니다. (선택 후 자동으로 다음 사람 턴)
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="danger" id="forceEndBtn">즉시 종료(폭탄 공개)</button>
+          <span class="muted" id="gameMsg"></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="card" id="statusCard" style="display:none">
+      <h2>상태 (공개 금지: 운영자/진행용)</h2>
+      <div class="muted">아래는 디버그/진행 도움용. 게임 중엔 보지 마세요 😂</div>
+      <div style="height:10px"></div>
+      <div class="list" id="playersList"></div>
+    </div>
+  </div>
+
+<script>
+  // --- secure-ish random helpers
+  function randInt(min, maxInclusive){
+    const range = maxInclusive - min + 1;
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    return min + (buf[0] % range);
+  }
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = randInt(0,i);
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  // --- state
+  let state = {
+    round: 1,
+    names: [],
+    alive: [],
+    // each player holds a card: "BOMB" or "SAFE"
+    cards: [],
+    // deck has some safe cards, and may contain bombs depending on swaps
+    deck: [],
+    turnIndex: 0,
+    timer: null,
+    timeLeft: null,
+    revealedThisTurn: false,
+    deckSwapOn: true,
+    ended: false
+  };
+
+  const $ = (id)=>document.getElementById(id);
+
+  const setupCard = $("setupCard");
+  const gameCard = $("gameCard");
+  const statusCard = $("statusCard");
+
+  function parseNames(){
+    const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    // unique-ish but keep order
+    const seen = new Set();
+    const names = [];
+    for(const n of raw){
+      if(!seen.has(n)){ seen.add(n); names.push(n); }
+    }
+    return names.slice(0,10);
+  }
+
+  function updateStatusList(){
+    const list = $("playersList");
+    list.innerHTML = "";
+    state.alive.forEach((name, idx)=>{
+      const line = document.createElement("div");
+      line.className = "playerLine";
+      const left = document.createElement("div");
+      left.innerHTML = `<b>${name}</b> <span class="tag">${idx===state.turnIndex ? "현재턴" : "대기"}</span>`;
+      const right = document.createElement("div");
+      right.className = "muted";
+      right.textContent = state.cards[idx]==="BOMB" ? "💣" : "✅";
+      line.appendChild(left);
+      line.appendChild(right);
+      list.appendChild(line);
+    });
+  }
+
+  function setTurnUI(){
+    $("currentPlayer").textContent = state.alive[state.turnIndex] ?? "-";
+    $("cardBox").style.display = "none";
+    $("myCard").textContent = "?";
+    state.revealedThisTurn = false;
+
+    // buttons enable/disable
+    $("revealBtn").disabled = state.ended;
+    $("keepBtn").disabled = state.ended;
+    $("swapLeftBtn").disabled = state.ended || state.alive.length < 2;
+    $("swapRightBtn").disabled = state.ended || state.alive.length < 2;
+    $("swapDeckBtn").disabled = state.
