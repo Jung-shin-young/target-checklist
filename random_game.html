@@ -3,16 +3,19 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>💣 와이어 컷 디퓨즈</title>
+  <title>🎱 멀티볼 핀볼 배틀 (Chaos Arena)</title>
   <style>
     :root{ --r:16px; }
     body{ margin:0; background:#0b0f14; color:#e9eef6; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif; }
     .wrap{ max-width:980px; margin:0 auto; padding:14px; }
     .card{ background:#111826; border:1px solid #223049; border-radius:var(--r); padding:12px; box-shadow:0 8px 22px rgba(0,0,0,.35); }
-    h1{ font-size:18px; margin:0 0 8px; }
+    h1{ font-size:18px; margin:0 0 6px; }
     .muted{ color:#a9b6cc; font-size:13px; line-height:1.35; }
     .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px; }
-    textarea,select,button{ border:1px solid #2a3a57; background:#0e1522; color:#e9eef6; border-radius:12px; padding:10px 12px; font-size:14px; outline:none; }
+    textarea,select,button{
+      border:1px solid #2a3a57; background:#0e1522; color:#e9eef6;
+      border-radius:12px; padding:10px 12px; font-size:14px; outline:none;
+    }
     textarea{ width:100%; min-height:86px; resize:vertical; }
     button{ cursor:pointer; background:#1a2a46; }
     button.primary{ background:#2d5bff; border-color:#2d5bff; }
@@ -20,39 +23,36 @@
     button:disabled{ opacity:.55; cursor:not-allowed; }
     .pill{ display:inline-flex; gap:8px; align-items:center; border:1px solid #2a3a57; padding:8px 10px; border-radius:999px; background:#0e1522; }
     .sep{ height:1px; background:#223049; margin:10px 0; }
-    .center{ text-align:center; }
-    .big{ font-size:28px; font-weight:900; letter-spacing:.4px; }
-    .timer{ font-size:44px; font-weight:900; letter-spacing:1px; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap:10px; }
+    @media(min-width:860px){ .grid{ grid-template-columns: 1.1fr .9fr; } }
+
+    /* 클릭 씹힘 방지 */
+    .controls{ position:relative; z-index:10; }
+    canvas{ position:relative; z-index:1; width:100%; height:auto; display:block; border-radius:14px; border:1px solid #223049; background:#0e1522; touch-action:manipulation; }
+
+    .hud{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .big{ font-size:26px; font-weight:900; letter-spacing:.3px; }
+    .timer{ font-size:40px; font-weight:900; letter-spacing:1px; }
     .panel{ background:#0e1522; border:1px solid #223049; border-radius:14px; padding:12px; }
-    .wires{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:10px; }
-    @media (min-width:720px){ .wires{ grid-template-columns:1fr 1fr; } }
-    .wireBtn{
-      display:flex; justify-content:space-between; align-items:center;
-      padding:14px 14px; border-radius:14px; border:1px solid #2a3a57;
-      background:#0b1220; font-weight:800;
-      user-select:none;
-    }
-    .wireBtn:hover{ border-color:#4f7cff; }
-    .wireCut{ opacity:.55; text-decoration:line-through; }
-    .flash{ animation: flash 0.15s linear 0s 6; }
-    @keyframes flash { 0%{filter:brightness(1);} 50%{filter:brightness(1.8);} 100%{filter:brightness(1);} }
-    .shake{ animation: shake 0.12s linear 0s 10; }
-    @keyframes shake{
-      0%{transform:translateX(0)} 25%{transform:translateX(-4px)} 50%{transform:translateX(4px)} 75%{transform:translateX(-3px)} 100%{transform:translateX(0)}
-    }
-    .log{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; color:#cfe3ff; white-space:pre-wrap; }
+    .bar{ height:10px; border:1px solid #2a3a57; border-radius:999px; overflow:hidden; }
+    .bar > i{ display:block; height:100%; width:0%; background:#2d5bff; }
+    .pLine{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border:1px solid #223049; border-radius:12px; margin-top:8px; }
+    .name{ font-weight:800; }
+    .score{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#cfe3ff; }
+    .flash{ animation: flash 0.12s linear 0s 6; }
+    @keyframes flash { 0%{filter:brightness(1);} 50%{filter:brightness(1.7);} 100%{filter:brightness(1);} }
   </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>💣 와이어 컷 디퓨즈 (커피내기용)</h1>
+    <h1>🎱 멀티볼 핀볼 배틀 (운빨 100%)</h1>
     <div class="muted">
-      한 폰으로 돌려가며: <b>현재 차례</b> 사람이 와이어 하나를 “자르기”.<br/>
-      운빨 100%지만 카운트다운+페이크로 박진감 있음. (룰렛보다 훨씬 쫄림)
+      조작 없음. 공(멀티볼)이 튀면서 <b>누구 구역을 많이 때리냐</b>로 결정됨.  
+      제한시간 끝나면 <b>가장 많이 맞은 사람(위험 1등)</b>이 커피 쏘기.
     </div>
 
-    <div class="row">
+    <div class="row controls">
       <textarea id="names" placeholder="이름을 줄바꿈으로 입력 (최대 10명)
 예:
 철수
@@ -60,54 +60,64 @@
 민수"></textarea>
     </div>
 
-    <div class="row">
-      <span class="pill">와이어 개수
-        <select id="wireCount">
-          <option value="6" selected>6개 (추천)</option>
-          <option value="8">8개</option>
-          <option value="10">10개</option>
+    <div class="row controls">
+      <span class="pill">시간(초)
+        <select id="seconds">
+          <option value="12">12</option>
+          <option value="18" selected>18</option>
+          <option value="25">25</option>
         </select>
       </span>
-      <span class="pill">타이머(초)
-        <select id="timerRange">
-          <option value="12-22" selected>12~22</option>
-          <option value="15-30">15~30</option>
-          <option value="20-40">20~40</option>
+      <span class="pill">공 개수
+        <select id="balls">
+          <option value="3">3</option>
+          <option value="5" selected>5 (추천)</option>
+          <option value="8">8 (난장판)</option>
         </select>
       </span>
-      <span class="pill">페이크 이벤트
-        <select id="fakeLevel">
-          <option value="low">낮음</option>
-          <option value="mid" selected>보통</option>
-          <option value="high">높음</option>
+      <span class="pill">난이도
+        <select id="chaos">
+          <option value="1">보통</option>
+          <option value="2" selected>빡셈</option>
+          <option value="3">미침</option>
         </select>
       </span>
     </div>
 
-    <div class="row">
-      <button class="primary" id="startBtn">게임 시작</button>
-      <button id="nextRoundBtn" disabled>다음 라운드</button>
+    <div class="row controls">
+      <button class="primary" id="prepBtn">보드 준비</button>
+      <button class="primary" id="startBtn" disabled>START ▶</button>
+      <button id="rerollBtn" disabled>난수 리셋</button>
       <button class="danger" id="resetBtn">리셋</button>
       <span class="muted" id="msg"></span>
     </div>
 
     <div class="sep"></div>
 
-    <div class="panel center" id="hud" style="display:none">
-      <div class="muted">현재 차례</div>
-      <div class="big" id="turnName">-</div>
-      <div class="sep"></div>
-      <div class="muted">남은 시간</div>
-      <div class="timer" id="timeLeft">--</div>
-      <div class="muted" id="statusText" style="margin-top:6px">와이어를 하나 자르세요.</div>
-    </div>
+    <div class="grid">
+      <div>
+        <canvas id="cv" width="900" height="900"></canvas>
+      </div>
+      <div class="panel">
+        <div class="hud">
+          <div>
+            <div class="muted">남은 시간</div>
+            <div class="timer" id="timeLeft">--</div>
+          </div>
+          <div>
+            <div class="muted">상태</div>
+            <div class="big" id="status">대기</div>
+          </div>
+        </div>
 
-    <div class="wires" id="wires" style="display:none"></div>
+        <div class="sep"></div>
+        <div class="muted">위험도(맞은 횟수)</div>
+        <div id="plist"></div>
 
-    <div class="sep"></div>
-    <div class="panel">
-      <div class="muted">진행 로그</div>
-      <div class="log" id="log">-</div>
+        <div class="sep"></div>
+        <div class="muted">결과</div>
+        <div class="big" id="result">-</div>
+      </div>
     </div>
   </div>
 </div>
@@ -115,19 +125,17 @@
 <script>
 window.addEventListener("DOMContentLoaded", () => {
   const $ = (id)=>document.getElementById(id);
+  const msg = $("msg");
 
-  // 에러를 화면에 표시
   window.onerror = (m, s, line, col) => {
-    $("msg").textContent = `JS 오류: ${m} (line ${line}:${col})`;
+    msg.textContent = `JS 오류: ${m} (line ${line}:${col})`;
   };
 
-  function setMsg(t=""){ $("msg").textContent = t; }
-  function setLog(t){ $("log").textContent = t; }
-  function addLog(line){
-    const cur = $("log").textContent;
-    $("log").textContent = (cur === "-" ? "" : cur) + line + "\n";
-  }
+  function setMsg(t=""){ msg.textContent = t; }
+  function setStatus(t){ $("status").textContent = t; }
+  function setResult(t){ $("result").textContent = t; }
 
+  // crypto random
   function rand01(){
     const u = new Uint32Array(1);
     crypto.getRandomValues(u);
@@ -144,18 +152,6 @@ window.addEventListener("DOMContentLoaded", () => {
     return arr;
   }
 
-  let names = [];
-  let turn = 0;
-  let running = false;
-  let ended = false;
-  let timer = null;
-  let timeLeft = 0;
-
-  // wires state
-  // outcome types: "BOOM"(즉사), "DEFUSE"(해체), "SAFE"(그냥 넘어감)
-  let wireOutcomes = [];
-  let wireCut = [];
-
   function parseNames(){
     const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
     const seen = new Set();
@@ -166,201 +162,405 @@ window.addEventListener("DOMContentLoaded", () => {
     return out.slice(0,10);
   }
 
-  function updateTurnUI(){
-    $("turnName").textContent = names[turn] ?? "-";
+  const cv = $("cv");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+
+  // arena
+  const R = 360;
+  const wallR = 330;
+  const bumperR = 12;
+
+  let ready=false, running=false;
+  let players=[], scores=[], maxScore=1;
+  let bumpers=[], balls=[];
+  let secondsLeft = 0;
+  let tickTimer = null;
+
+  function buildPlayerList(){
+    const plist = $("plist");
+    plist.innerHTML = "";
+    for(let i=0;i<players.length;i++){
+      const line = document.createElement("div");
+      line.className = "pLine";
+      line.innerHTML = `
+        <div style="min-width:110px" class="name">${players[i]}</div>
+        <div style="flex:1">
+          <div class="bar"><i id="bar${i}"></i></div>
+        </div>
+        <div class="score" id="score${i}">0</div>
+      `;
+      plist.appendChild(line);
+    }
   }
 
-  function stopTimer(){
-    if(timer){ clearInterval(timer); timer = null; }
+  function updateBars(){
+    maxScore = Math.max(1, ...scores);
+    for(let i=0;i<scores.length;i++){
+      const pct = Math.min(100, Math.round((scores[i] / maxScore) * 100));
+      const bar = document.getElementById(`bar${i}`);
+      const sc = document.getElementById(`score${i}`);
+      if(bar) bar.style.width = pct + "%";
+      if(sc) sc.textContent = String(scores[i]);
+    }
   }
 
-  function endGame(reason, loserName){
-    ended = true;
-    running = false;
-    stopTimer();
-    $("nextRoundBtn").disabled = false;
+  function resetRuntime(){
+    stopClock();
+    running=false;
+    secondsLeft = 0;
+    $("timeLeft").textContent = "--";
+    setStatus("대기");
+    setResult("-");
+  }
 
-    const hud = $("hud");
-    hud.classList.add("flash","shake");
-    setTimeout(()=>hud.classList.remove("flash","shake"), 1200);
+  function stopClock(){
+    if(tickTimer){ clearInterval(tickTimer); tickTimer=null; }
+  }
 
-    if(reason === "boom"){
-      $("statusText").textContent = `💥 폭발! ${loserName} 패배`;
-      addLog(`💥 폭발! 패배: ${loserName}`);
-      alert(`💥 폭발!\n패배: ${loserName}\n\n커피 쏘기 ㄱㄱ`);
-    } else if(reason === "timeout"){
-      $("statusText").textContent = `⏱ 타임아웃! ${loserName} 패배`;
-      addLog(`⏱ 타임아웃 패배: ${loserName}`);
-      alert(`⏱ 타임아웃!\n패배: ${loserName}\n\n커피 쏘기 ㄱㄱ`);
-    } else if(reason === "defuse"){
-      $("statusText").textContent = `🧰 해체 성공! (${loserName}가 살림)`;
-      addLog(`🧰 해체 성공! 마지막 컷: ${loserName}`);
-      alert(`🧰 해체 성공!\n마지막으로 자른 사람: ${loserName}\n\n이번 라운드는 무효로 할지, 당첨으로 할지 룰 정해도 됨`);
+  function prep(){
+    players = parseNames();
+    if(players.length < 3){
+      setMsg("최소 3명부터 가능!");
+      ready=false;
+      $("startBtn").disabled = true;
+      $("rerollBtn").disabled = true;
+      resetRuntime();
+      draw();
+      return;
+    }
+    setMsg(`보드 준비 완료: ${players.length}명`);
+    scores = Array(players.length).fill(0);
+    updateBars();
+    buildPlayerList();
+
+    // build player segments (angles)
+    // and inner bumpers
+    bumpers = [];
+    const chaos = Number($("chaos").value);
+    const ring = 220;
+
+    // bumpers random (more chaos => more bumpers)
+    const bumperCount = 18 + chaos*10;
+    for(let i=0;i<bumperCount;i++){
+      const a = rand01() * Math.PI*2;
+      const rr = ring + (rand01()-0.5) * (80 + chaos*20);
+      bumpers.push({
+        x: cx + Math.cos(a)*rr,
+        y: cy + Math.sin(a)*rr,
+        r: bumperR + rand01()*3
+      });
     }
 
-    // disable wire buttons
-    [...$("wires").querySelectorAll("button")].forEach(b=>b.disabled = true);
+    // balls empty until start
+    balls = [];
+    ready=true;
+    $("startBtn").disabled = false;
+    $("rerollBtn").disabled = false;
+    resetRuntime();
+    draw();
   }
 
-  function maybeFakeEvent(){
-    const lvl = $("fakeLevel").value;
-    const p = (lvl==="high") ? 0.22 : (lvl==="mid") ? 0.14 : 0.08;
-    if(rand01() > p) return;
-
-    const hud = $("hud");
-    hud.classList.add("flash");
-    $("statusText").textContent = "⚠ 경고음… (페이크)";
-    setTimeout(()=>{
-      hud.classList.remove("flash");
-      if(!ended) $("statusText").textContent = "와이어를 하나 자르세요.";
-    }, 650);
+  function reroll(){
+    if(!ready) return;
+    // just re-prep bumpers randomness without touching names/scores
+    setMsg("난수 리셋! 보드가 살짝 바뀜");
+    const chaos = Number($("chaos").value);
+    bumpers = [];
+    const ring = 220;
+    const bumperCount = 18 + chaos*10;
+    for(let i=0;i<bumperCount;i++){
+      const a = rand01() * Math.PI*2;
+      const rr = ring + (rand01()-0.5) * (80 + chaos*20);
+      bumpers.push({ x: cx + Math.cos(a)*rr, y: cy + Math.sin(a)*rr, r: bumperR + rand01()*3 });
+    }
+    draw();
+    setTimeout(()=>setMsg(""), 700);
   }
 
-  function startTimer(){
-    const [a,b] = $("timerRange").value.split("-").map(Number);
-    timeLeft = randInt(a,b);
-    $("timeLeft").textContent = timeLeft;
+  function start(){
+    if(!ready) return;
+    if(running) return;
 
-    stopTimer();
-    timer = setInterval(()=>{
-      if(ended) return;
-      timeLeft--;
-      $("timeLeft").textContent = timeLeft;
+    // reset scores each round
+    scores = Array(players.length).fill(0);
+    updateBars();
+    setResult("-");
 
-      // 페이크 이벤트
-      if(timeLeft % 3 === 0) maybeFakeEvent();
+    const chaos = Number($("chaos").value);
+    const ballCount = Number($("balls").value);
+    const speedBase = 3.0 + chaos*0.8;
 
-      if(timeLeft <= 0){
-        endGame("timeout", names[turn] ?? "누군가");
+    balls = [];
+    for(let i=0;i<ballCount;i++){
+      const a = rand01()*Math.PI*2;
+      const rr = rand01()*80;
+      const x = cx + Math.cos(a)*rr;
+      const y = cy + Math.sin(a)*rr;
+      const ang = rand01()*Math.PI*2;
+      balls.push({
+        x, y, r: 10 + rand01()*3,
+        vx: Math.cos(ang) * (speedBase + rand01()*2.2),
+        vy: Math.sin(ang) * (speedBase + rand01()*2.2)
+      });
+    }
+
+    running=true;
+    setStatus("진행중");
+    $("cv").classList.remove("flash");
+
+    // clock
+    const total = Number($("seconds").value);
+    secondsLeft = total;
+    $("timeLeft").textContent = String(secondsLeft);
+    stopClock();
+    tickTimer = setInterval(()=>{
+      if(!running) return;
+      secondsLeft--;
+      $("timeLeft").textContent = String(secondsLeft);
+
+      // little drama near end
+      if(secondsLeft <= 5){
+        $("cv").classList.add("flash");
+      }
+
+      if(secondsLeft <= 0){
+        finish();
       }
     }, 1000);
   }
 
-  function nextTurn(){
-    if(ended) return;
-    turn = (turn + 1) % names.length;
-    updateTurnUI();
+  function finish(){
+    running=false;
+    stopClock();
+    setStatus("종료");
+
+    // loser = max score (most hit)
+    const max = Math.max(...scores);
+    const idxs = [];
+    for(let i=0;i<scores.length;i++) if(scores[i]===max) idxs.push(i);
+    const loserIdx = idxs[randInt(0, idxs.length-1)];
+    const loser = players[loserIdx];
+
+    setResult(`☕ ${loser} 커피 쏘기! (위험 ${max})`);
+    setMsg("끝! 다시 하려면 START");
   }
 
-  function buildWires(){
-    const n = Number($("wireCount").value);
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-    // outcomes: 1 boom, 1 defuse, rest safe
-    wireOutcomes = Array(n).fill("SAFE");
-    wireOutcomes[0] = "BOOM";
-    wireOutcomes[1] = "DEFUSE";
-    shuffle(wireOutcomes);
+  function collideCircle(b, px, py, pr, bounce=1.0){
+    const dx = b.x - px;
+    const dy = b.y - py;
+    const dist = Math.hypot(dx,dy);
+    const minD = b.r + pr;
+    if(dist < minD && dist > 0.0001){
+      const nx = dx / dist;
+      const ny = dy / dist;
+      const overlap = (minD - dist);
+      b.x += nx * overlap;
+      b.y += ny * overlap;
 
-    wireCut = Array(n).fill(false);
-
-    const container = $("wires");
-    container.innerHTML = "";
-    const colors = ["RED","BLUE","GREEN","YELLOW","PURPLE","ORANGE","WHITE","BLACK","CYAN","PINK"];
-
-    for(let i=0;i<n;i++){
-      const btn = document.createElement("button");
-      btn.className = "wireBtn";
-      btn.type = "button";
-      btn.innerHTML = `<span>🔌 WIRE ${i+1}</span><span class="muted">${colors[i % colors.length]}</span>`;
-      btn.addEventListener("click", () => cutWire(i, btn));
-      container.appendChild(btn);
-    }
-  }
-
-  function cutWire(i, btn){
-    if(ended) return;
-    if(wireCut[i]) return;
-
-    wireCut[i] = true;
-    btn.classList.add("wireCut");
-    btn.disabled = true;
-
-    const actor = names[turn] ?? "누군가";
-    addLog(`- ${actor} : WIRE ${i+1} 컷`);
-
-    // 작은 연출
-    $("hud").classList.add("flash");
-    setTimeout(()=>$("hud").classList.remove("flash"), 250);
-
-    const out = wireOutcomes[i];
-    if(out === "BOOM"){
-      endGame("boom", actor);
-      return;
-    }
-    if(out === "DEFUSE"){
-      endGame("defuse", actor);
-      return;
-    }
-
-    // safe
-    $("statusText").textContent = "✅ 세이프… 다음 사람!";
-    setTimeout(()=>{
-      if(!ended){
-        $("statusText").textContent = "와이어를 하나 자르세요.";
-        nextTurn();
+      const vn = b.vx*nx + b.vy*ny;
+      if(vn < 0){
+        b.vx -= (1 + bounce) * vn * nx;
+        b.vy -= (1 + bounce) * vn * ny;
       }
-    }, 450);
-  }
-
-  function startGame(){
-    names = parseNames();
-    if(names.length < 3){
-      setMsg("최소 3명부터 가능!");
-      return;
+      // tiny chaos
+      b.vx += (rand01()-0.5)*0.25;
+      b.vy += (rand01()-0.5)*0.25;
+      return true;
     }
+    return false;
+  }
+
+  function wallBounce(b){
+    // bounce inside circle wall
+    const dx = b.x - cx;
+    const dy = b.y - cy;
+    const dist = Math.hypot(dx,dy);
+    const limit = wallR - b.r;
+    if(dist > limit && dist > 0.0001){
+      const nx = dx / dist;
+      const ny = dy / dist;
+      b.x = cx + nx * limit;
+      b.y = cy + ny * limit;
+
+      // reflect velocity across normal
+      const vn = b.vx*nx + b.vy*ny;
+      if(vn > 0){
+        b.vx -= 2 * vn * nx;
+        b.vy -= 2 * vn * ny;
+      }
+      // add energy a bit for excitement
+      b.vx *= 1.03;
+      b.vy *= 1.03;
+    }
+  }
+
+  function scoreIfHitPlayer(b){
+    // player region is outer ring segments: angle determines whose "shield" got hit
+    const dx = b.x - cx;
+    const dy = b.y - cy;
+    const dist = Math.hypot(dx,dy);
+
+    // only count when ball is near outer ring
+    if(dist < wallR - 25) return;
+
+    let ang = Math.atan2(dy, dx);
+    if(ang < 0) ang += Math.PI*2;
+    const seg = (Math.PI*2) / players.length;
+    const idx = Math.min(players.length-1, Math.floor(ang / seg));
+    scores[idx] += 1;
+    updateBars();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // bg
+    ctx.fillStyle = "#0e1522";
+    ctx.fillRect(0,0,W,H);
+
+    // outer ring segments
+    if(players.length){
+      const seg = (Math.PI*2)/players.length;
+      for(let i=0;i<players.length;i++){
+        const a0 = i*seg;
+        const a1 = a0 + seg;
+
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy,wallR+10,a0,a1,false);
+        ctx.closePath();
+        ctx.globalAlpha = 0.10;
+        ctx.fillStyle = "#2d5bff";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // name labels
+        const mid = (a0+a1)/2;
+        const tx = cx + Math.cos(mid)*(wallR-10);
+        const ty = cy + Math.sin(mid)*(wallR-10);
+        ctx.fillStyle = "#e9eef6";
+        ctx.font = "18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(players[i], tx, ty);
+      }
+    }
+
+    // wall circle
+    ctx.strokeStyle = "#223049";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(cx,cy,wallR,0,Math.PI*2);
+    ctx.stroke();
+
+    // bumpers
+    ctx.fillStyle = "#cfe3ff";
+    for(const p of bumpers){
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    // balls
+    for(const b of balls){
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.globalAlpha = 0.25;
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.arc(b.x - 5, b.y - 6, b.r*0.55, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // hint
+    if(!ready){
+      ctx.fillStyle = "rgba(0,0,0,.35)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#e9eef6";
+      ctx.font = "30px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("이름 입력 → 보드 준비", cx, cy);
+    } else if(ready && !running && balls.length===0){
+      ctx.fillStyle = "#a9b6cc";
+      ctx.font = "24px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("START를 눌러 시작!", cx, cy);
+    }
+  }
+
+  function step(){
+    if(running){
+      const chaos = Number($("chaos").value);
+      const drag = 0.999 - chaos*0.0006; // more chaos => less drag
+      const jitter = 0.035 + chaos*0.02;
+
+      for(const b of balls){
+        // move
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // small random "wind"
+        b.vx += (rand01()-0.5)*jitter;
+        b.vy += (rand01()-0.5)*jitter;
+
+        // bumpers collision
+        for(const p of bumpers){
+          if(collideCircle(b, p.x, p.y, p.r, 1.05)){
+            // minor speed boost on bumper
+            b.vx *= 1.01; b.vy *= 1.01;
+          }
+        }
+
+        // wall bounce + score
+        wallBounce(b);
+        scoreIfHitPlayer(b);
+
+        // drag clamp
+        b.vx *= drag;
+        b.vy *= drag;
+        b.vx = clamp(b.vx, -12, 12);
+        b.vy = clamp(b.vy, -12, 12);
+      }
+    }
+
+    draw();
+    requestAnimationFrame(step);
+  }
+
+  $("prepBtn").addEventListener("click", prep);
+  $("startBtn").addEventListener("click", start);
+  $("rerollBtn").addEventListener("click", reroll);
+  $("resetBtn").addEventListener("click", () => {
+    ready=false; running=false;
+    players=[]; bumpers=[]; balls=[]; scores=[];
+    stopClock();
+    $("timeLeft").textContent="--";
+    setStatus("대기");
+    setResult("-");
     setMsg("");
-    setLog("-");
-    turn = randInt(0, names.length-1);
-    ended = false;
-    running = true;
+    $("startBtn").disabled = true;
+    $("rerollBtn").disabled = true;
+    $("plist").innerHTML = "";
+    draw();
+  });
 
-    $("hud").style.display = "block";
-    $("wires").style.display = "grid";
-    $("nextRoundBtn").disabled = true;
-
-    updateTurnUI();
-    buildWires();
-    $("statusText").textContent = "와이어를 하나 자르세요.";
-    addLog(`🎬 시작! (첫 턴: ${names[turn]})`);
-
-    startTimer();
-  }
-
-  function nextRound(){
-    if(!names.length) return;
-    ended = false;
-    running = true;
-
-    $("nextRoundBtn").disabled = true;
-    updateTurnUI();
-    buildWires();
-    $("statusText").textContent = "와이어를 하나 자르세요.";
-    addLog(`\n🔁 다음 라운드 시작! (첫 턴: ${names[turn]})`);
-
-    startTimer();
-    [...$("wires").querySelectorAll("button")].forEach(b=>b.disabled = false);
-  }
-
-  function resetAll(){
-    stopTimer();
-    names = [];
-    turn = 0;
-    ended = false;
-    running = false;
-    $("hud").style.display = "none";
-    $("wires").style.display = "none";
-    $("nextRoundBtn").disabled = true;
-    setMsg("");
-    setLog("-");
-    $("timeLeft").textContent = "--";
-    $("turnName").textContent = "-";
-    $("statusText").textContent = "";
-  }
-
-  $("startBtn").addEventListener("click", startGame);
-  $("nextRoundBtn").addEventListener("click", nextRound);
-  $("resetBtn").addEventListener("click", resetAll);
-
+  // init
+  setStatus("대기");
+  setResult("-");
+  $("startBtn").disabled = true;
+  $("rerollBtn").disabled = true;
+  draw();
+  requestAnimationFrame(step);
 });
 </script>
 </body>
