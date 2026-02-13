@@ -100,6 +100,13 @@
     </div>
   </div>
 </div>
+<script>
+  // ✅ 화면에 JS 에러를 표시 (콘솔 없어도 원인 보이게)
+  window.onerror = function (msg, src, line, col, err) {
+    const el = document.getElementById("msg");
+    if (el) el.textContent = `JS 오류: ${msg} (line ${line}:${col})`;
+  };
+</script>
 
 <script>
 (() => {
