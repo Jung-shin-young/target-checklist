@@ -3,68 +3,125 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Chaos Drop Royale (Prototype)</title>
+  <title>Marble Roulette Style — Chaos Drop Royale</title>
   <style>
-    html,body{margin:0;height:100%;background:#0b0b10;color:#eee;font-family:system-ui,-apple-system,Segoe UI,Roboto}
-    #ui{
-      position:fixed;top:10px;left:10px;z-index:10;
-      background:rgba(20,20,30,.85);border:1px solid rgba(255,255,255,.12);
-      padding:10px 12px;border-radius:14px;backdrop-filter: blur(6px);
-      width:min(420px, calc(100vw - 20px));
-    }
-    #ui h1{font-size:14px;margin:0 0 8px 0;opacity:.95}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
-    label{font-size:12px;opacity:.9;display:flex;align-items:center;gap:6px}
-    input[type="number"]{width:76px;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0f1220;color:#eee}
-    input[type="checkbox"]{transform:scale(1.05)}
-    button{
-      padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.18);
-      background:#14182a;color:#fff;cursor:pointer;font-weight:600
-    }
-    button:hover{filter:brightness(1.1)}
-    #hud{font-size:12px;opacity:.9;margin-top:6px;line-height:1.4}
-    #hint{font-size:11px;opacity:.7;margin-top:6px}
+    html,body{margin:0;height:100%;background:#05060b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto}
     canvas{display:block}
+
+    #panel{
+      position:fixed;left:14px;top:14px;z-index:20;
+      width:min(460px, calc(100vw - 28px));
+      background:rgba(10,12,20,.82);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;
+      box-shadow:0 10px 40px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+    #panel header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    #panel header .title{font-weight:800;font-size:13px;letter-spacing:.2px}
+    #panel header .sub{font-size:11px;opacity:.75;margin-left:8px}
+    #panel header .right{display:flex;gap:8px;align-items:center}
+    #panel button{
+      padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
+      background:rgba(20,26,44,.9);color:#fff;cursor:pointer;font-weight:700
+    }
+    #panel button:hover{filter:brightness(1.1)}
+    #body{padding:12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .box{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;padding:10px;background:rgba(255,255,255,.03)
+    }
+    .box h3{margin:0 0 8px 0;font-size:12px;opacity:.9}
+    textarea{
+      width:100%;min-height:88px;resize:vertical;
+      padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+      background:#0b0f1f;color:#fff;font-size:12px;line-height:1.4
+    }
+    label{display:flex;gap:8px;align-items:center;font-size:12px;opacity:.9;margin:6px 0}
+    input[type="number"]{
+      width:86px;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.14);
+      background:#0b0f1f;color:#fff
+    }
+    input[type="checkbox"]{transform:scale(1.1)}
+    #hud{
+      margin-top:10px;
+      padding:10px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.25);
+      font-size:12px;line-height:1.5;opacity:.92
+    }
+    #mini{
+      position:fixed;left:14px;top:14px;z-index:21;display:none;
+      padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,12,20,.82);backdrop-filter: blur(10px);
+      box-shadow:0 10px 40px rgba(0,0,0,.45);
+    }
+    #mini .row{display:flex;gap:8px;align-items:center}
+    #mini .txt{font-size:12px;font-weight:800}
+    #mini .sub{font-size:11px;opacity:.7}
   </style>
 </head>
 <body>
-  <div id="ui">
-    <h1>🎰 Chaos Drop Royale — 세로 낙하형 (공평+적당반전)</h1>
-
+  <div id="mini">
     <div class="row">
-      <label>인원(2~20)
-        <input id="players" type="number" min="2" max="20" value="12">
-      </label>
-      <label>최대 공/인
-        <input id="maxBalls" type="number" min="1" max="3" value="2">
-      </label>
-      <label>시드
-        <input id="seed" type="number" min="1" max="999999" value="12345">
-      </label>
+      <div>
+        <div class="txt">🎰 Marble Drop</div>
+        <div class="sub" id="miniHud">대기중</div>
+      </div>
+      <button id="openBtn">열기</button>
+      <button id="startBtn2">시작</button>
     </div>
+  </div>
 
-    <div class="row">
-      <label><input id="rndPlayers" type="checkbox">인원 랜덤</label>
-      <label><input id="rndBalls" type="checkbox" checked>공 수 랜덤</label>
-      <label><input id="rndSize" type="checkbox" checked>크기/무게 랜덤</label>
-      <label><input id="showNames" type="checkbox" checked>이름 표시</label>
+  <div id="panel">
+    <header>
+      <div>
+        <span class="title">🎰 Marble Roulette Style</span>
+        <span class="sub">세로 낙하형 + 장애물 + “적당 반전”</span>
+      </div>
+      <div class="right">
+        <button id="toggleBtn">접기</button>
+        <button id="startBtn">START</button>
+        <button id="seedBtn">SEED</button>
+      </div>
+    </header>
+
+    <div id="body">
+      <div class="grid">
+        <div class="box">
+          <h3>이름 입력 (콤마/줄바꿈 OK, 가중치 *N 가능)</h3>
+          <textarea id="names">짱구*5, 짱아*10, 봉미선*3</textarea>
+          <div style="font-size:11px;opacity:.7;margin-top:6px">
+            예: A*3, B*1 또는 줄바꿈으로도 가능
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>옵션</h3>
+          <label>최대 인원(2~20) <input id="maxPlayers" type="number" min="2" max="20" value="20"></label>
+          <label>최대 공/인(1~3) <input id="maxBalls" type="number" min="1" max="3" value="2"></label>
+          <label>혼돈 레벨(0~5) <input id="chaos" type="number" min="0" max="5" value="3"></label>
+          <label>시드 <input id="seed" type="number" min="1" max="999999" value="12345"></label>
+
+          <label><input id="rndPlayers" type="checkbox" checked> 인원 랜덤(입력에서 일부만 뽑음)</label>
+          <label><input id="rndBalls" type="checkbox" checked> 공 수 랜덤</label>
+          <label><input id="rndSize" type="checkbox" checked> 크기/무게 랜덤</label>
+          <label><input id="showNames" type="checkbox" checked> 이름 표시</label>
+        </div>
+      </div>
+
+      <div id="hud">대기중…</div>
     </div>
-
-    <div class="row">
-      <label>혼돈 레벨(0~5)
-        <input id="chaos" type="number" min="0" max="5" value="3">
-      </label>
-      <button id="startBtn">START</button>
-      <button id="resetBtn">RESET</button>
-    </div>
-
-    <div id="hud">대기중…</div>
-    <div id="hint">팁: 화면은 남은 공들의 “평균 위치”를 따라가서 60~80초 정도 계속 박터지게 움직임.</div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
   <script>
-    // ---------- tiny deterministic RNG (mulberry32) ----------
+    // ----- deterministic RNG -----
     function mulberry32(a){
       return function(){
         let t = a += 0x6D2B79F5;
@@ -75,137 +132,119 @@
     }
     const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 
-    // ---------- game constants ----------
-    const W = 720;
-    const VIEW_H = 900;     // viewport height (camera follows)
-    const WORLD_H = 5200;   // tall vertical world
-    const WALL = 24;
+    // ----- parse names: comma/newline, allow *N -----
+    function parseNames(raw){
+      const parts = raw
+        .replace(/\r/g,'')
+        .split(/[\n,]+/)
+        .map(s=>s.trim())
+        .filter(Boolean);
 
-    // zones (y ranges)
-    const Z1 = {y0: 120,  y1: 1550};  // bumper storm
-    const Z2 = {y0: 1550, y1: 2900};  // branching + moving gates
-    const Z3 = {y0: 2900, y1: 3900};  // rotating wheel + chaos ring
-    const Z4 = {y0: 3900, y1: 4600};  // blackholes + gravity flip
-    const ZF = {y0: 4600, y1: 5050};  // final chaos gate + goal
+      const out = [];
+      for(const p of parts){
+        const m = p.match(/^(.+?)\s*\*\s*(\d+)$/);
+        if (m){
+          const name = m[1].trim();
+          const n = clamp(parseInt(m[2],10)||1,1,999);
+          for(let i=0;i<n;i++) out.push(name);
+        } else {
+          out.push(p);
+        }
+      }
+      return out.slice(0, 200); // safety
+    }
 
-    // fairness philosophy: no rubber-band, just "final zone events" with moderate probability.
-    // ---------- Phaser Scene ----------
+    // ----- game dims -----
+    const W = 760;
+    const VIEW_H = 920;
+    const WORLD_H = 5600;
+    const WALL = 26;
+
+    const Z1 = {y0: 140,  y1: 1700};
+    const Z2 = {y0: 1700, y1: 3200};
+    const Z3 = {y0: 3200, y1: 4200};
+    const Z4 = {y0: 4200, y1: 5000};
+    const ZF = {y0: 5000, y1: 5480};
+
     class Main extends Phaser.Scene {
       constructor(){ super('main'); }
-
       init(data){
         this.cfg = data.cfg;
         this.rng = mulberry32(this.cfg.seed|0);
         this.balls = [];
         this.labels = [];
-        this.finished = 0;
         this.total = 0;
+        this.finished = 0;
         this.startAt = 0;
         this.finalEventFired = false;
-        this.gravityFlipped = false;
+        this.gravityEventDone = false;
       }
 
-      preload(){}
-
       create(){
-        const scene = this;
-
-        // Matter world tuning for "dynamic bumpiness"
-        this.matter.world.setBounds(0, 0, W, WORLD_H, 64, true, true, false, true);
-        this.matter.world.engine.positionIterations = 8;
-        this.matter.world.engine.velocityIterations = 6;
-        this.matter.world.engine.constraintIterations = 2;
-
-        // default gravity (down)
-        this.matter.world.setGravity(0, 1.08);
-
-        // background grid-ish
-        const g = this.add.graphics();
-        g.lineStyle(1, 0x1e2236, 0.5);
-        for(let y=0;y<=WORLD_H;y+=80){
-          g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.strokePath();
-        }
-        for(let x=0;x<=W;x+=80){
-          g.beginPath(); g.moveTo(x,0); g.lineTo(x,WORLD_H); g.strokePath();
-        }
-        g.setDepth(-10);
-
-        // walls
-        this._staticRect(WALL/2, WORLD_H/2, WALL, WORLD_H, {label:'wall'});
-        this._staticRect(W - WALL/2, WORLD_H/2, WALL, WORLD_H, {label:'wall'});
-
-        // core map build
-        this._buildZone1();
-        this._buildZone2();
-        this._buildZone3();
-        this._buildZone4();
-        this._buildFinalZone();
-
-        // finish sensor
-        this.finishLine = this.matter.add.rectangle(W/2, WORLD_H-80, W-2*WALL-40, 16, {
-          isStatic:true, isSensor:true, label:'finish'
-        });
-        this.add.rectangle(W/2, WORLD_H-80, W-2*WALL-40, 16, 0x2cff9a, 0.10).setStrokeStyle(1,0x2cff9a,0.25);
+        // physics tuning: punchy collisions
+        this.matter.world.setBounds(0,0,W,WORLD_H,64,true,true,false,true);
+        this.matter.world.engine.positionIterations = 10;
+        this.matter.world.engine.velocityIterations = 8;
+        this.matter.world.setGravity(0, 1.12);
 
         // camera
         this.cameras.main.setBounds(0,0,W,WORLD_H);
         this.cameras.main.setViewport(0,0,window.innerWidth,window.innerHeight);
+        this.cameras.main.setZoom(1.12);
+
         this.scale.on('resize', (gs)=>{
           this.cameras.main.setViewport(0,0,gs.width,gs.height);
         });
 
-        // collisions / sensors
+        // neon background + track glow
+        this._drawNeonBG();
+        this._buildTrack();
+        this._spawn();
+
+        // finish sensor
+        this.finish = this.matter.add.rectangle(W/2, WORLD_H-90, W-2*WALL-70, 18, {isStatic:true,isSensor:true,label:'finish'});
+        this._neonRect(W/2, WORLD_H-90, W-2*WALL-70, 18, 0x2cff9a, 0.20, 2.2);
+
         this.matter.world.on('collisionstart', (evt)=>{
           for (const pair of evt.pairs){
-            const a = pair.bodyA;
-            const b = pair.bodyB;
+            const a=pair.bodyA, b=pair.bodyB;
             if ((a.label==='finish' && b.label==='ball') || (b.label==='finish' && a.label==='ball')){
-              const ballBody = (a.label==='ball') ? a : b;
-              const spr = ballBody.gameObject;
-              if (spr && !spr._done){
-                spr._done = true;
+              const ball = (a.label==='ball') ? a : b;
+              const go = ball.gameObject;
+              if (go && !go._done){
+                go._done = true;
                 this.finished++;
-                // pop effect
-                const fx = this.add.circle(spr.x, spr.y, spr.displayWidth*0.35, 0xffffff, 0.18);
-                this.tweens.add({targets:fx, scale:3, alpha:0, duration:420, onComplete:()=>fx.destroy()});
-                // freeze + fade
-                spr.setVelocity(0,0);
-                spr.setStatic(true);
-                this.tweens.add({targets:spr, alpha:0.25, duration:250});
+                go.setStatic(true);
+                this.tweens.add({targets:go, alpha:0.25, duration:220});
               }
             }
           }
         });
 
-        // spawn players + balls
-        this._spawnAll();
-
         this.startAt = performance.now();
 
-        // HUD update timer
-        this.time.addEvent({
-          delay: 120, loop:true, callback: ()=> this._updateHUD()
-        });
+        // HUD timer
+        this.time.addEvent({delay:120, loop:true, callback:()=>this._updateHUD()});
 
-        // gentle "final event" trigger window (moderate, not always)
-        // fires once when (time>55s) AND (some balls are near final zone)
+        // events: keep “적당 반전”
         this.time.addEvent({
-          delay: 250, loop:true, callback: ()=>{
-            const t = (performance.now() - this.startAt)/1000;
-            if (!this.finalEventFired && t > 55){
-              const nearFinal = this.balls.some(s=>!s._done && s.y > ZF.y0-180);
-              if (nearFinal){
-                this._fireFinalEvent();
-              }
+          delay:250, loop:true, callback:()=>{
+            const t = (performance.now()-this.startAt)/1000;
+
+            // FINAL once after ~55s if someone near final zone
+            if (!this.finalEventFired && t>55){
+              const near = this.balls.some(s=>!s._done && s.y > ZF.y0-240);
+              if (near) this._finalEvent();
             }
-            // gravity flip once in Z4 window, not guaranteed
-            if (!this.gravityFlipped && t > 48){
-              // 30% chance to flip sideways briefly
-              if (this.rng() < 0.30){
-                this.gravityFlipped = true;
-                this._gravitySideFlip();
-              } else {
-                this.gravityFlipped = true; // mark as decided (no more checks)
+
+            // optional gravity wiggle (rare)
+            if (!this.gravityEventDone && t>46){
+              this.gravityEventDone = true;
+              if (this.rng() < 0.22){
+                const dir = this.rng()<0.5 ? -1 : 1;
+                this._announce('EVENT: 중력 흔들림');
+                this.matter.world.setGravity(0.55*dir, 0.92);
+                this.time.delayedCall(1800, ()=> this.matter.world.setGravity(0,1.12));
               }
             }
           }
@@ -213,527 +252,464 @@
       }
 
       update(){
-        // camera follow average position of "alive" balls
-        let sumY=0, n=0;
-        for (const s of this.balls){
-          if (!s._done){
-            sumY += s.y; n++;
-          }
-        }
-        if (n>0){
-          const avgY = sumY/n;
-          const targetY = clamp(avgY - VIEW_H*0.35, 0, WORLD_H - VIEW_H);
-          this.cameras.main.scrollY = Phaser.Math.Linear(this.cameras.main.scrollY, targetY, 0.08);
+        // follow average alive y (stable + watchable)
+        let sum=0,n=0;
+        for(const s of this.balls){ if(!s._done){sum+=s.y;n++;} }
+        if(n){
+          const avg = sum/n;
+          const target = clamp(avg - VIEW_H*0.38, 0, WORLD_H - VIEW_H);
+          this.cameras.main.scrollY = Phaser.Math.Linear(this.cameras.main.scrollY, target, 0.09);
         }
 
         // labels follow
         if (this.cfg.showNames){
-          for (let i=0;i<this.balls.length;i++){
-            const s = this.balls[i];
-            const txt = this.labels[i];
-            if (!txt) continue;
-            txt.setPosition(s.x, s.y - s.displayHeight*0.7);
-            txt.setVisible(!s._done);
+          for(let i=0;i<this.balls.length;i++){
+            const s=this.balls[i], t=this.labels[i];
+            if(!t) continue;
+            t.setPosition(s.x, s.y - s.displayHeight*0.8);
+            t.setVisible(!s._done);
           }
         }
       }
 
-      // ---------- map builders ----------
-      _staticRect(x,y,w,h, opt={}){
-        const body = this.matter.add.rectangle(x,y,w,h,{
-          isStatic:true,
-          friction:0.02,
-          restitution:0.9,
-          label: opt.label || 'static'
-        });
-        const col = opt.color ?? 0x6f7cff;
-        const alpha = opt.alpha ?? 0.10;
-        const r = this.add.rectangle(x,y,w,h,col,alpha);
-        r.setStrokeStyle(1,col,0.15);
-        r.setDepth(-2);
-        r._body = body;
-        return {body, rect:r};
+      // ----- visuals helpers -----
+      _drawNeonBG(){
+        const g = this.add.graphics().setDepth(-20);
+        // faint grid
+        g.lineStyle(1, 0x1f284a, 0.35);
+        for(let y=0;y<=WORLD_H;y+=90){ g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.strokePath(); }
+        for(let x=0;x<=W;x+=90){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,WORLD_H); g.strokePath(); }
       }
 
-      _bumper(x,y,r, strength=0.015){
-        const body = this.matter.add.circle(x,y,r,{
-          isStatic:true,
-          restitution: 1.25,
-          friction: 0.001,
-          label:'bumper'
-        });
-        // visual
-        const c = this.add.circle(x,y,r,0xffd84a,0.08).setStrokeStyle(1,0xffd84a,0.22);
-        c.setDepth(-1);
+      _neonRect(x,y,w,h,color,fillAlpha=0.08, glow=2.0, angle=0){
+        const r = this.add.rectangle(x,y,w,h,color,fillAlpha).setDepth(-5);
+        r.setRotation(angle);
+        r.setStrokeStyle(3, color, 0.85);
+        // extra glow strokes
+        const g1 = this.add.rectangle(x,y,w,h,color,0).setDepth(-6);
+        g1.setRotation(angle);
+        g1.setStrokeStyle(10, color, 0.12*glow);
+        const g2 = this.add.rectangle(x,y,w,h,color,0).setDepth(-7);
+        g2.setRotation(angle);
+        g2.setStrokeStyle(20, color, 0.06*glow);
+      }
 
-        // tiny "kick" sensor ring (makes it feel more arcade)
-        const sensor = this.matter.add.circle(x,y,r+10,{isStatic:true,isSensor:true,label:'bumperSensor'});
+      _staticWall(x,y,w,h,color=0x8efcff, angle=0){
+        const body = this.matter.add.rectangle(x,y,w,h,{isStatic:true,restitution:1.12,friction:0.002,angle,label:'wall'});
+        this._neonRect(x,y,w,h,color,0.02,2.4,angle);
+        return body;
+      }
+
+      _bumper(x,y,r,color=0xffd84a){
+        const body = this.matter.add.circle(x,y,r,{isStatic:true,restitution:1.35,friction:0.0008,label:'bumper'});
+        const c = this.add.circle(x,y,r,color,0.08).setStrokeStyle(3,color,0.8).setDepth(-4);
+        // glow
+        const g = this.add.circle(x,y,r+10,color,0.03).setDepth(-6);
+        // little kick (arcade feel)
+        const sensor = this.matter.add.circle(x,y,r+14,{isStatic:true,isSensor:true,label:'bumperS'});
         this.matter.world.on('collisionstart', (evt)=>{
-          for (const p of evt.pairs){
-            const a=p.bodyA, b=p.bodyB;
+          for(const p of evt.pairs){
+            const a=p.bodyA,b=p.bodyB;
             if ((a===sensor && b.label==='ball') || (b===sensor && a.label==='ball')){
               const ball = (b.label==='ball') ? b : a;
-              const dx = ball.position.x - x;
-              const dy = ball.position.y - y;
-              const mag = Math.max(1, Math.hypot(dx,dy));
-              // push outwards a bit
-              const vx = (dx/mag) * (strength*800);
-              const vy = (dy/mag) * (strength*800);
-              ball.force.x += vx;
-              ball.force.y += vy;
+              const dx = ball.position.x - x, dy = ball.position.y - y;
+              const d = Math.max(1, Math.hypot(dx,dy));
+              const k = 0.0018;
+              ball.force.x += (dx/d)*k*140;
+              ball.force.y += (dy/d)*k*140;
+            }
+          }
+        });
+        return body;
+      }
+
+      _rotor(x,y,r,dir=1){
+        // static center ring + tangential force sensor
+        this.matter.add.circle(x,y,r,{isStatic:true,restitution:1.15,friction:0.001,label:'rotor'});
+        const col = 0x7cfffb;
+        this.add.circle(x,y,r,col,0.05).setStrokeStyle(3,col,0.7).setDepth(-4);
+        this.add.circle(x,y,r+12,col,0.02).setDepth(-6);
+
+        const sensor = this.matter.add.circle(x,y,r+28,{isStatic:true,isSensor:true,label:'rotorS'});
+        this.matter.world.on('collisionstart',(evt)=>{
+          for(const p of evt.pairs){
+            const a=p.bodyA,b=p.bodyB;
+            if ((a===sensor && b.label==='ball') || (b===sensor && a.label==='ball')){
+              const ball = (b.label==='ball') ? b : a;
+              const dx = ball.position.x - x, dy = ball.position.y - y;
+              const d = Math.max(1, Math.hypot(dx,dy));
+              const tx = -dy/d * dir;
+              const ty =  dx/d * dir;
+              const k = 0.0011;
+              ball.force.x += tx*k*120;
+              ball.force.y += ty*k*120;
             }
           }
         });
       }
 
-      _movingGate(x,y,w,h, dx, periodMs){
-        const body = this.matter.add.rectangle(x,y,w,h,{
-          isStatic:true, restitution:1.05, friction:0.01, label:'gate'
-        });
-        const r = this.add.rectangle(x,y,w,h,0xff6bd6,0.10).setStrokeStyle(1,0xff6bd6,0.2).setDepth(-1);
-        const t0 = performance.now();
-        this.time.addEvent({
-          delay: 16, loop:true, callback: ()=>{
-            const t = (performance.now()-t0)/periodMs * Math.PI*2;
-            const nx = x + Math.sin(t)*dx;
-            this.matter.body.setPosition(body,{x:nx,y:y});
-            r.setPosition(nx,y);
-          }
-        });
-      }
-
-      _rotor(x,y,r, speed){
-        const body = this.matter.add.circle(x,y,r,{
-          isStatic:true, restitution:1.15, friction:0.002, label:'rotor'
-        });
-        const ring = this.add.circle(x,y,r,0x7cfffb,0.06).setStrokeStyle(1,0x7cfffb,0.20).setDepth(-1);
-
-        // "spin kick": apply tangential force when ball close
-        const sensor = this.matter.add.circle(x,y,r+26,{isStatic:true,isSensor:true,label:'rotorSensor'});
-        this.matter.world.on('collisionstart', (evt)=>{
-          for (const p of evt.pairs){
-            const a=p.bodyA, b=p.bodyB;
-            if ((a===sensor && b.label==='ball') || (b===sensor && a.label==='ball')){
-              const ball = (b.label==='ball') ? b : a;
-              const dx = ball.position.x - x;
-              const dy = ball.position.y - y;
-              const mag = Math.max(1, Math.hypot(dx,dy));
-              // tangential direction
-              const tx = -dy/mag;
-              const ty = dx/mag;
-              ball.force.x += tx * speed;
-              ball.force.y += ty * speed;
-            }
-          }
-        });
-
-        // ring pulse
-        this.tweens.add({targets:ring, alpha: {from:0.04, to:0.10}, duration:800, yoyo:true, repeat:-1});
-      }
-
-      _blackHole(x,y,r, pull){
+      _blackHole(x,y,r){
+        const col = 0xb38bff;
         const sensor = this.matter.add.circle(x,y,r,{isStatic:true,isSensor:true,label:'hole'});
-        const c = this.add.circle(x,y,r,0x000000,0.25).setStrokeStyle(1,0xb38bff,0.25).setDepth(-1);
+        this.add.circle(x,y,r,0x000000,0.30).setStrokeStyle(3,col,0.55).setDepth(-4);
+        this.add.circle(x,y,r+14,col,0.02).setDepth(-6);
 
-        // continuous pulling
+        // pulling field (continuous)
         this.time.addEvent({
-          delay:16, loop:true, callback: ()=>{
-            for (const s of this.balls){
-              if (s._done) continue;
-              const b = s.body;
-              if (!b) continue;
-              const dx = x - b.position.x;
-              const dy = y - b.position.y;
-              const d = Math.hypot(dx,dy);
-              if (d < r*2.1){
-                const k = (1 - d/(r*2.1)) * pull;
-                b.force.x += (dx/d) * k;
-                b.force.y += (dy/d) * k;
+          delay:16, loop:true, callback:()=>{
+            for(const s of this.balls){
+              if(s._done) continue;
+              const b=s.body;
+              const dx=x-b.position.x, dy=y-b.position.y;
+              const d=Math.hypot(dx,dy);
+              if(d<r*2.2){
+                const k=(1 - d/(r*2.2))*0.00055;
+                b.force.x += (dx/d)*k*140;
+                b.force.y += (dy/d)*k*140;
               }
             }
           }
         });
 
-        // if swallowed (very close), teleport upward a bit (not too crazy)
+        // swallow -> re-inject (moderate shuffle, not "free win")
         this.time.addEvent({
-          delay:80, loop:true, callback: ()=>{
-            for (const s of this.balls){
-              if (s._done) continue;
+          delay:90, loop:true, callback:()=>{
+            for(const s of this.balls){
+              if(s._done) continue;
               const b=s.body;
-              const d = Math.hypot(x-b.position.x, y-b.position.y);
-              if (d < r*0.45){
-                // moderate "re-shuffle": send to a random earlier lane in Z3/Z2
-                const tx = WALL + 60 + this.rng()*(W - 2*WALL - 120);
-                const ty = Z3.y0 + 80 + this.rng()*(Z3.y1 - Z3.y0 - 200);
+              const d=Math.hypot(x-b.position.x, y-b.position.y);
+              if(d<r*0.42){
+                const tx = WALL+70 + this.rng()*(W-2*WALL-140);
+                const ty = Z3.y0+120 + this.rng()*(Z3.y1-Z3.y0-240);
                 this.matter.body.setPosition(b,{x:tx,y:ty});
                 this.matter.body.setVelocity(b,{x:(this.rng()-0.5)*4, y:(this.rng()-0.5)*2});
               }
             }
           }
         });
-
-        return {sensor, c};
       }
 
-      _buildZone1(){
-        // Dense bumper storm
+      _announce(msg){
+        const t = this.add.text(W/2, this.cameras.main.scrollY + 80, msg, {
+          fontSize:'20px', fontStyle:'900', color:'#ffffff',
+          stroke:'#000000', strokeThickness:6
+        }).setOrigin(0.5).setAlpha(0).setDepth(50);
+        this.tweens.add({targets:t, alpha:1, duration:180, yoyo:true, hold:1100, onComplete:()=>t.destroy()});
+      }
+
+      // ----- track / obstacles -----
+      _buildTrack(){
+        // side walls (neon)
+        this._staticWall(WALL/2, WORLD_H/2, WALL, WORLD_H, 0x8efcff);
+        this._staticWall(W - WALL/2, WORLD_H/2, WALL, WORLD_H, 0x8efcff);
+
+        // Zone 1: bumper storm
         const chaos = this.cfg.chaos;
         const cols = 9;
         const rows = 14 + chaos*2;
-        const xMin = WALL+50, xMax=W-WALL-50;
-        const yMin = Z1.y0+90, yMax = Z1.y1-60;
-
+        const xMin = WALL+60, xMax = W-WALL-60;
+        const yMin = Z1.y0+120, yMax = Z1.y1-90;
         for(let r=0;r<rows;r++){
           const y = Phaser.Math.Linear(yMin,yMax, r/(rows-1));
           for(let c=0;c<cols;c++){
             const x = Phaser.Math.Linear(xMin,xMax, c/(cols-1)) + ((r%2)*18) + (this.rng()-0.5)*8;
-            if (this.rng() < 0.78) this._bumper(x,y, 10 + this.rng()*6, 0.010 + chaos*0.001);
+            if (this.rng() < 0.80) this._bumper(x,y, 10+this.rng()*6);
           }
         }
-
-        // some angled deflectors
+        // angled deflectors (thicker neon)
         for(let i=0;i<10+chaos*2;i++){
           const x = xMin + this.rng()*(xMax-xMin);
           const y = yMin + this.rng()*(yMax-yMin);
-          const w = 120 + this.rng()*70;
-          const h = 14;
+          const w = 140 + this.rng()*90;
+          const h = 18;
           const angle = (this.rng()<0.5 ? -1 : 1) * (0.25 + this.rng()*0.5);
-          const body = this.matter.add.rectangle(x,y,w,h,{
-            isStatic:true, restitution:1.1, friction:0.002, angle, label:'deflector'
-          });
-          const rect = this.add.rectangle(x,y,w,h,0x7cfffb,0.06).setStrokeStyle(1,0x7cfffb,0.14).setDepth(-2);
-          rect.rotation = angle;
+          this.matter.add.rectangle(x,y,w,h,{isStatic:true,restitution:1.15,friction:0.001,angle,label:'def'});
+          this._neonRect(x,y,w,h,0x7cfffb,0.02,2.2,angle);
         }
-      }
 
-      _buildZone2(){
-        // Branching lanes with gates
+        // Zone 2: branching + moving gates
         const laneW = (W - 2*WALL - 40)/3;
-        const y0 = Z2.y0 + 40, y1 = Z2.y1 - 40;
-
-        // separators
+        const y0 = Z2.y0+60, y1 = Z2.y1-60;
         for(let i=1;i<=2;i++){
-          this._staticRect(WALL+20 + laneW*i, (y0+y1)/2, 10, (y1-y0), {color:0x6f7cff, alpha:0.08});
+          this._staticWall(WALL+20 + laneW*i, (y0+y1)/2, 12, (y1-y0), 0x6f7cff);
         }
-
-        // gates (moving blockers)
-        for(let i=0;i<7+this.cfg.chaos;i++){
+        // gates
+        for(let i=0;i<7+chaos;i++){
           const lane = Math.floor(this.rng()*3);
           const x = WALL+20 + laneW*lane + laneW/2;
           const y = y0 + this.rng()*(y1-y0);
-          const w = laneW*0.62;
-          const h = 16;
-          const dx = 70 + this.rng()*60;
+          const w = laneW*0.68;
+          const h = 18;
+          const dx = 80 + this.rng()*70;
           const period = 900 + this.rng()*700;
-          this._movingGate(x,y,w,h,dx,period);
-        }
+          const body = this.matter.add.rectangle(x,y,w,h,{isStatic:true,restitution:1.10,friction:0.002,label:'gate'});
+          this._neonRect(x,y,w,h,0xff6bd6,0.02,2.0,0);
 
-        // bumpers sprinkled
-        for(let i=0;i<22+this.cfg.chaos*5;i++){
-          const x = WALL+50 + this.rng()*(W-2*WALL-100);
+          const t0p = performance.now();
+          this.time.addEvent({
+            delay:16, loop:true, callback:()=>{
+              const t = (performance.now()-t0p)/period*Math.PI*2;
+              const nx = x + Math.sin(t)*dx;
+              this.matter.body.setPosition(body,{x:nx,y:y});
+              // (시각은 고정 네온이라, 위치감은 충분히 남. 필요하면 rect도 움직이게 바꿀 수 있음)
+            }
+          });
+        }
+        for(let i=0;i<24+chaos*5;i++){
+          const x = WALL+60 + this.rng()*(W-2*WALL-120);
           const y = y0 + this.rng()*(y1-y0);
-          this._bumper(x,y, 10+this.rng()*6, 0.012);
+          this._bumper(x,y, 10+this.rng()*6, 0xffd84a);
         }
-      }
 
-      _buildZone3(){
-        // Rotating influence zone
-        const yMid = (Z3.y0 + Z3.y1)/2;
-
-        // big rotor in center + two side rotors
-        this._rotor(W/2, yMid, 54, 0.00085);
-        this._rotor(W*0.27, yMid-260, 40, 0.00070);
-        this._rotor(W*0.73, yMid+240, 40, -0.00072);
-
-        // "pinball pins" rows
-        for(let i=0;i<70+this.cfg.chaos*10;i++){
-          const x = WALL+50 + this.rng()*(W-2*WALL-100);
-          const y = Z3.y0+80 + this.rng()*(Z3.y1 - Z3.y0 - 160);
-          this._bumper(x,y, 9+this.rng()*5, 0.010);
+        // Zone 3: rotors
+        const yMid = (Z3.y0+Z3.y1)/2;
+        this._rotor(W/2, yMid, 62, (this.rng()<0.5?1:-1));
+        this._rotor(W*0.28, yMid-260, 48, 1);
+        this._rotor(W*0.72, yMid+250, 48, -1);
+        for(let i=0;i<70+chaos*10;i++){
+          const x = WALL+60 + this.rng()*(W-2*WALL-120);
+          const y = Z3.y0+120 + this.rng()*(Z3.y1-Z3.y0-240);
+          this._bumper(x,y, 9+this.rng()*5, 0x2cff9a);
         }
-      }
 
-      _buildZone4(){
-        // Blackholes + (optional) gravity side flip later
-        const y0 = Z4.y0+60, y1 = Z4.y1-80;
-        const holes = 2 + (this.cfg.chaos>=4 ? 1 : 0);
+        // Zone 4: black holes
+        const holes = 2 + (chaos>=4 ? 1 : 0);
         for(let i=0;i<holes;i++){
+          const x = WALL+140 + this.rng()*(W-2*WALL-280);
+          const y = Z4.y0+120 + this.rng()*(Z4.y1-Z4.y0-240);
+          this._blackHole(x,y, 52 + this.rng()*14);
+        }
+
+        // Final corridor + bumpers
+        const fy0 = ZF.y0+40, fy1 = ZF.y1-160;
+        this._staticWall(WALL+92, (fy0+fy1)/2, 14, (fy1-fy0), 0x2cff9a);
+        this._staticWall(W-(WALL+92), (fy0+fy1)/2, 14, (fy1-fy0), 0x2cff9a);
+        for(let i=0;i<18+chaos*3;i++){
           const x = WALL+120 + this.rng()*(W-2*WALL-240);
-          const y = y0 + this.rng()*(y1-y0);
-          this._blackHole(x,y, 46 + this.rng()*16, 0.00045 + this.cfg.chaos*0.00008);
-        }
-
-        // some tight funnels
-        for(let i=0;i<6;i++){
-          const y = y0 + (i/5)*(y1-y0);
-          const x = W/2 + (this.rng()-0.5)*120;
-          const w = 220, h = 14;
-          const a = (this.rng()<0.5?-1:1)*(0.22+this.rng()*0.25);
-          const body = this.matter.add.rectangle(x,y,w,h,{isStatic:true,restitution:1.05,friction:0.003,angle:a,label:'funnel'});
-          const rect = this.add.rectangle(x,y,w,h,0xb38bff,0.06).setStrokeStyle(1,0xb38bff,0.16).setDepth(-2);
-          rect.rotation=a;
+          const y = fy0 + this.rng()*(fy1-fy0);
+          this._bumper(x,y, 10+this.rng()*6, 0x7cfffb);
         }
       }
 
-      _buildFinalZone(){
-        // final chaos gate visuals + mild deflectors
-        const y0 = ZF.y0+40, y1 = ZF.y1-120;
-
-        // narrowing corridor
-        this._staticRect(WALL+80, (y0+y1)/2, 12, (y1-y0), {color:0x2cff9a, alpha:0.08});
-        this._staticRect(W- (WALL+80), (y0+y1)/2, 12, (y1-y0), {color:0x2cff9a, alpha:0.08});
-
-        // last bumpers (not too many, keeps "meaning" of mid race)
-        for(let i=0;i<18+this.cfg.chaos*3;i++){
-          const x = WALL+110 + this.rng()*(W-2*WALL-220);
-          const y = y0 + this.rng()*(y1-y0);
-          this._bumper(x,y, 10+this.rng()*6, 0.010);
-        }
-
-        // goal mouth
-        this._staticRect(W/2, WORLD_H-40, W-2*WALL-160, 18, {color:0x2cff9a, alpha:0.10});
-      }
-
-      // ---------- spawning ----------
+      // ----- spawning -----
       _pickBallCount(maxBalls){
         if (!this.cfg.rndBalls) return maxBalls;
-        // fair distribution, public probabilities (no hidden advantage)
-        const r = this.rng();
-        if (maxBalls<=1) return 1;
-        if (maxBalls===2) return (r < 0.55) ? 1 : 2;
-        // maxBalls===3
-        if (r < 0.45) return 1;
-        if (r < 0.80) return 2;
+        const r=this.rng();
+        if(maxBalls<=1) return 1;
+        if(maxBalls===2) return (r<0.55)?1:2;
+        if(r<0.45) return 1;
+        if(r<0.80) return 2;
         return 3;
       }
-
       _pickBallType(){
-        if (!this.cfg.rndSize){
-          return {radius:14, density:0.0022, restitution:1.20};
-        }
-        // chaos affects "extremes" a bit, but still equal for everyone
-        const c = this.cfg.chaos;
-        const r = this.rng();
-        const giantChance = 0.02 + c*0.01; // up to ~7%
-        const largeChance = 0.20 + c*0.03; // up to ~35%
-        const smallChance = 0.25 + c*0.02; // up to ~35%
-
-        if (r < giantChance){
-          return {radius:22, density:0.0036, restitution:1.05}; // heavy, pushy, less bouncy
-        } else if (r < giantChance + largeChance){
-          return {radius:18, density:0.0030, restitution:1.10};
-        } else if (r < giantChance + largeChance + smallChance){
-          return {radius:12, density:0.0018, restitution:1.28}; // fast/bouncy
-        } else {
-          return {radius:14, density:0.0022, restitution:1.20};
-        }
+        if(!this.cfg.rndSize) return {radius:14,density:0.0022,restitution:1.22};
+        const c=this.cfg.chaos;
+        const r=this.rng();
+        const giant = 0.02 + c*0.01;
+        const large = 0.20 + c*0.03;
+        const small = 0.25 + c*0.02;
+        if(r<giant) return {radius:23,density:0.0038,restitution:1.06};
+        if(r<giant+large) return {radius:18,density:0.0031,restitution:1.10};
+        if(r<giant+large+small) return {radius:12,density:0.0018,restitution:1.30};
+        return {radius:14,density:0.0022,restitution:1.22};
       }
 
-      _spawnAll(){
-        let p = clamp(this.cfg.players,2,20);
-        if (this.cfg.rndPlayers){
-          // fair random: uniform 2..players
-          p = 2 + Math.floor(this.rng() * (this.cfg.players - 1));
+      _spawn(){
+        const namesRaw = this.cfg.names;
+        const maxPlayers = clamp(this.cfg.maxPlayers,2,20);
+        let pool = namesRaw.length ? namesRaw : Array.from({length:maxPlayers},(_,i)=>`P${i+1}`);
+
+        // choose players
+        let chosen = pool.slice(0, maxPlayers);
+        if (this.cfg.rndPlayers && pool.length>2){
+          // pick random subset size 2..maxPlayers
+          const size = 2 + Math.floor(this.rng()*(maxPlayers-1));
+          // shuffle pool
+          for(let i=pool.length-1;i>0;i--){
+            const j=Math.floor(this.rng()*(i+1));
+            [pool[i],pool[j]]=[pool[j],pool[i]];
+          }
+          chosen = pool.slice(0,size);
         }
+
         const maxBalls = clamp(this.cfg.maxBalls,1,3);
 
-        const palette = [
+        // nice palette
+        const colors = [
           0x7cfffb,0xff6bd6,0xffd84a,0x2cff9a,0xb38bff,0xff8a4a,0x6f7cff,
           0xff4d6d,0x4dff88,0x4d7dff,0xfff04d,0x8a4dff,0x4dfff0,0xff4df0,
           0xaaff4d,0x4dffaa,0xffaa4d,0xaa4dff,0x4daaff,0xffffff
         ];
 
-        const startY = 60;
-        const span = W - 2*WALL - 120;
+        const startY = 72;
+        const span = W - 2*WALL - 160;
 
-        let idx=0;
-        for(let i=0;i<p;i++){
-          const ballsForPlayer = this._pickBallCount(maxBalls);
-          for(let k=0;k<ballsForPlayer;k++){
+        for(let i=0;i<chosen.length;i++){
+          const count = this._pickBallCount(maxBalls);
+          for(let k=0;k<count;k++){
             const t = this._pickBallType();
-            const x = WALL + 60 + ( (i/(p-1||1))*span ) + (this.rng()-0.5)*26 + (k-0.5)*10;
-            const y = startY - k*20;
-            const color = palette[i % palette.length];
+            const x = WALL+80 + (i/Math.max(1,chosen.length-1))*span + (this.rng()-0.5)*22 + (k-0.5)*10;
+            const y = startY - k*22;
+            const col = colors[i % colors.length];
 
-            const s = this.add.circle(x,y,t.radius,color,0.18).setStrokeStyle(2,color,0.55);
-            this.matter.add.gameObject(s, {
-              shape: {type:'circle', radius:t.radius},
+            const ball = this.add.circle(x,y,t.radius,col,0.22).setStrokeStyle(3,col,0.85);
+            this.matter.add.gameObject(ball,{
+              shape:{type:'circle',radius:t.radius},
               label:'ball',
-              friction: 0.002,
-              frictionAir: 0.003,
-              restitution: t.restitution,
-              density: t.density
+              friction:0.002,
+              frictionAir:0.003,
+              restitution:t.restitution,
+              density:t.density
             });
 
-            // stronger collisions vibe
-            s.setBounce(t.restitution);
-            s.setFriction(0.004);
-            s.setVelocity((this.rng()-0.5)*2.2, 0.2 + this.rng()*0.6);
-            s._done = false;
-            s._player = i+1;
-            s._ballIndex = k+1;
+            ball.setVelocity((this.rng()-0.5)*2.2, 0.5+this.rng()*0.7);
+            ball._done=false;
+            ball._name=chosen[i];
+            ball._i=i; ball._k=k;
 
-            this.balls.push(s);
-
-            if (this.cfg.showNames){
-              const name = `P${i+1}${ballsForPlayer>1?`-${k+1}`:''}`;
-              const txt = this.add.text(x,y, name, {fontSize:'11px', color:'#ffffff'}).setAlpha(0.85);
-              txt.setDepth(5);
-              this.labels.push(txt);
-            } else {
-              this.labels.push(null);
+            // label with outline (VERY readable)
+            let txt=null;
+            if(this.cfg.showNames){
+              txt = this.add.text(x,y, chosen[i], {
+                fontSize:'16px',
+                fontStyle:'900',
+                color:'#ffffff',
+                stroke:'#000000',
+                strokeThickness:6
+              }).setOrigin(0.5,1).setDepth(30);
             }
-
-            idx++;
+            this.balls.push(ball);
+            this.labels.push(txt);
           }
         }
-
         this.total = this.balls.length;
       }
 
-      // ---------- events ----------
-      _fireFinalEvent(){
-        // Moderate: not always a big flip.
+      _finalEvent(){
         this.finalEventFired = true;
-
-        const roll = this.rng();
-        let msg = 'FINAL: (아무 일 없음)';
-        if (roll < 0.40){
-          // nothing
-        } else if (roll < 0.65){
-          // small global accel downward (keeps race meaningful)
-          msg = 'FINAL: 전원 가속';
-          this.matter.world.setGravity(0, 1.22);
-          this.time.delayedCall(2500, ()=> this.matter.world.setGravity(0, 1.08));
-        } else if (roll < 0.80){
-          // mild shockwave near final gate
-          msg = 'FINAL: 충격파';
-          const cx = W/2, cy = ZF.y0 + 180;
-          for (const s of this.balls){
-            if (s._done) continue;
-            if (s.y < ZF.y0-220 || s.y > ZF.y1) continue;
-            const b = s.body;
-            const dx = b.position.x - cx;
-            const dy = b.position.y - cy;
-            const d = Math.max(1, Math.hypot(dx,dy));
-            const k = (1 - Math.min(1, d/260)) * 0.0022;
+        const roll=this.rng();
+        let msg='FINAL: (아무 일 없음)';
+        if(roll<0.40){
+          // none
+        } else if(roll<0.65){
+          msg='FINAL: 전원 가속';
+          this.matter.world.setGravity(0, 1.28);
+          this.time.delayedCall(2200, ()=>this.matter.world.setGravity(0,1.12));
+        } else if(roll<0.80){
+          msg='FINAL: 충격파';
+          const cx=W/2, cy=ZF.y0+220;
+          for(const s of this.balls){
+            if(s._done) continue;
+            if(s.y<ZF.y0-220 || s.y>ZF.y1) continue;
+            const b=s.body;
+            const dx=b.position.x-cx, dy=b.position.y-cy;
+            const d=Math.max(1, Math.hypot(dx,dy));
+            const k=(1 - Math.min(1, d/280))*0.0020;
             b.force.x += (dx/d)*k*320;
             b.force.y += (dy/d)*k*260;
           }
-        } else if (roll < 0.90){
-          // swap positions of 2 random balls that are both in final area (rare-ish)
-          msg = 'FINAL: 위치 교체(2개)';
-          const candidates = this.balls.filter(s=>!s._done && s.y > ZF.y0-120 && s.y < ZF.y1-40);
-          if (candidates.length >= 2){
-            const a = candidates[Math.floor(this.rng()*candidates.length)];
-            let b = candidates[Math.floor(this.rng()*candidates.length)];
-            if (a===b) b = candidates[(candidates.indexOf(a)+1)%candidates.length];
-            const pa = {x:a.body.position.x, y:a.body.position.y};
-            const pb = {x:b.body.position.x, y:b.body.position.y};
+        } else if(roll<0.90){
+          msg='FINAL: 위치 교체(2개)';
+          const cand=this.balls.filter(s=>!s._done && s.y>ZF.y0-140 && s.y<ZF.y1-60);
+          if(cand.length>=2){
+            const a=cand[Math.floor(this.rng()*cand.length)];
+            let b=cand[Math.floor(this.rng()*cand.length)];
+            if(a===b) b=cand[(cand.indexOf(a)+1)%cand.length];
+            const pa={x:a.body.position.x,y:a.body.position.y};
+            const pb={x:b.body.position.x,y:b.body.position.y};
             this.matter.body.setPosition(a.body,pb);
             this.matter.body.setPosition(b.body,pa);
           } else {
-            msg = 'FINAL: (교체 실패→없음)';
+            msg='FINAL: (교체 실패→없음)';
           }
         } else {
-          // very rare: small temporary drag increase (like "sticky")
-          msg = 'FINAL: 끈적존(잠깐)';
-          for (const s of this.balls){
-            if (s._done) continue;
-            if (s.y > ZF.y0-220 && s.y < ZF.y1){
-              s.setFrictionAir(0.018);
-            }
+          msg='FINAL: 끈적존(잠깐)';
+          for(const s of this.balls){
+            if(!s._done && s.y>ZF.y0-240 && s.y<ZF.y1) s.setFrictionAir(0.020);
           }
-          this.time.delayedCall(2200, ()=>{
-            for (const s of this.balls){ if(!s._done) s.setFrictionAir(0.003); }
+          this.time.delayedCall(2000, ()=>{
+            for(const s of this.balls){ if(!s._done) s.setFrictionAir(0.003); }
           });
         }
-
         this._announce(msg);
       }
 
-      _gravitySideFlip(){
-        // Side gravity for a moment (rare). Not a guaranteed flip.
-        this._announce('EVENT: 중력 좌우 흔들림');
-        const dir = (this.rng()<0.5 ? -1 : 1);
-        this.matter.world.setGravity(0.55*dir, 0.92);
-        this.time.delayedCall(2200, ()=> this.matter.world.setGravity(0, 1.08));
-      }
-
-      _announce(text){
-        const t = this.add.text(W/2, this.cameras.main.scrollY + 70, text, {
-          fontSize:'18px', color:'#ffffff', fontStyle:'700'
-        }).setOrigin(0.5).setAlpha(0.0).setDepth(20);
-        this.tweens.add({targets:t, alpha:1, duration:200, yoyo:true, hold:1200,
-          onComplete:()=>t.destroy()
-        });
-      }
-
       _updateHUD(){
-        const elapsed = (performance.now() - this.startAt)/1000;
-        const alive = this.total - this.finished;
-        const hud = document.getElementById('hud');
+        const t=(performance.now()-this.startAt)/1000;
+        const alive=this.total-this.finished;
+        const hud=document.getElementById('hud');
+        const mini=document.getElementById('miniHud');
 
-        // rough "rank": by max Y (lower is behind). show top 5 by progress
-        const ongoing = this.balls.filter(s=>!s._done);
-        ongoing.sort((a,b)=> b.y - a.y);
-        const top = ongoing.slice(0,5).map(s=>`P${s._player}${(s._ballIndex?`-${s._ballIndex}`:'')}`).join(', ');
+        // show top 8 by progress
+        const ongoing=this.balls.filter(s=>!s._done).sort((a,b)=>b.y-a.y);
+        const top=ongoing.slice(0,8).map(s=>s._name).join(', ');
 
-        hud.innerHTML =
-          `진행: <b>${this.finished}</b> / ${this.total}  (남음 ${alive})<br>`+
-          `경과: ${elapsed.toFixed(1)}s<br>`+
-          `선두권(대충): ${top || '—'}<br>`+
-          `FINAL 이벤트: ${this.finalEventFired ? '발동됨' : '대기중'}`;
+        const text =
+          `진행: <b>${this.finished}</b> / ${this.total} (남음 ${alive})<br>`+
+          `경과: ${t.toFixed(1)}s<br>`+
+          `선두권: ${top || '—'}<br>`+
+          `FINAL: ${this.finalEventFired ? '발동됨' : '대기중'}`;
+
+        hud.innerHTML=text;
+        mini.textContent = `진행 ${this.finished}/${this.total} · ${t.toFixed(1)}s`;
       }
     }
 
-    // ---------- boot / UI handlers ----------
-    let game = null;
+    let game=null;
 
-    function startGame(){
-      const cfg = {
-        players: parseInt(document.getElementById('players').value,10) || 12,
-        maxBalls: parseInt(document.getElementById('maxBalls').value,10) || 2,
-        seed: parseInt(document.getElementById('seed').value,10) || 12345,
+    function getCfg(){
+      const names = parseNames(document.getElementById('names').value);
+      return {
+        names,
+        maxPlayers: parseInt(document.getElementById('maxPlayers').value,10)||20,
+        maxBalls: parseInt(document.getElementById('maxBalls').value,10)||2,
+        chaos: clamp(parseInt(document.getElementById('chaos').value,10)||3,0,5),
+        seed: parseInt(document.getElementById('seed').value,10)||12345,
         rndPlayers: document.getElementById('rndPlayers').checked,
         rndBalls: document.getElementById('rndBalls').checked,
         rndSize: document.getElementById('rndSize').checked,
-        showNames: document.getElementById('showNames').checked,
-        chaos: clamp(parseInt(document.getElementById('chaos').value,10) || 3, 0, 5),
+        showNames: document.getElementById('showNames').checked
       };
+    }
 
-      if (game) { game.destroy(true); game = null; }
-
+    function start(){
+      const cfg=getCfg();
+      if(game){ game.destroy(true); game=null; }
       game = new Phaser.Game({
         type: Phaser.AUTO,
-        parent: document.body,
-        backgroundColor: '#0b0b10',
+        backgroundColor:'#05060b',
         width: window.innerWidth,
         height: window.innerHeight,
-        physics: {
-          default: 'matter',
-          matter: {
-            gravity: { y: 1.08 },
-            enableSleep: true,
-            debug: false
-          }
+        physics:{
+          default:'matter',
+          matter:{ gravity:{y:1.12}, enableSleep:true, debug:false }
         },
-        scene: [ new Main() ]
+        scene:[ new Main() ]
       });
-
-      game.scene.start('main', { cfg });
+      game.scene.start('main', {cfg});
     }
 
-    function resetSeed(){
-      const v = 1 + Math.floor(Math.random()*999999);
-      document.getElementById('seed').value = v;
+    function newSeed(){
+      document.getElementById('seed').value = 1 + Math.floor(Math.random()*999999);
     }
 
-    document.getElementById('startBtn').addEventListener('click', startGame);
-    document.getElementById('resetBtn').addEventListener('click', resetSeed);
+    // fold/unfold
+    const panel=document.getElementById('panel');
+    const mini=document.getElementById('mini');
+    document.getElementById('toggleBtn').onclick=()=>{
+      panel.style.display='none';
+      mini.style.display='block';
+    };
+    document.getElementById('openBtn').onclick=()=>{
+      panel.style.display='block';
+      mini.style.display='none';
+    };
 
-    // auto-start once
-    startGame();
+    document.getElementById('startBtn').onclick=start;
+    document.getElementById('startBtn2').onclick=start;
+    document.getElementById('seedBtn').onclick=newSeed;
+
+    start();
   </script>
 </body>
 </html>
