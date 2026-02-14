@@ -1,1056 +1,739 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>☄ CHAOS PINBALL ARENA</title>
-<style>
-  :root{
-    --bg1:#050714;
-    --bg2:#071b2e;
-    --card:rgba(255,255,255,.07);
-    --stroke:rgba(255,255,255,.14);
-    --text:#eef3ff;
-    --muted:rgba(238,243,255,.72);
-    --a1:#4ea3ff;
-    --a2:#b388ff;
-    --danger:#ff4d6d;
-    --good:#40f99b;
-    --gold:#ffd166;
-    --r:18px;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; color:var(--text);
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;
-    background:
-      radial-gradient(1100px 700px at 15% 15%, rgba(179,136,255,.25), transparent 60%),
-      radial-gradient(900px 650px at 90% 20%, rgba(78,163,255,.22), transparent 58%),
-      radial-gradient(900px 700px at 40% 95%, rgba(255,77,109,.12), transparent 60%),
-      linear-gradient(180deg, var(--bg1), var(--bg2));
-    -webkit-tap-highlight-color: transparent;
-  }
-  .wrap{max-width:1040px;margin:0 auto;padding:14px}
-  .top{
-    border:1px solid var(--stroke);
-    border-radius:var(--r);
-    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-    box-shadow: 0 0 18px rgba(78,163,255,.25), 0 0 44px rgba(179,136,255,.14);
-    padding:14px;
-    backdrop-filter: blur(10px);
-  }
-  h1{margin:0;font-size:18px;letter-spacing:.4px}
-  .sub{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.35}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
-  @media(min-width:980px){.grid{grid-template-columns: 1.0fr 1.2fr}}
-  .card{
-    border:1px solid var(--stroke);
-    border-radius:var(--r);
-    background:var(--card);
-    box-shadow:0 18px 60px rgba(0,0,0,.35);
-    padding:12px;
-    backdrop-filter: blur(10px);
-  }
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  textarea,select,button,input{
-    border:1px solid rgba(255,255,255,.16);
-    background:rgba(0,0,0,.26);
-    color:var(--text);
-    border-radius:14px;
-    padding:10px 12px;
-    font-size:14px;
-    outline:none;
-  }
-  textarea{width:100%;min-height:90px;resize:vertical}
-  button{cursor:pointer;transition:transform .05s ease, filter .15s ease; user-select:none}
-  button:active{transform:scale(0.98)}
-  button:disabled{opacity:.55;cursor:not-allowed;filter:saturate(.7)}
-  .primary{
-    background:linear-gradient(90deg, rgba(78,163,255,.95), rgba(179,136,255,.90));
-    border:none;
-    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 0 18px rgba(78,163,255,.18);
-  }
-  .danger{
-    background:linear-gradient(90deg, rgba(255,77,109,.95), rgba(255,140,0,.70));
-    border:none;
-    box-shadow:0 0 18px rgba(255,77,109,.18);
-  }
-  .pill{
-    display:inline-flex;align-items:center;gap:8px;
-    padding:8px 10px;border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(0,0,0,.22);
-    color:var(--muted);font-size:12px;
-  }
-  .sep{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
-  canvas{
-    width:100%;
-    height:auto;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.16);
-    background:rgba(0,0,0,.22);
-    box-shadow: 0 0 30px rgba(78,163,255,.15);
-    touch-action: manipulation;
-  }
-  .big{font-size:26px;font-weight:950;letter-spacing:.6px;text-align:center}
-  .muted{color:var(--muted);font-size:13px}
-  .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-  .line{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:10px 12px;border-radius:14px;
-    border:1px solid rgba(255,255,255,.14);
-    background:rgba(0,0,0,.18);
-  }
-  .name{font-weight:900}
-  .count{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#cfe3ff; font-weight:900}
-  .bar{flex:1;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);overflow:hidden}
-  .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg, rgba(78,163,255,.95), rgba(179,136,255,.90))}
-  .toast{
-    position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
-    background:rgba(0,0,0,.55);
-    border:1px solid rgba(255,255,255,.16);
-    padding:10px 12px;border-radius:999px;
-    color:rgba(238,243,255,.92);
-    backdrop-filter: blur(8px);
-    display:none;
-    max-width:calc(100vw - 24px);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-  }
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Chaos Drop Royale (Prototype)</title>
+  <style>
+    html,body{margin:0;height:100%;background:#0b0b10;color:#eee;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    #ui{
+      position:fixed;top:10px;left:10px;z-index:10;
+      background:rgba(20,20,30,.85);border:1px solid rgba(255,255,255,.12);
+      padding:10px 12px;border-radius:14px;backdrop-filter: blur(6px);
+      width:min(420px, calc(100vw - 20px));
+    }
+    #ui h1{font-size:14px;margin:0 0 8px 0;opacity:.95}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+    label{font-size:12px;opacity:.9;display:flex;align-items:center;gap:6px}
+    input[type="number"]{width:76px;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0f1220;color:#eee}
+    input[type="checkbox"]{transform:scale(1.05)}
+    button{
+      padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.18);
+      background:#14182a;color:#fff;cursor:pointer;font-weight:600
+    }
+    button:hover{filter:brightness(1.1)}
+    #hud{font-size:12px;opacity:.9;margin-top:6px;line-height:1.4}
+    #hint{font-size:11px;opacity:.7;margin-top:6px}
+    canvas{display:block}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <h1>☄ CHAOS PINBALL ARENA</h1>
-    <div class="sub">
-      회전 원판 + 블랙홀 흡입 + 슬롯 섞기 이벤트까지… 끝까지 결과 모르게 미쳐돌게 만든 랜덤 핀볼.<br/>
-      <b>결과:</b> 모든 공이 떨어진 뒤 “가장 많이 맞은(슬롯에 가장 많이 떨어진) 사람” = 커피.
+  <div id="ui">
+    <h1>🎰 Chaos Drop Royale — 세로 낙하형 (공평+적당반전)</h1>
+
+    <div class="row">
+      <label>인원(2~20)
+        <input id="players" type="number" min="2" max="20" value="12">
+      </label>
+      <label>최대 공/인
+        <input id="maxBalls" type="number" min="1" max="3" value="2">
+      </label>
+      <label>시드
+        <input id="seed" type="number" min="1" max="999999" value="12345">
+      </label>
     </div>
+
+    <div class="row">
+      <label><input id="rndPlayers" type="checkbox">인원 랜덤</label>
+      <label><input id="rndBalls" type="checkbox" checked>공 수 랜덤</label>
+      <label><input id="rndSize" type="checkbox" checked>크기/무게 랜덤</label>
+      <label><input id="showNames" type="checkbox" checked>이름 표시</label>
+    </div>
+
+    <div class="row">
+      <label>혼돈 레벨(0~5)
+        <input id="chaos" type="number" min="0" max="5" value="3">
+      </label>
+      <button id="startBtn">START</button>
+      <button id="resetBtn">RESET</button>
+    </div>
+
+    <div id="hud">대기중…</div>
+    <div id="hint">팁: 화면은 남은 공들의 “평균 위치”를 따라가서 60~80초 정도 계속 박터지게 움직임.</div>
   </div>
 
-  <div class="grid">
-    <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div class="pill">👥 참가자 (최소 2명, 최대 10명)</div>
-        <div class="pill">⚙ 옵션</div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <textarea id="names" placeholder="이름을 줄바꿈으로 입력
-예:
-철수
-영희
-민수"></textarea>
-      </div>
-
-      <div class="row">
-        <span class="pill">인당 공 개수
-          <select id="ballsPer">
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-        </span>
-
-        <span class="pill">동시 멀티볼
-          <select id="multi">
-            <option value="2">2개</option>
-            <option value="3" selected>3개</option>
-            <option value="5">5개</option>
-          </select>
-        </span>
-
-        <span class="pill">카오스 강도
-          <select id="chaos">
-            <option value="1">보통</option>
-            <option value="2" selected>미침</option>
-            <option value="3">극악</option>
-          </select>
-        </span>
-      </div>
-
-      <div class="row">
-        <span class="pill">맵 이벤트(섞기/뒤집기)
-          <select id="events">
-            <option value="on" selected>ON</option>
-            <option value="off">OFF</option>
-          </select>
-        </span>
-        <span class="pill">잔상/네온
-          <select id="glow">
-            <option value="on" selected>ON</option>
-            <option value="off">OFF</option>
-          </select>
-        </span>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row">
-        <button class="primary" id="startBtn">▶ DROP & CHAOS</button>
-        <button id="rerollBtn">🎲 보드 리셋</button>
-        <button class="danger" id="resetBtn">리셋</button>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="muted">슬롯 적중(맞은 횟수)</div>
-      <div class="list" id="scoreList"></div>
-
-      <div class="sep"></div>
-      <div class="big" id="result">-</div>
-    </div>
-
-    <div class="card">
-      <canvas id="cv" width="800" height="1100"></canvas>
-      <div class="muted" style="margin-top:10px">
-        팁: <b>미침/극악</b>에서 진짜 재밌는 건 “블랙홀 연속흡입 + 슬롯 뒤집기” 터질 때임 ㅋㅋ
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-  const $ = (id)=>document.getElementById(id);
-
-  // ====== helpers ======
-  function toast(t){
-    const el = $("toast");
-    el.textContent = t;
-    el.style.display = "block";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(()=>el.style.display="none", 1200);
-  }
-
-  // crypto RNG
-  function rand01(){
-    const u = new Uint32Array(1);
-    crypto.getRandomValues(u);
-    return u[0] / 0xFFFFFFFF;
-  }
-  function randInt(min, maxInc){
-    return min + Math.floor(rand01() * (maxInc - min + 1));
-  }
-  function pick(arr){ return arr[randInt(0, arr.length-1)]; }
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-      const j = randInt(0,i);
-      [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
-    return arr;
-  }
-
-  // ====== canvas ======
-  const cv = $("cv");
-  const ctx = cv.getContext("2d");
-  const W = cv.width, H = cv.height;
-
-  // ====== state ======
-  let running = false;
-  let players = [];
-  let slots = [];         // {x,w,name,color}
-  let scores = [];        // counts per slot index
-  let pegs = [];          // {x,y,r}
-  let spinners = [];      // {x,y,r,ang,omega}
-  let holes = [];         // {x,y,r,core}
-  let balls = [];         // active balls {x,y,vx,vy,r,color,alive,trail}
-  let queue = [];         // balls to spawn [{color}]
-  let particles = [];     // {x,y,vx,vy,life,ttl,size,color,add}
-  let frame = 0;
-
-  // physics params (will be set by chaos)
-  let G = 0.34;           // gravity
-  let DRAG = 0.995;       // air drag
-  let BOUNCE = 0.94;
-  let JITTER = 0.10;
-  let HOLE_PULL = 0.85;
-
-  // layout
-  const topSpawnY = 70;
-  const leftWall = 40;
-  const rightWall = W - 40;
-  const floorY = H - 120;
-  let slotY = H - 110;
-
-  // colors
-  const palette = [
-    "#4ea3ff", "#b388ff", "#40f99b", "#ffd166", "#ff4d6d",
-    "#22d3ee", "#fb7185", "#a3e635", "#f472b6", "#f97316"
-  ];
-
-  function parseNames(){
-    const raw = $("names").value.split("\n").map(s=>s.trim()).filter(Boolean);
-    const seen = new Set();
-    const out = [];
-    for(const n of raw){
-      if(!seen.has(n)){ seen.add(n); out.push(n); }
-    }
-    return out.slice(0,10);
-  }
-
-  function buildScoreList(){
-    const wrap = $("scoreList");
-    wrap.innerHTML = "";
-    const max = Math.max(1, ...scores);
-    for(let i=0;i<slots.length;i++){
-      const line = document.createElement("div");
-      line.className = "line";
-      line.innerHTML = `
-        <div class="name" style="min-width:92px">${slots[i].name}</div>
-        <div class="bar"><i style="width:${Math.round((scores[i]/max)*100)}%"></i></div>
-        <div class="count">${scores[i]}</div>
-      `;
-      // tint bar by slot color
-      const bar = line.querySelector(".bar i");
-      bar.style.background = `linear-gradient(90deg, ${slots[i].color}, rgba(179,136,255,.9))`;
-      wrap.appendChild(line);
-    }
-  }
-
-  function emitBurst(x,y,color,amount=24, power=3.8){
-    for(let i=0;i<amount;i++){
-      const a = rand01() * Math.PI*2;
-      const sp = power * (0.3 + rand01());
-      particles.push({
-        x, y,
-        vx: Math.cos(a)*sp,
-        vy: Math.sin(a)*sp,
-        life: 0,
-        ttl: 35 + randInt(0,25),
-        size: 1.6 + rand01()*2.8,
-        color,
-        add: rand01() < 0.35
-      });
-    }
-  }
-
-  function emitSparkLine(x,y,color,amount=16){
-    for(let i=0;i<amount;i++){
-      particles.push({
-        x: x + (rand01()-0.5)*6,
-        y: y + (rand01()-0.5)*6,
-        vx: (rand01()-0.5)*5,
-        vy: (rand01()-0.5)*5,
-        life: 0,
-        ttl: 20 + randInt(0,18),
-        size: 0.9 + rand01()*1.6,
-        color,
-        add: true
-      });
-    }
-  }
-
-  function resetAll(hard=false){
-    running = false;
-    balls = [];
-    queue = [];
-    particles = [];
-    frame = 0;
-    $("result").textContent = "-";
-    if(hard){
-      players = [];
-      slots = [];
-      scores = [];
-      $("scoreList").innerHTML = "";
-    }
-    draw();
-  }
-
-  function rerollBoard(){
-    // pegs / spinners / holes regenerated, slots remain
-    pegs = [];
-    spinners = [];
-    holes = [];
-
-    const chaos = Number($("chaos").value);
-
-    // pegs grid with jitter
-    const pegRows = 9 + chaos*2;
-    const pegCols = 7 + chaos;
-    const startY = 140;
-    const endY = floorY - 170;
-    const spanY = endY - startY;
-    for(let r=0;r<pegRows;r++){
-      const y = startY + (r/(pegRows-1))*spanY;
-      for(let c=0;c<pegCols;c++){
-        const xSpan = (rightWall - leftWall);
-        const x = leftWall + (c/(pegCols-1))*xSpan + (rand01()-0.5)*16;
-        pegs.push({ x, y: y + (rand01()-0.5)*10, r: 8 + rand01()*2.5 });
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+  <script>
+    // ---------- tiny deterministic RNG (mulberry32) ----------
+    function mulberry32(a){
+      return function(){
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       }
     }
+    const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 
-    // spinners (rotating discs)
-    const spinnerCount = 4 + chaos*2;
-    for(let i=0;i<spinnerCount;i++){
-      spinners.push({
-        x: leftWall + 60 + rand01()*(rightWall-leftWall-120),
-        y: 210 + rand01()*(floorY-320),
-        r: 26 + rand01()*18,
-        ang: rand01()*Math.PI*2,
-        omega: (rand01()<0.5?-1:1) * (0.015 + rand01()*(0.02 + chaos*0.01))
-      });
-    }
+    // ---------- game constants ----------
+    const W = 720;
+    const VIEW_H = 900;     // viewport height (camera follows)
+    const WORLD_H = 5200;   // tall vertical world
+    const WALL = 24;
 
-    // black holes
-    const holeCount = 2 + chaos;
-    for(let i=0;i<holeCount;i++){
-      holes.push({
-        x: leftWall + 80 + rand01()*(rightWall-leftWall-160),
-        y: 260 + rand01()*(floorY-420),
-        r: 34 + rand01()*22,
-        core: 10 + rand01()*10
-      });
-    }
-  }
+    // zones (y ranges)
+    const Z1 = {y0: 120,  y1: 1550};  // bumper storm
+    const Z2 = {y0: 1550, y1: 2900};  // branching + moving gates
+    const Z3 = {y0: 2900, y1: 3900};  // rotating wheel + chaos ring
+    const Z4 = {y0: 3900, y1: 4600};  // blackholes + gravity flip
+    const ZF = {y0: 4600, y1: 5050};  // final chaos gate + goal
 
-  function buildSlotsAndQueue(){
-    players = parseNames();
-    if(players.length < 2){
-      toast("2명 이상!");
-      return false;
-    }
+    // fairness philosophy: no rubber-band, just "final zone events" with moderate probability.
+    // ---------- Phaser Scene ----------
+    class Main extends Phaser.Scene {
+      constructor(){ super('main'); }
 
-    const n = players.length;
-    slots = [];
-    scores = Array(n).fill(0);
-
-    // slot widths
-    const slotLeft = leftWall;
-    const slotRight = rightWall;
-    const totalW = slotRight - slotLeft;
-    const w = totalW / n;
-
-    for(let i=0;i<n;i++){
-      const color = palette[i % palette.length];
-      slots.push({
-        x: slotLeft + i*w,
-        w,
-        name: players[i],
-        color
-      });
-    }
-
-    // ball queue: per player ballsPer
-    const ballsPer = Number($("ballsPer").value);
-    queue = [];
-    for(let i=0;i<n;i++){
-      for(let k=0;k<ballsPer;k++){
-        queue.push({ color: slots[i].color });
-      }
-    }
-    shuffle(queue);
-
-    buildScoreList();
-    return true;
-  }
-
-  function spawnBall(){
-    if(queue.length === 0) return;
-
-    const item = queue.pop();
-    const chaos = Number($("chaos").value);
-
-    const r = 10 + rand01()*2.5;
-    const x = (leftWall+rightWall)/2 + (rand01()-0.5)*(70 + chaos*10);
-    const y = topSpawnY + rand01()*10;
-    const vx = (rand01()-0.5) * (2.0 + chaos*0.8);
-    const vy = 1.0 + rand01()*1.0;
-
-    balls.push({
-      x,y,vx,vy,r,
-      color: item.color,
-      alive:true,
-      trail:[]
-    });
-
-    emitSparkLine(x,y,item.color, 10);
-  }
-
-  function setChaosParams(){
-    const chaos = Number($("chaos").value);
-    if(chaos === 1){
-      G = 0.32; DRAG = 0.996; BOUNCE = 0.94; JITTER = 0.07; HOLE_PULL = 0.75;
-    } else if(chaos === 2){
-      G = 0.36; DRAG = 0.995; BOUNCE = 0.945; JITTER = 0.11; HOLE_PULL = 0.92;
-    } else {
-      G = 0.40; DRAG = 0.993; BOUNCE = 0.955; JITTER = 0.16; HOLE_PULL = 1.15;
-    }
-  }
-
-  function collideCircle(b, px, py, pr, bounce=1.0, push=1.0){
-    const dx = b.x - px;
-    const dy = b.y - py;
-    const dist = Math.hypot(dx,dy);
-    const minD = b.r + pr;
-    if(dist < minD && dist > 0.0001){
-      const nx = dx / dist;
-      const ny = dy / dist;
-
-      // resolve overlap
-      const overlap = (minD - dist);
-      b.x += nx * overlap * push;
-      b.y += ny * overlap * push;
-
-      // reflect velocity
-      const vn = b.vx*nx + b.vy*ny;
-      if(vn < 0){
-        b.vx -= (1 + bounce) * vn * nx;
-        b.vy -= (1 + bounce) * vn * ny;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  function collideSpinner(b, s){
-    // treat spinner as circle; add tangential velocity based on omega
-    const hit = collideCircle(b, s.x, s.y, s.r, 1.05, 1.0);
-    if(hit){
-      // tangential component
-      const dx = b.x - s.x;
-      const dy = b.y - s.y;
-      const dist = Math.hypot(dx,dy) || 1;
-      const tx = -dy / dist;
-      const ty = dx / dist;
-      const tang = s.omega * (s.r * 8.0);
-      b.vx += tx * tang;
-      b.vy += ty * tang;
-
-      // spinner reacts a bit
-      s.omega += (rand01()-0.5)*0.004;
-      emitBurst(b.x, b.y, "#ffd166", 12, 3.0);
-      return true;
-    }
-    return false;
-  }
-
-  function applyBlackHole(b, h){
-    const dx = h.x - b.x;
-    const dy = h.y - b.y;
-    const dist = Math.hypot(dx,dy);
-    const pullR = h.r * 2.0;
-
-    if(dist < pullR && dist > 0.001){
-      const nx = dx / dist;
-      const ny = dy / dist;
-      const strength = HOLE_PULL * (1 - dist/pullR);
-      b.vx += nx * strength;
-      b.vy += ny * strength;
-
-      // swirl
-      b.vx += -ny * strength * 0.45;
-      b.vy += nx * strength * 0.45;
-      emitSparkLine(b.x, b.y, "#22d3ee", 2);
-    }
-
-    // event horizon → teleport/reinsert
-    if(dist < h.core + b.r){
-      emitBurst(h.x, h.y, "#22d3ee", 36, 4.4);
-      // teleport to top with random x; keep color
-      b.x = leftWall + 40 + rand01()*(rightWall-leftWall-80);
-      b.y = topSpawnY + rand01()*10;
-      b.vx = (rand01()-0.5)*6;
-      b.vy = 1.2 + rand01()*2.0;
-      b.trail = [];
-      return true;
-    }
-    return false;
-  }
-
-  function maybeMapEvent(){
-    if($("events").value !== "on") return;
-    const chaos = Number($("chaos").value);
-
-    // roughly every ~2 seconds with small chance
-    const p = (chaos===1)?0.004 : (chaos===2)?0.007 : 0.010;
-    if(rand01() > p) return;
-
-    const type = pick(["flipSlots","shuffleSlots","spinBoost","holeShift","pegJolt"]);
-    if(type === "flipSlots"){
-      slots.reverse();
-      toast("🌀 슬롯 뒤집힘!");
-      emitBurst((leftWall+rightWall)/2, floorY, "#b388ff", 40, 4.0);
-    } else if(type === "shuffleSlots"){
-      shuffle(slots);
-      toast("🎲 슬롯 섞임!");
-      emitBurst((leftWall+rightWall)/2, floorY, "#4ea3ff", 40, 4.0);
-    } else if(type === "spinBoost"){
-      spinners.forEach(s=> s.omega *= (1.15 + rand01()*0.35));
-      toast("⚙ 스피너 과부하!");
-      emitBurst(W/2, H/2, "#ffd166", 42, 4.2);
-    } else if(type === "holeShift"){
-      holes.forEach(h=>{
-        h.x = leftWall + 80 + rand01()*(rightWall-leftWall-160);
-        h.y = 240 + rand01()*(floorY-420);
-      });
-      toast("🕳 블랙홀 이동!");
-      emitBurst(W/2, H/2, "#22d3ee", 42, 4.2);
-    } else if(type === "pegJolt"){
-      pegs.forEach(p=>{ p.x += (rand01()-0.5)*8; p.y += (rand01()-0.5)*6; });
-      toast("⚡ 보드 흔들림!");
-      emitBurst(W/2, H/2, "#ff4d6d", 36, 4.0);
-    }
-  }
-
-  function slotIndexFromX(x){
-    // slots are dynamic order; locate by x in current layout positions (we re-layout each draw)
-    // We'll compute on the fly during draw: slots have x,w already; just find containing x.
-    for(let i=0;i<slots.length;i++){
-      if(x >= slots[i].x && x < slots[i].x + slots[i].w) return i;
-    }
-    return Math.max(0, Math.min(slots.length-1, Math.floor((x-leftWall)/((rightWall-leftWall)/slots.length))));
-  }
-
-  function finalizeIfDone(){
-    if(queue.length === 0 && balls.length === 0 && running){
-      running = false;
-
-      // find max score
-      const max = Math.max(...scores);
-      const idxs = [];
-      for(let i=0;i<scores.length;i++) if(scores[i]===max) idxs.push(i);
-      const loserIdx = idxs[randInt(0, idxs.length-1)];
-      const loser = slots[loserIdx]?.name ?? "누군가";
-
-      $("result").textContent = `☕ 커피는… ${loser} ! (맞은 공 ${max})`;
-      toast(`패배: ${loser}`);
-    }
-  }
-
-  // ===== draw =====
-  function drawBackground(){
-    ctx.fillStyle = "rgba(0,0,0,.18)";
-    ctx.fillRect(0,0,W,H);
-
-    if($("glow").value === "on"){
-      // faint vignette
-      const g = ctx.createRadialGradient(W*0.5, H*0.35, 120, W*0.5, H*0.35, 900);
-      g.addColorStop(0, "rgba(78,163,255,.08)");
-      g.addColorStop(0.55, "rgba(179,136,255,.05)");
-      g.addColorStop(1, "rgba(0,0,0,.35)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,W,H);
-    }
-  }
-
-  function drawWalls(){
-    ctx.strokeStyle = "rgba(255,255,255,.12)";
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(leftWall, 60);
-    ctx.lineTo(leftWall, floorY);
-    ctx.lineTo(rightWall, floorY);
-    ctx.lineTo(rightWall, 60);
-    ctx.stroke();
-
-    // top guide
-    ctx.strokeStyle = "rgba(78,163,255,.18)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(leftWall, 110);
-    ctx.lineTo(rightWall, 110);
-    ctx.stroke();
-  }
-
-  function drawPegs(){
-    for(const p of pegs){
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,255,255,.45)";
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fill();
-
-      if($("glow").value === "on"){
-        ctx.globalAlpha = 0.25;
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(78,163,255,.7)";
-        ctx.arc(p.x, p.y, p.r*1.8, 0, Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-  }
-
-  function drawSpinners(){
-    for(const s of spinners){
-      // body
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate(s.ang);
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,209,102,.14)";
-      ctx.strokeStyle = "rgba(255,209,102,.40)";
-      ctx.lineWidth = 3;
-      ctx.arc(0,0,s.r,0,Math.PI*2);
-      ctx.fill();
-      ctx.stroke();
-
-      // blades
-      for(let i=0;i<4;i++){
-        ctx.rotate(Math.PI/2);
-        ctx.beginPath();
-        ctx.strokeStyle = "rgba(255,209,102,.55)";
-        ctx.lineWidth = 4;
-        ctx.moveTo(0,0);
-        ctx.lineTo(s.r*0.92,0);
-        ctx.stroke();
+      init(data){
+        this.cfg = data.cfg;
+        this.rng = mulberry32(this.cfg.seed|0);
+        this.balls = [];
+        this.labels = [];
+        this.finished = 0;
+        this.total = 0;
+        this.startAt = 0;
+        this.finalEventFired = false;
+        this.gravityFlipped = false;
       }
 
-      if($("glow").value === "on"){
-        ctx.globalAlpha = 0.28;
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255,209,102,.25)";
-        ctx.arc(0,0,s.r*1.8,0,Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
+      preload(){}
 
-      ctx.restore();
-    }
-  }
+      create(){
+        const scene = this;
 
-  function drawHoles(){
-    for(const h of holes){
-      // outer field
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(34,211,238,.10)";
-      ctx.strokeStyle = "rgba(34,211,238,.35)";
-      ctx.lineWidth = 2;
-      ctx.arc(h.x, h.y, h.r, 0, Math.PI*2);
-      ctx.fill();
-      ctx.stroke();
+        // Matter world tuning for "dynamic bumpiness"
+        this.matter.world.setBounds(0, 0, W, WORLD_H, 64, true, true, false, true);
+        this.matter.world.engine.positionIterations = 8;
+        this.matter.world.engine.velocityIterations = 6;
+        this.matter.world.engine.constraintIterations = 2;
 
-      // core
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(0,0,0,.65)";
-      ctx.arc(h.x, h.y, h.core, 0, Math.PI*2);
-      ctx.fill();
+        // default gravity (down)
+        this.matter.world.setGravity(0, 1.08);
 
-      // swirl ring
-      ctx.beginPath();
-      ctx.strokeStyle = "rgba(34,211,238,.55)";
-      ctx.lineWidth = 2;
-      ctx.arc(h.x, h.y, h.core+10, 0, Math.PI*2);
-      ctx.stroke();
-    }
-  }
-
-  function drawSlots(){
-    // compute slot positions each frame from current order
-    const n = slots.length;
-    if(n === 0) return;
-    const slotLeft = leftWall;
-    const slotRight = rightWall;
-    const totalW = slotRight - slotLeft;
-    const w = totalW / n;
-
-    for(let i=0;i<n;i++){
-      slots[i].x = slotLeft + i*w;
-      slots[i].w = w;
-    }
-
-    // bar
-    ctx.fillStyle = "rgba(0,0,0,.25)";
-    ctx.fillRect(slotLeft, slotY, totalW, 90);
-
-    for(let i=0;i<n;i++){
-      const s = slots[i];
-      ctx.strokeStyle = "rgba(255,255,255,.14)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(s.x, slotY, s.w, 90);
-
-      // neon top
-      ctx.fillStyle = s.color;
-      ctx.globalAlpha = 0.18;
-      ctx.fillRect(s.x, slotY, s.w, 10);
-      ctx.globalAlpha = 1;
-
-      // name
-      ctx.fillStyle = "rgba(238,243,255,.90)";
-      ctx.font = "bold 18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(s.name, s.x + s.w/2, slotY + 44);
-
-      // count
-      const idx = i;
-      ctx.fillStyle = "rgba(207,227,255,.88)";
-      ctx.font = "bold 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
-      ctx.fillText(String(scores[idx] ?? 0), s.x + s.w/2, slotY + 70);
-    }
-  }
-
-  function drawParticles(){
-    for(const p of particles){
-      const t = p.life / p.ttl;
-      const a = Math.max(0, 1 - t);
-      ctx.globalAlpha = a * (p.add ? 0.95 : 0.75);
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * (0.9 + (1-t)*0.6), 0, Math.PI*2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawBalls(){
-    for(const b of balls){
-      // trail
-      if($("glow").value === "on"){
-        ctx.globalAlpha = 0.20;
-        ctx.strokeStyle = b.color;
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        for(let i=0;i<b.trail.length;i++){
-          const pt = b.trail[i];
-          if(i===0) ctx.moveTo(pt.x, pt.y);
-          else ctx.lineTo(pt.x, pt.y);
+        // background grid-ish
+        const g = this.add.graphics();
+        g.lineStyle(1, 0x1e2236, 0.5);
+        for(let y=0;y<=WORLD_H;y+=80){
+          g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.strokePath();
         }
-        ctx.stroke();
-        ctx.globalAlpha = 1;
+        for(let x=0;x<=W;x+=80){
+          g.beginPath(); g.moveTo(x,0); g.lineTo(x,WORLD_H); g.strokePath();
+        }
+        g.setDepth(-10);
+
+        // walls
+        this._staticRect(WALL/2, WORLD_H/2, WALL, WORLD_H, {label:'wall'});
+        this._staticRect(W - WALL/2, WORLD_H/2, WALL, WORLD_H, {label:'wall'});
+
+        // core map build
+        this._buildZone1();
+        this._buildZone2();
+        this._buildZone3();
+        this._buildZone4();
+        this._buildFinalZone();
+
+        // finish sensor
+        this.finishLine = this.matter.add.rectangle(W/2, WORLD_H-80, W-2*WALL-40, 16, {
+          isStatic:true, isSensor:true, label:'finish'
+        });
+        this.add.rectangle(W/2, WORLD_H-80, W-2*WALL-40, 16, 0x2cff9a, 0.10).setStrokeStyle(1,0x2cff9a,0.25);
+
+        // camera
+        this.cameras.main.setBounds(0,0,W,WORLD_H);
+        this.cameras.main.setViewport(0,0,window.innerWidth,window.innerHeight);
+        this.scale.on('resize', (gs)=>{
+          this.cameras.main.setViewport(0,0,gs.width,gs.height);
+        });
+
+        // collisions / sensors
+        this.matter.world.on('collisionstart', (evt)=>{
+          for (const pair of evt.pairs){
+            const a = pair.bodyA;
+            const b = pair.bodyB;
+            if ((a.label==='finish' && b.label==='ball') || (b.label==='finish' && a.label==='ball')){
+              const ballBody = (a.label==='ball') ? a : b;
+              const spr = ballBody.gameObject;
+              if (spr && !spr._done){
+                spr._done = true;
+                this.finished++;
+                // pop effect
+                const fx = this.add.circle(spr.x, spr.y, spr.displayWidth*0.35, 0xffffff, 0.18);
+                this.tweens.add({targets:fx, scale:3, alpha:0, duration:420, onComplete:()=>fx.destroy()});
+                // freeze + fade
+                spr.setVelocity(0,0);
+                spr.setStatic(true);
+                this.tweens.add({targets:spr, alpha:0.25, duration:250});
+              }
+            }
+          }
+        });
+
+        // spawn players + balls
+        this._spawnAll();
+
+        this.startAt = performance.now();
+
+        // HUD update timer
+        this.time.addEvent({
+          delay: 120, loop:true, callback: ()=> this._updateHUD()
+        });
+
+        // gentle "final event" trigger window (moderate, not always)
+        // fires once when (time>55s) AND (some balls are near final zone)
+        this.time.addEvent({
+          delay: 250, loop:true, callback: ()=>{
+            const t = (performance.now() - this.startAt)/1000;
+            if (!this.finalEventFired && t > 55){
+              const nearFinal = this.balls.some(s=>!s._done && s.y > ZF.y0-180);
+              if (nearFinal){
+                this._fireFinalEvent();
+              }
+            }
+            // gravity flip once in Z4 window, not guaranteed
+            if (!this.gravityFlipped && t > 48){
+              // 30% chance to flip sideways briefly
+              if (this.rng() < 0.30){
+                this.gravityFlipped = true;
+                this._gravitySideFlip();
+              } else {
+                this.gravityFlipped = true; // mark as decided (no more checks)
+              }
+            }
+          }
+        });
       }
 
-      // body
-      ctx.beginPath();
-      ctx.fillStyle = b.color;
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-      ctx.fill();
+      update(){
+        // camera follow average position of "alive" balls
+        let sumY=0, n=0;
+        for (const s of this.balls){
+          if (!s._done){
+            sumY += s.y; n++;
+          }
+        }
+        if (n>0){
+          const avgY = sumY/n;
+          const targetY = clamp(avgY - VIEW_H*0.35, 0, WORLD_H - VIEW_H);
+          this.cameras.main.scrollY = Phaser.Math.Linear(this.cameras.main.scrollY, targetY, 0.08);
+        }
 
-      // highlight
-      ctx.globalAlpha = 0.28;
-      ctx.beginPath();
-      ctx.fillStyle = "#ffffff";
-      ctx.arc(b.x - b.r*0.25, b.y - b.r*0.35, b.r*0.45, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function draw(){
-    // pseudo motion blur
-    if($("glow").value === "on"){
-      ctx.fillStyle = "rgba(0,0,0,.22)";
-      ctx.fillRect(0,0,W,H);
-    } else {
-      ctx.clearRect(0,0,W,H);
-    }
-
-    drawBackground();
-    drawWalls();
-    drawHoles();
-    drawSpinners();
-    drawPegs();
-    drawSlots();
-    drawParticles();
-    drawBalls();
-
-    // overlay hint if idle
-    if(!running && balls.length===0 && queue.length===0){
-      ctx.fillStyle = "rgba(0,0,0,.35)";
-      ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = "rgba(238,243,255,.92)";
-      ctx.font = "900 34px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("DROP & CHAOS", W/2, H/2 - 18);
-      ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-      ctx.fillStyle = "rgba(238,243,255,.70)";
-      ctx.fillText("이름 입력 → 시작", W/2, H/2 + 24);
-    }
-  }
-
-  // ===== update =====
-  function update(){
-    frame++;
-
-    // spawn balls up to multi limit
-    if(running){
-      const multi = Number($("multi").value);
-      const targetActive = Math.min(multi, 8);
-      if(balls.length < targetActive && queue.length > 0){
-        // spawn bursty
-        const spawnCount = Math.min(targetActive - balls.length, 2);
-        for(let i=0;i<spawnCount;i++) spawnBall();
-      }
-
-      // map chaos events
-      maybeMapEvent();
-    }
-
-    // animate spinners
-    for(const s of spinners){
-      s.ang += s.omega;
-      // slowly drift omega
-      s.omega += (rand01()-0.5)*0.0007;
-      // clamp
-      s.omega = Math.max(-0.07, Math.min(0.07, s.omega));
-    }
-
-    // update particles
-    particles = particles.filter(p => {
-      p.life++;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vx *= 0.985;
-      p.vy = p.vy*0.985 + 0.02;
-      return p.life < p.ttl;
-    });
-
-    // update balls
-    const newBalls = [];
-    for(const b of balls){
-      // trail
-      b.trail.push({x:b.x, y:b.y});
-      if(b.trail.length > 12) b.trail.shift();
-
-      // forces
-      b.vy += G;
-      b.vx *= DRAG;
-      b.vy *= DRAG;
-
-      // mild random jitter (chaos)
-      b.vx += (rand01()-0.5) * JITTER;
-      b.vy += (rand01()-0.5) * (JITTER*0.5);
-
-      // move
-      b.x += b.vx;
-      b.y += b.vy;
-
-      // walls
-      if(b.x < leftWall + b.r){
-        b.x = leftWall + b.r;
-        b.vx = Math.abs(b.vx) * BOUNCE;
-        emitSparkLine(b.x, b.y, b.color, 6);
-      }
-      if(b.x > rightWall - b.r){
-        b.x = rightWall - b.r;
-        b.vx = -Math.abs(b.vx) * BOUNCE;
-        emitSparkLine(b.x, b.y, b.color, 6);
-      }
-      if(b.y < 60 + b.r){
-        b.y = 60 + b.r;
-        b.vy = Math.abs(b.vy) * BOUNCE;
-      }
-
-      // pegs collisions (cheap: sample subset for performance)
-      for(let i=0;i<pegs.length;i+=2){
-        const p = pegs[i];
-        if(collideCircle(b, p.x, p.y, p.r, 1.02, 1.0)){
-          // add random bounce spice
-          b.vx += (rand01()-0.5)*2.2;
-          b.vy += (rand01()-0.5)*1.3;
-          emitSparkLine(b.x, b.y, b.color, 5);
+        // labels follow
+        if (this.cfg.showNames){
+          for (let i=0;i<this.balls.length;i++){
+            const s = this.balls[i];
+            const txt = this.labels[i];
+            if (!txt) continue;
+            txt.setPosition(s.x, s.y - s.displayHeight*0.7);
+            txt.setVisible(!s._done);
+          }
         }
       }
 
-      // spinners collisions
-      for(const s of spinners){
-        collideSpinner(b, s);
+      // ---------- map builders ----------
+      _staticRect(x,y,w,h, opt={}){
+        const body = this.matter.add.rectangle(x,y,w,h,{
+          isStatic:true,
+          friction:0.02,
+          restitution:0.9,
+          label: opt.label || 'static'
+        });
+        const col = opt.color ?? 0x6f7cff;
+        const alpha = opt.alpha ?? 0.10;
+        const r = this.add.rectangle(x,y,w,h,col,alpha);
+        r.setStrokeStyle(1,col,0.15);
+        r.setDepth(-2);
+        r._body = body;
+        return {body, rect:r};
       }
 
-      // black holes pull/teleport
-      for(const h of holes){
-        applyBlackHole(b, h);
+      _bumper(x,y,r, strength=0.015){
+        const body = this.matter.add.circle(x,y,r,{
+          isStatic:true,
+          restitution: 1.25,
+          friction: 0.001,
+          label:'bumper'
+        });
+        // visual
+        const c = this.add.circle(x,y,r,0xffd84a,0.08).setStrokeStyle(1,0xffd84a,0.22);
+        c.setDepth(-1);
+
+        // tiny "kick" sensor ring (makes it feel more arcade)
+        const sensor = this.matter.add.circle(x,y,r+10,{isStatic:true,isSensor:true,label:'bumperSensor'});
+        this.matter.world.on('collisionstart', (evt)=>{
+          for (const p of evt.pairs){
+            const a=p.bodyA, b=p.bodyB;
+            if ((a===sensor && b.label==='ball') || (b===sensor && a.label==='ball')){
+              const ball = (b.label==='ball') ? b : a;
+              const dx = ball.position.x - x;
+              const dy = ball.position.y - y;
+              const mag = Math.max(1, Math.hypot(dx,dy));
+              // push outwards a bit
+              const vx = (dx/mag) * (strength*800);
+              const vy = (dy/mag) * (strength*800);
+              ball.force.x += vx;
+              ball.force.y += vy;
+            }
+          }
+        });
       }
 
-      // floor / slot landing
-      if(b.y > slotY){
-        // count which slot
-        const idx = slotIndexFromX(b.x);
-        scores[idx] = (scores[idx]||0) + 1;
-        buildScoreList();
-
-        // landing explosion
-        emitBurst(b.x, slotY+20, slots[idx]?.color ?? b.color, 46, 4.6);
-        emitBurst(b.x, slotY+20, "#ffffff", 10, 3.0);
-
-        // remove ball
-        continue;
+      _movingGate(x,y,w,h, dx, periodMs){
+        const body = this.matter.add.rectangle(x,y,w,h,{
+          isStatic:true, restitution:1.05, friction:0.01, label:'gate'
+        });
+        const r = this.add.rectangle(x,y,w,h,0xff6bd6,0.10).setStrokeStyle(1,0xff6bd6,0.2).setDepth(-1);
+        const t0 = performance.now();
+        this.time.addEvent({
+          delay: 16, loop:true, callback: ()=>{
+            const t = (performance.now()-t0)/periodMs * Math.PI*2;
+            const nx = x + Math.sin(t)*dx;
+            this.matter.body.setPosition(body,{x:nx,y:y});
+            r.setPosition(nx,y);
+          }
+        });
       }
 
-      // clamp speed
-      const sp = Math.hypot(b.vx,b.vy);
-      const maxSp = 18;
-      if(sp > maxSp){
-        b.vx = (b.vx/sp)*maxSp;
-        b.vy = (b.vy/sp)*maxSp;
+      _rotor(x,y,r, speed){
+        const body = this.matter.add.circle(x,y,r,{
+          isStatic:true, restitution:1.15, friction:0.002, label:'rotor'
+        });
+        const ring = this.add.circle(x,y,r,0x7cfffb,0.06).setStrokeStyle(1,0x7cfffb,0.20).setDepth(-1);
+
+        // "spin kick": apply tangential force when ball close
+        const sensor = this.matter.add.circle(x,y,r+26,{isStatic:true,isSensor:true,label:'rotorSensor'});
+        this.matter.world.on('collisionstart', (evt)=>{
+          for (const p of evt.pairs){
+            const a=p.bodyA, b=p.bodyB;
+            if ((a===sensor && b.label==='ball') || (b===sensor && a.label==='ball')){
+              const ball = (b.label==='ball') ? b : a;
+              const dx = ball.position.x - x;
+              const dy = ball.position.y - y;
+              const mag = Math.max(1, Math.hypot(dx,dy));
+              // tangential direction
+              const tx = -dy/mag;
+              const ty = dx/mag;
+              ball.force.x += tx * speed;
+              ball.force.y += ty * speed;
+            }
+          }
+        });
+
+        // ring pulse
+        this.tweens.add({targets:ring, alpha: {from:0.04, to:0.10}, duration:800, yoyo:true, repeat:-1});
       }
 
-      newBalls.push(b);
+      _blackHole(x,y,r, pull){
+        const sensor = this.matter.add.circle(x,y,r,{isStatic:true,isSensor:true,label:'hole'});
+        const c = this.add.circle(x,y,r,0x000000,0.25).setStrokeStyle(1,0xb38bff,0.25).setDepth(-1);
+
+        // continuous pulling
+        this.time.addEvent({
+          delay:16, loop:true, callback: ()=>{
+            for (const s of this.balls){
+              if (s._done) continue;
+              const b = s.body;
+              if (!b) continue;
+              const dx = x - b.position.x;
+              const dy = y - b.position.y;
+              const d = Math.hypot(dx,dy);
+              if (d < r*2.1){
+                const k = (1 - d/(r*2.1)) * pull;
+                b.force.x += (dx/d) * k;
+                b.force.y += (dy/d) * k;
+              }
+            }
+          }
+        });
+
+        // if swallowed (very close), teleport upward a bit (not too crazy)
+        this.time.addEvent({
+          delay:80, loop:true, callback: ()=>{
+            for (const s of this.balls){
+              if (s._done) continue;
+              const b=s.body;
+              const d = Math.hypot(x-b.position.x, y-b.position.y);
+              if (d < r*0.45){
+                // moderate "re-shuffle": send to a random earlier lane in Z3/Z2
+                const tx = WALL + 60 + this.rng()*(W - 2*WALL - 120);
+                const ty = Z3.y0 + 80 + this.rng()*(Z3.y1 - Z3.y0 - 200);
+                this.matter.body.setPosition(b,{x:tx,y:ty});
+                this.matter.body.setVelocity(b,{x:(this.rng()-0.5)*4, y:(this.rng()-0.5)*2});
+              }
+            }
+          }
+        });
+
+        return {sensor, c};
+      }
+
+      _buildZone1(){
+        // Dense bumper storm
+        const chaos = this.cfg.chaos;
+        const cols = 9;
+        const rows = 14 + chaos*2;
+        const xMin = WALL+50, xMax=W-WALL-50;
+        const yMin = Z1.y0+90, yMax = Z1.y1-60;
+
+        for(let r=0;r<rows;r++){
+          const y = Phaser.Math.Linear(yMin,yMax, r/(rows-1));
+          for(let c=0;c<cols;c++){
+            const x = Phaser.Math.Linear(xMin,xMax, c/(cols-1)) + ((r%2)*18) + (this.rng()-0.5)*8;
+            if (this.rng() < 0.78) this._bumper(x,y, 10 + this.rng()*6, 0.010 + chaos*0.001);
+          }
+        }
+
+        // some angled deflectors
+        for(let i=0;i<10+chaos*2;i++){
+          const x = xMin + this.rng()*(xMax-xMin);
+          const y = yMin + this.rng()*(yMax-yMin);
+          const w = 120 + this.rng()*70;
+          const h = 14;
+          const angle = (this.rng()<0.5 ? -1 : 1) * (0.25 + this.rng()*0.5);
+          const body = this.matter.add.rectangle(x,y,w,h,{
+            isStatic:true, restitution:1.1, friction:0.002, angle, label:'deflector'
+          });
+          const rect = this.add.rectangle(x,y,w,h,0x7cfffb,0.06).setStrokeStyle(1,0x7cfffb,0.14).setDepth(-2);
+          rect.rotation = angle;
+        }
+      }
+
+      _buildZone2(){
+        // Branching lanes with gates
+        const laneW = (W - 2*WALL - 40)/3;
+        const y0 = Z2.y0 + 40, y1 = Z2.y1 - 40;
+
+        // separators
+        for(let i=1;i<=2;i++){
+          this._staticRect(WALL+20 + laneW*i, (y0+y1)/2, 10, (y1-y0), {color:0x6f7cff, alpha:0.08});
+        }
+
+        // gates (moving blockers)
+        for(let i=0;i<7+this.cfg.chaos;i++){
+          const lane = Math.floor(this.rng()*3);
+          const x = WALL+20 + laneW*lane + laneW/2;
+          const y = y0 + this.rng()*(y1-y0);
+          const w = laneW*0.62;
+          const h = 16;
+          const dx = 70 + this.rng()*60;
+          const period = 900 + this.rng()*700;
+          this._movingGate(x,y,w,h,dx,period);
+        }
+
+        // bumpers sprinkled
+        for(let i=0;i<22+this.cfg.chaos*5;i++){
+          const x = WALL+50 + this.rng()*(W-2*WALL-100);
+          const y = y0 + this.rng()*(y1-y0);
+          this._bumper(x,y, 10+this.rng()*6, 0.012);
+        }
+      }
+
+      _buildZone3(){
+        // Rotating influence zone
+        const yMid = (Z3.y0 + Z3.y1)/2;
+
+        // big rotor in center + two side rotors
+        this._rotor(W/2, yMid, 54, 0.00085);
+        this._rotor(W*0.27, yMid-260, 40, 0.00070);
+        this._rotor(W*0.73, yMid+240, 40, -0.00072);
+
+        // "pinball pins" rows
+        for(let i=0;i<70+this.cfg.chaos*10;i++){
+          const x = WALL+50 + this.rng()*(W-2*WALL-100);
+          const y = Z3.y0+80 + this.rng()*(Z3.y1 - Z3.y0 - 160);
+          this._bumper(x,y, 9+this.rng()*5, 0.010);
+        }
+      }
+
+      _buildZone4(){
+        // Blackholes + (optional) gravity side flip later
+        const y0 = Z4.y0+60, y1 = Z4.y1-80;
+        const holes = 2 + (this.cfg.chaos>=4 ? 1 : 0);
+        for(let i=0;i<holes;i++){
+          const x = WALL+120 + this.rng()*(W-2*WALL-240);
+          const y = y0 + this.rng()*(y1-y0);
+          this._blackHole(x,y, 46 + this.rng()*16, 0.00045 + this.cfg.chaos*0.00008);
+        }
+
+        // some tight funnels
+        for(let i=0;i<6;i++){
+          const y = y0 + (i/5)*(y1-y0);
+          const x = W/2 + (this.rng()-0.5)*120;
+          const w = 220, h = 14;
+          const a = (this.rng()<0.5?-1:1)*(0.22+this.rng()*0.25);
+          const body = this.matter.add.rectangle(x,y,w,h,{isStatic:true,restitution:1.05,friction:0.003,angle:a,label:'funnel'});
+          const rect = this.add.rectangle(x,y,w,h,0xb38bff,0.06).setStrokeStyle(1,0xb38bff,0.16).setDepth(-2);
+          rect.rotation=a;
+        }
+      }
+
+      _buildFinalZone(){
+        // final chaos gate visuals + mild deflectors
+        const y0 = ZF.y0+40, y1 = ZF.y1-120;
+
+        // narrowing corridor
+        this._staticRect(WALL+80, (y0+y1)/2, 12, (y1-y0), {color:0x2cff9a, alpha:0.08});
+        this._staticRect(W- (WALL+80), (y0+y1)/2, 12, (y1-y0), {color:0x2cff9a, alpha:0.08});
+
+        // last bumpers (not too many, keeps "meaning" of mid race)
+        for(let i=0;i<18+this.cfg.chaos*3;i++){
+          const x = WALL+110 + this.rng()*(W-2*WALL-220);
+          const y = y0 + this.rng()*(y1-y0);
+          this._bumper(x,y, 10+this.rng()*6, 0.010);
+        }
+
+        // goal mouth
+        this._staticRect(W/2, WORLD_H-40, W-2*WALL-160, 18, {color:0x2cff9a, alpha:0.10});
+      }
+
+      // ---------- spawning ----------
+      _pickBallCount(maxBalls){
+        if (!this.cfg.rndBalls) return maxBalls;
+        // fair distribution, public probabilities (no hidden advantage)
+        const r = this.rng();
+        if (maxBalls<=1) return 1;
+        if (maxBalls===2) return (r < 0.55) ? 1 : 2;
+        // maxBalls===3
+        if (r < 0.45) return 1;
+        if (r < 0.80) return 2;
+        return 3;
+      }
+
+      _pickBallType(){
+        if (!this.cfg.rndSize){
+          return {radius:14, density:0.0022, restitution:1.20};
+        }
+        // chaos affects "extremes" a bit, but still equal for everyone
+        const c = this.cfg.chaos;
+        const r = this.rng();
+        const giantChance = 0.02 + c*0.01; // up to ~7%
+        const largeChance = 0.20 + c*0.03; // up to ~35%
+        const smallChance = 0.25 + c*0.02; // up to ~35%
+
+        if (r < giantChance){
+          return {radius:22, density:0.0036, restitution:1.05}; // heavy, pushy, less bouncy
+        } else if (r < giantChance + largeChance){
+          return {radius:18, density:0.0030, restitution:1.10};
+        } else if (r < giantChance + largeChance + smallChance){
+          return {radius:12, density:0.0018, restitution:1.28}; // fast/bouncy
+        } else {
+          return {radius:14, density:0.0022, restitution:1.20};
+        }
+      }
+
+      _spawnAll(){
+        let p = clamp(this.cfg.players,2,20);
+        if (this.cfg.rndPlayers){
+          // fair random: uniform 2..players
+          p = 2 + Math.floor(this.rng() * (this.cfg.players - 1));
+        }
+        const maxBalls = clamp(this.cfg.maxBalls,1,3);
+
+        const palette = [
+          0x7cfffb,0xff6bd6,0xffd84a,0x2cff9a,0xb38bff,0xff8a4a,0x6f7cff,
+          0xff4d6d,0x4dff88,0x4d7dff,0xfff04d,0x8a4dff,0x4dfff0,0xff4df0,
+          0xaaff4d,0x4dffaa,0xffaa4d,0xaa4dff,0x4daaff,0xffffff
+        ];
+
+        const startY = 60;
+        const span = W - 2*WALL - 120;
+
+        let idx=0;
+        for(let i=0;i<p;i++){
+          const ballsForPlayer = this._pickBallCount(maxBalls);
+          for(let k=0;k<ballsForPlayer;k++){
+            const t = this._pickBallType();
+            const x = WALL + 60 + ( (i/(p-1||1))*span ) + (this.rng()-0.5)*26 + (k-0.5)*10;
+            const y = startY - k*20;
+            const color = palette[i % palette.length];
+
+            const s = this.add.circle(x,y,t.radius,color,0.18).setStrokeStyle(2,color,0.55);
+            this.matter.add.gameObject(s, {
+              shape: {type:'circle', radius:t.radius},
+              label:'ball',
+              friction: 0.002,
+              frictionAir: 0.003,
+              restitution: t.restitution,
+              density: t.density
+            });
+
+            // stronger collisions vibe
+            s.setBounce(t.restitution);
+            s.setFriction(0.004);
+            s.setVelocity((this.rng()-0.5)*2.2, 0.2 + this.rng()*0.6);
+            s._done = false;
+            s._player = i+1;
+            s._ballIndex = k+1;
+
+            this.balls.push(s);
+
+            if (this.cfg.showNames){
+              const name = `P${i+1}${ballsForPlayer>1?`-${k+1}`:''}`;
+              const txt = this.add.text(x,y, name, {fontSize:'11px', color:'#ffffff'}).setAlpha(0.85);
+              txt.setDepth(5);
+              this.labels.push(txt);
+            } else {
+              this.labels.push(null);
+            }
+
+            idx++;
+          }
+        }
+
+        this.total = this.balls.length;
+      }
+
+      // ---------- events ----------
+      _fireFinalEvent(){
+        // Moderate: not always a big flip.
+        this.finalEventFired = true;
+
+        const roll = this.rng();
+        let msg = 'FINAL: (아무 일 없음)';
+        if (roll < 0.40){
+          // nothing
+        } else if (roll < 0.65){
+          // small global accel downward (keeps race meaningful)
+          msg = 'FINAL: 전원 가속';
+          this.matter.world.setGravity(0, 1.22);
+          this.time.delayedCall(2500, ()=> this.matter.world.setGravity(0, 1.08));
+        } else if (roll < 0.80){
+          // mild shockwave near final gate
+          msg = 'FINAL: 충격파';
+          const cx = W/2, cy = ZF.y0 + 180;
+          for (const s of this.balls){
+            if (s._done) continue;
+            if (s.y < ZF.y0-220 || s.y > ZF.y1) continue;
+            const b = s.body;
+            const dx = b.position.x - cx;
+            const dy = b.position.y - cy;
+            const d = Math.max(1, Math.hypot(dx,dy));
+            const k = (1 - Math.min(1, d/260)) * 0.0022;
+            b.force.x += (dx/d)*k*320;
+            b.force.y += (dy/d)*k*260;
+          }
+        } else if (roll < 0.90){
+          // swap positions of 2 random balls that are both in final area (rare-ish)
+          msg = 'FINAL: 위치 교체(2개)';
+          const candidates = this.balls.filter(s=>!s._done && s.y > ZF.y0-120 && s.y < ZF.y1-40);
+          if (candidates.length >= 2){
+            const a = candidates[Math.floor(this.rng()*candidates.length)];
+            let b = candidates[Math.floor(this.rng()*candidates.length)];
+            if (a===b) b = candidates[(candidates.indexOf(a)+1)%candidates.length];
+            const pa = {x:a.body.position.x, y:a.body.position.y};
+            const pb = {x:b.body.position.x, y:b.body.position.y};
+            this.matter.body.setPosition(a.body,pb);
+            this.matter.body.setPosition(b.body,pa);
+          } else {
+            msg = 'FINAL: (교체 실패→없음)';
+          }
+        } else {
+          // very rare: small temporary drag increase (like "sticky")
+          msg = 'FINAL: 끈적존(잠깐)';
+          for (const s of this.balls){
+            if (s._done) continue;
+            if (s.y > ZF.y0-220 && s.y < ZF.y1){
+              s.setFrictionAir(0.018);
+            }
+          }
+          this.time.delayedCall(2200, ()=>{
+            for (const s of this.balls){ if(!s._done) s.setFrictionAir(0.003); }
+          });
+        }
+
+        this._announce(msg);
+      }
+
+      _gravitySideFlip(){
+        // Side gravity for a moment (rare). Not a guaranteed flip.
+        this._announce('EVENT: 중력 좌우 흔들림');
+        const dir = (this.rng()<0.5 ? -1 : 1);
+        this.matter.world.setGravity(0.55*dir, 0.92);
+        this.time.delayedCall(2200, ()=> this.matter.world.setGravity(0, 1.08));
+      }
+
+      _announce(text){
+        const t = this.add.text(W/2, this.cameras.main.scrollY + 70, text, {
+          fontSize:'18px', color:'#ffffff', fontStyle:'700'
+        }).setOrigin(0.5).setAlpha(0.0).setDepth(20);
+        this.tweens.add({targets:t, alpha:1, duration:200, yoyo:true, hold:1200,
+          onComplete:()=>t.destroy()
+        });
+      }
+
+      _updateHUD(){
+        const elapsed = (performance.now() - this.startAt)/1000;
+        const alive = this.total - this.finished;
+        const hud = document.getElementById('hud');
+
+        // rough "rank": by max Y (lower is behind). show top 5 by progress
+        const ongoing = this.balls.filter(s=>!s._done);
+        ongoing.sort((a,b)=> b.y - a.y);
+        const top = ongoing.slice(0,5).map(s=>`P${s._player}${(s._ballIndex?`-${s._ballIndex}`:'')}`).join(', ');
+
+        hud.innerHTML =
+          `진행: <b>${this.finished}</b> / ${this.total}  (남음 ${alive})<br>`+
+          `경과: ${elapsed.toFixed(1)}s<br>`+
+          `선두권(대충): ${top || '—'}<br>`+
+          `FINAL 이벤트: ${this.finalEventFired ? '발동됨' : '대기중'}`;
+      }
     }
-    balls = newBalls;
 
-    // finalize?
-    finalizeIfDone();
-  }
+    // ---------- boot / UI handlers ----------
+    let game = null;
 
-  function loop(){
-    if(running){
-      update();
-    } else {
-      // keep particles animating a bit
-      if(particles.length){
-        update();
-      }
+    function startGame(){
+      const cfg = {
+        players: parseInt(document.getElementById('players').value,10) || 12,
+        maxBalls: parseInt(document.getElementById('maxBalls').value,10) || 2,
+        seed: parseInt(document.getElementById('seed').value,10) || 12345,
+        rndPlayers: document.getElementById('rndPlayers').checked,
+        rndBalls: document.getElementById('rndBalls').checked,
+        rndSize: document.getElementById('rndSize').checked,
+        showNames: document.getElementById('showNames').checked,
+        chaos: clamp(parseInt(document.getElementById('chaos').value,10) || 3, 0, 5),
+      };
+
+      if (game) { game.destroy(true); game = null; }
+
+      game = new Phaser.Game({
+        type: Phaser.AUTO,
+        parent: document.body,
+        backgroundColor: '#0b0b10',
+        width: window.innerWidth,
+        height: window.innerHeight,
+        physics: {
+          default: 'matter',
+          matter: {
+            gravity: { y: 1.08 },
+            enableSleep: true,
+            debug: false
+          }
+        },
+        scene: [ new Main() ]
+      });
+
+      game.scene.start('main', { cfg });
     }
-    draw();
-    requestAnimationFrame(loop);
-  }
 
-  // ===== buttons =====
-  $("startBtn").addEventListener("click", ()=>{
-    if(running) return;
-
-    // build slots & queue
-    if(!buildSlotsAndQueue()) return;
-
-    // board
-    setChaosParams();
-    rerollBoard();
-
-    // reset counts/particles/balls
-    balls = [];
-    particles = [];
-    frame = 0;
-
-    // start
-    running = true;
-    $("result").textContent = "떨어지는 중… (끝까지 모름)";
-    toast("DROP!");
-  });
-
-  $("rerollBtn").addEventListener("click", ()=>{
-    if(running) return;
-    // if players already parsed, keep slots; else build when start
-    const names = parseNames();
-    if(names.length >= 2){
-      buildSlotsAndQueue();
+    function resetSeed(){
+      const v = 1 + Math.floor(Math.random()*999999);
+      document.getElementById('seed').value = v;
     }
-    setChaosParams();
-    rerollBoard();
-    particles = [];
-    balls = [];
-    queue = [];
-    $("result").textContent = "-";
-    toast("보드 리셋!");
-  });
 
-  $("resetBtn").addEventListener("click", ()=>{
-    resetAll(true);
-    $("result").textContent = "-";
-    toast("리셋");
-  });
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('resetBtn').addEventListener('click', resetSeed);
 
-  // initial board
-  setChaosParams();
-  rerollBoard();
-  draw();
-  requestAnimationFrame(loop);
-});
-</script>
+    // auto-start once
+    startGame();
+  </script>
 </body>
 </html>
