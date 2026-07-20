@@ -1,31 +1,1187 @@
-grant select, insert, update, delete
-on table public.checklist_cn8_front_camera
-to anon;
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-alter table public.checklist_cn8_front_camera
-enable row level security;
+  <title>CN8 전방카메라 관리자</title>
 
-create policy "cn8_admin_select"
-on public.checklist_cn8_front_camera
-for select
-to anon
-using (true);
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-create policy "cn8_admin_insert"
-on public.checklist_cn8_front_camera
-for insert
-to anon
-with check (true);
+    body {
+      margin: 12px;
+      padding-bottom: 30px;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      color: #111;
+      background: #f5f6f8;
+    }
 
-create policy "cn8_admin_update"
-on public.checklist_cn8_front_camera
-for update
-to anon
-using (true)
-with check (true);
+    h1 {
+      margin: 0 0 5px;
+      font-size: 23px;
+    }
 
-create policy "cn8_admin_delete"
-on public.checklist_cn8_front_camera
-for delete
-to anon
-using (true);
+    h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    button,
+    input,
+    textarea {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      font: inherit;
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .header {
+      margin-bottom: 10px;
+    }
+
+    .muted {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .panel {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .wrap {
+      flex-wrap: wrap;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    .summaryGrid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .summaryItem {
+      min-width: 0;
+      padding: 8px 3px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      text-align: center;
+      background: #fafafa;
+      font-size: 10px;
+    }
+
+    .summaryItem b {
+      display: block;
+      margin-top: 2px;
+      font-size: 16px;
+    }
+
+    .guide {
+      margin-top: 7px;
+      padding: 9px;
+      border-radius: 9px;
+      color: #555;
+      background: #f4f4f4;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .buttonGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .primary {
+      color: #fff;
+      border-color: #1759b8;
+      background: #1759b8;
+      font-weight: 700;
+    }
+
+    .danger {
+      color: #a32020;
+      border-color: #d9a8a8;
+      background: #fff7f7;
+    }
+
+    .warning {
+      color: #7b5500;
+      border-color: #ddc16b;
+      background: #fff9df;
+    }
+
+    .searchLine {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 7px;
+    }
+
+    #search {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .card {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .card.done {
+      border-color: #8fc99b;
+      background: #f5fff7;
+    }
+
+    .card.working {
+      border-color: #8fb5df;
+      background: #f5faff;
+    }
+
+    .vinLine {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .vin {
+      min-width: 0;
+      font-size: 21px;
+      font-weight: 800;
+      word-break: break-all;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      margin-left: auto;
+      padding: 4px 7px;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #f5f5f5;
+    }
+
+    .history {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .historyItem {
+      min-width: 0;
+      padding: 6px 3px;
+      border: 1px solid #e7e7e7;
+      border-radius: 8px;
+      text-align: center;
+      background: #fafafa;
+      font-size: 10px;
+    }
+
+    .historyItem b {
+      display: block;
+      overflow: hidden;
+      margin-top: 2px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cardButtons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 7px;
+      font-size: 12px;
+    }
+
+    .empty {
+      padding: 25px 10px;
+      border: 1px dashed #ccc;
+      border-radius: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    .loginOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0,0,0,0.55);
+    }
+
+    .loginBox {
+      width: min(380px, 100%);
+      padding: 18px;
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .loginBox input {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .loginBox button {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        margin: 8px;
+      }
+
+      .panel {
+        padding: 10px;
+      }
+
+      .summaryItem {
+        font-size: 9px;
+      }
+
+      .summaryItem b {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loginOverlay" class="loginOverlay">
+    <div class="loginBox">
+      <h2>관리자 확인</h2>
+
+      <div class="muted">
+        관리자 비밀번호를 입력하세요.
+      </div>
+
+      <input
+        id="passwordInput"
+        type="password"
+        placeholder="관리자 비밀번호"
+        autocomplete="current-password"
+      >
+
+      <button id="loginBtn" class="primary">
+        관리자 화면 열기
+      </button>
+
+      <div id="loginMessage" class="status"></div>
+    </div>
+  </div>
+
+
+  <div class="header">
+    <h1>CN8 전방카메라 관리자</h1>
+
+    <div class="row">
+      <span class="muted" id="connection">
+        연결 대기
+      </span>
+
+      <button id="refreshBtn" class="right">
+        새로고침
+      </button>
+    </div>
+  </div>
+
+
+  <div class="panel">
+    <h2>전체 현황</h2>
+
+    <div class="summaryGrid">
+      <div class="summaryItem">
+        전체
+        <b id="countTotal">-</b>
+      </div>
+
+      <div class="summaryItem">
+        미완료
+        <b id="countWaiting">-</b>
+      </div>
+
+      <div class="summaryItem">
+        작업중
+        <b id="countWorking">-</b>
+      </div>
+
+      <div class="summaryItem">
+        업데이트
+        <b id="countUpdate">-</b>
+      </div>
+
+      <div class="summaryItem">
+        최종완료
+        <b id="countDone">-</b>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="panel">
+    <h2>VIN 일괄 추가</h2>
+
+    <textarea
+      id="vinInput"
+      placeholder="VIN을 줄바꿈으로 붙여넣으세요.
+
+예:
+1234
+5678
+9012"
+    ></textarea>
+
+    <div class="guide">
+      줄바꿈, 쉼표, 공백으로 구분할 수 있습니다.<br>
+      이미 존재하는 VIN은 자동으로 무시하고 신규 VIN만 추가합니다.
+    </div>
+
+    <div class="buttonGrid">
+      <button id="previewBtn">
+        입력 확인
+      </button>
+
+      <button id="addBtn" class="primary">
+        VIN 추가
+      </button>
+    </div>
+
+    <div id="addStatus" class="status muted"></div>
+  </div>
+
+
+  <div class="panel">
+    <h2>VIN 검색 및 관리</h2>
+
+    <div class="searchLine">
+      <input
+        id="search"
+        placeholder="VIN 검색"
+        autocomplete="off"
+      >
+
+      <button id="clearSearchBtn">
+        초기화
+      </button>
+    </div>
+
+    <div id="resultCount" class="status muted"></div>
+
+    <div id="list" class="list"></div>
+  </div>
+
+
+<script>
+  /*
+    관리자 URL에 접근할 때 사용하는 간단한 비밀번호입니다.
+
+    반드시 원하는 값으로 변경하세요.
+    단, HTML 안에 들어가는 비밀번호이므로
+    전문적인 보안 기능은 아니고 실수 방지용입니다.
+  */
+  const ADMIN_PASSWORD = "cn8admin";
+
+  const SUPABASE_URL =
+    "https://ulqpqkzgwitkxxnipjkx.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_LMSx0JifZNOQXN-ViIjNaA_fg3Vkedl";
+
+  const TABLE_NAME =
+    "checklist_cn8_front_camera";
+
+
+  const $ = id =>
+    document.getElementById(id);
+
+
+  let items = [];
+
+  let authenticated =
+    sessionStorage.getItem(
+      "cn8_admin_authenticated"
+    ) === "yes";
+
+
+  function getHeaders(prefer = "") {
+    const headers = {
+      apikey: SUPABASE_KEY,
+      "Content-Type": "application/json"
+    };
+
+    if (prefer) {
+      headers.Prefer = prefer;
+    }
+
+    return headers;
+  }
+
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+
+  function formatKST(value) {
+    if (!value) return "-";
+
+    return new Intl.DateTimeFormat(
+      "ko-KR",
+      {
+        timeZone: "Asia/Seoul",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }
+    ).format(new Date(value));
+  }
+
+
+  function isWorking(item) {
+    return (
+      Boolean(item.work_at) &&
+      !Boolean(item.update_done)
+    );
+  }
+
+
+  function isFinalDone(item) {
+    return (
+      Boolean(item.update_done) &&
+      Boolean(item.dtc_done)
+    );
+  }
+
+
+  function stateLabel(item) {
+    if (isFinalDone(item)) {
+      return "최종 완료";
+    }
+
+    if (item.update_done) {
+      return "업데이트 완료";
+    }
+
+    if (isWorking(item)) {
+      return "작업중";
+    }
+
+    return "미완료";
+  }
+
+
+  function showLogin() {
+    $("loginOverlay").style.display =
+      authenticated ? "none" : "flex";
+  }
+
+
+  function login() {
+    const value =
+      $("passwordInput").value;
+
+    if (value !== ADMIN_PASSWORD) {
+      $("loginMessage").textContent =
+        "비밀번호가 맞지 않습니다.";
+
+      return;
+    }
+
+    authenticated = true;
+
+    sessionStorage.setItem(
+      "cn8_admin_authenticated",
+      "yes"
+    );
+
+    $("loginOverlay").style.display =
+      "none";
+
+    loadData();
+  }
+
+
+  async function loadData() {
+    if (!authenticated) {
+      return;
+    }
+
+    $("connection").textContent =
+      "연결 중...";
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      "?select=*&order=vin.asc";
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            headers: getHeaders()
+          }
+        );
+
+      const text =
+        await response.text();
+
+      if (!response.ok) {
+        $("connection").textContent =
+          `로드 실패 ${response.status}`;
+
+        alert(
+          "Supabase 로드 실패\n\n" +
+          text
+        );
+
+        return;
+      }
+
+      items =
+        text ? JSON.parse(text) : [];
+
+      $("connection").textContent =
+        `연결됨 ✅ ${items.length}대`;
+
+      updateSummary();
+      render();
+
+    } catch (error) {
+      $("connection").textContent =
+        "연결 오류";
+
+      alert(
+        "Supabase 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  function updateSummary() {
+    const total =
+      items.length;
+
+    const waiting =
+      items.filter(item =>
+        !item.work_at &&
+        !item.update_done &&
+        !item.dtc_done
+      ).length;
+
+    const working =
+      items.filter(isWorking).length;
+
+    const update =
+      items.filter(item =>
+        Boolean(item.update_done)
+      ).length;
+
+    const done =
+      items.filter(isFinalDone).length;
+
+    $("countTotal").textContent =
+      total;
+
+    $("countWaiting").textContent =
+      waiting;
+
+    $("countWorking").textContent =
+      working;
+
+    $("countUpdate").textContent =
+      update;
+
+    $("countDone").textContent =
+      done;
+  }
+
+
+  function parseVinInput() {
+    const raw =
+      $("vinInput").value;
+
+    const values =
+      raw
+        .split(/[\s,;]+/)
+        .map(value =>
+          value.trim()
+        )
+        .filter(Boolean);
+
+    /*
+      입력창 내부 중복 제거
+      대소문자는 구분하지 않도록 대문자로 통일
+    */
+    return [
+      ...new Set(
+        values.map(value =>
+          value.toUpperCase()
+        )
+      )
+    ];
+  }
+
+
+  function previewVin() {
+    const vins =
+      parseVinInput();
+
+    if (!vins.length) {
+      $("addStatus").textContent =
+        "입력된 VIN이 없습니다.";
+
+      return;
+    }
+
+    const existing =
+      new Set(
+        items.map(item =>
+          String(item.vin || "")
+            .toUpperCase()
+        )
+      );
+
+    const duplicateCount =
+      vins.filter(vin =>
+        existing.has(vin)
+      ).length;
+
+    const newCount =
+      vins.length - duplicateCount;
+
+    $("addStatus").textContent =
+      `입력 ${vins.length}대 · ` +
+      `신규 ${newCount}대 · ` +
+      `기존 중복 ${duplicateCount}대`;
+  }
+
+
+  async function addVins() {
+    const vins =
+      parseVinInput();
+
+    if (!vins.length) {
+      alert(
+        "추가할 VIN을 입력해주세요."
+      );
+
+      return;
+    }
+
+    const existing =
+      new Set(
+        items.map(item =>
+          String(item.vin || "")
+            .toUpperCase()
+        )
+      );
+
+    const newVins =
+      vins.filter(vin =>
+        !existing.has(vin)
+      );
+
+    if (!newVins.length) {
+      alert(
+        "모든 VIN이 이미 등록되어 있습니다."
+      );
+
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        `신규 VIN ${newVins.length}대를 추가하시겠습니까?\n\n` +
+        `기존 중복 ${vins.length - newVins.length}대는 무시됩니다.`
+      );
+
+    if (!confirmed) return;
+
+    $("addBtn").disabled = true;
+    $("addStatus").textContent =
+      "VIN 추가 중...";
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      "?on_conflict=vin";
+
+    const rows =
+      newVins.map(vin => ({
+        vin,
+        status: "미완료",
+        update_done: false,
+        dtc_done: false
+      }));
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "POST",
+            headers: getHeaders(
+              "resolution=ignore-duplicates,return=minimal"
+            ),
+            body: JSON.stringify(rows)
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "VIN 추가 실패\n\n" +
+          text
+        );
+
+        $("addStatus").textContent =
+          "추가 실패";
+
+        return;
+      }
+
+      $("addStatus").textContent =
+        `신규 VIN ${newVins.length}대 추가 완료`;
+
+      $("vinInput").value = "";
+
+      await loadData();
+
+    } catch (error) {
+      alert(
+        "VIN 추가 중 연결 오류\n\n" +
+        String(error)
+      );
+
+      $("addStatus").textContent =
+        "연결 오류";
+
+    } finally {
+      $("addBtn").disabled = false;
+    }
+  }
+
+
+  async function deleteVin(id, vin) {
+    const current =
+      items.find(item =>
+        item.id === id
+      );
+
+    if (!current) return;
+
+    let warning =
+      `VIN ${vin}을 삭제하시겠습니까?\n\n` +
+      "삭제하면 해당 VIN의 모든 작업 기록과 코멘트가 함께 삭제됩니다.";
+
+    if (
+      current.work_at ||
+      current.update_done ||
+      current.dtc_done ||
+      current.memo
+    ) {
+      warning =
+        `주의: VIN ${vin}에는 작업 기록이 있습니다.\n\n` +
+        "작업자, 시간, 완료 상태, 코멘트까지 모두 삭제됩니다.\n\n" +
+        "정말 삭제하시겠습니까?";
+    }
+
+    const firstConfirm =
+      confirm(warning);
+
+    if (!firstConfirm) return;
+
+    const typed =
+      prompt(
+        "삭제 확인을 위해 VIN을 다시 입력하세요.",
+        ""
+      );
+
+    if (typed === null) return;
+
+    if (
+      typed.trim().toUpperCase() !==
+      String(vin).toUpperCase()
+    ) {
+      alert(
+        "입력한 VIN이 일치하지 않아 삭제하지 않았습니다."
+      );
+
+      return;
+    }
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?id=eq.${encodeURIComponent(id)}`;
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "DELETE",
+            headers: getHeaders(
+              "return=minimal"
+            )
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "삭제 실패\n\n" +
+          text
+        );
+
+        return;
+      }
+
+      alert(
+        `${vin} 삭제 완료`
+      );
+
+      await loadData();
+
+    } catch (error) {
+      alert(
+        "삭제 중 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  async function resetVin(id, vin) {
+    const current =
+      items.find(item =>
+        item.id === id
+      );
+
+    if (!current) return;
+
+    const confirmed =
+      confirm(
+        `VIN ${vin}의 작업 상태를 초기화하시겠습니까?\n\n` +
+        "작업 시작, 업데이트, VER/DTC 완료 기록과 코멘트가 모두 삭제됩니다.\n" +
+        "VIN 자체는 삭제되지 않습니다."
+      );
+
+    if (!confirmed) return;
+
+    const secondConfirm =
+      confirm(
+        "초기화 후에는 기존 작업자와 시간을 복구할 수 없습니다.\n\n" +
+        "정말 초기화하시겠습니까?"
+      );
+
+    if (!secondConfirm) return;
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      status: "미완료",
+
+      work_by: null,
+      work_at: null,
+
+      update_done: false,
+      update_by: null,
+      update_at: null,
+
+      dtc_done: false,
+      dtc_by: null,
+      dtc_at: null,
+
+      memo: null,
+
+      updated_by: "ADMIN",
+      updated_at: now
+    };
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?id=eq.${encodeURIComponent(id)}`;
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "PATCH",
+            headers: getHeaders(
+              "return=minimal"
+            ),
+            body: JSON.stringify(payload)
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "초기화 실패\n\n" +
+          text
+        );
+
+        return;
+      }
+
+      alert(
+        `${vin} 작업 기록 초기화 완료`
+      );
+
+      await loadData();
+
+    } catch (error) {
+      alert(
+        "초기화 중 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  function render() {
+    const query =
+      $("search")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const view =
+      items.filter(item =>
+        !query ||
+        String(item.vin || "")
+          .toUpperCase()
+          .includes(query)
+      );
+
+    $("resultCount").textContent =
+      `검색 결과 ${view.length}대`;
+
+    const container =
+      $("list");
+
+    container.innerHTML = "";
+
+    if (!view.length) {
+      container.innerHTML = `
+        <div class="empty">
+          표시할 VIN이 없습니다.
+        </div>
+      `;
+
+      return;
+    }
+
+    const fragment =
+      document.createDocumentFragment();
+
+    view.forEach(item => {
+      const card =
+        document.createElement("div");
+
+      card.className =
+        isFinalDone(item)
+          ? "card done"
+          : isWorking(item)
+            ? "card working"
+            : "card";
+
+      card.innerHTML = `
+        <div class="vinLine">
+          <div class="vin">
+            ${escapeHtml(item.vin)}
+          </div>
+
+          <div class="badge">
+            ${stateLabel(item)}
+          </div>
+        </div>
+
+        <div class="history">
+          <div class="historyItem">
+            작업 시작
+            <b>${escapeHtml(item.work_by || "-")}</b>
+            ${formatKST(item.work_at)}
+          </div>
+
+          <div class="historyItem">
+            업데이트
+            <b>${escapeHtml(item.update_by || "-")}</b>
+            ${formatKST(item.update_at)}
+          </div>
+
+          <div class="historyItem">
+            VER/DTC
+            <b>${escapeHtml(item.dtc_by || "-")}</b>
+            ${formatKST(item.dtc_at)}
+          </div>
+        </div>
+
+        ${
+          item.memo
+            ? `
+              <div class="guide">
+                코멘트:
+                ${escapeHtml(item.memo)}
+              </div>
+            `
+            : ""
+        }
+
+        <div class="cardButtons">
+          <button
+            class="warning"
+            onclick="resetVin(
+              '${item.id}',
+              '${escapeHtml(item.vin)}'
+            )"
+          >
+            작업 기록 초기화
+          </button>
+
+          <button
+            class="danger"
+            onclick="deleteVin(
+              '${item.id}',
+              '${escapeHtml(item.vin)}'
+            )"
+          >
+            VIN 삭제
+          </button>
+        </div>
+      `;
+
+      fragment.appendChild(card);
+    });
+
+    container.appendChild(fragment);
+  }
+
+
+  $("loginBtn").onclick =
+    login;
+
+
+  $("passwordInput")
+    .addEventListener(
+      "keydown",
+      event => {
+        if (event.key === "Enter") {
+          login();
+        }
+      }
+    );
+
+
+  $("refreshBtn").onclick =
+    loadData;
+
+
+  $("previewBtn").onclick =
+    previewVin;
+
+
+  $("addBtn").onclick =
+    addVins;
+
+
+  $("search").addEventListener(
+    "input",
+    render
+  );
+
+
+  $("clearSearchBtn").onclick = () => {
+    $("search").value = "";
+    render();
+  };
+
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      showLogin();
+
+      if (authenticated) {
+        loadData();
+      }
+    }
+  );
+</script>
+
+</body>
+</html>
