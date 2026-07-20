@@ -1,689 +1,1556 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <title>CN8 전방카메라 실차 조치 현황</title>
+
   <style>
-    body{font-family:system-ui,-apple-system;margin:18px;line-height:1.35}
-    .box{border:1px solid #ddd;border-radius:14px;padding:12px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    input,button,textarea,select{border:1px solid #ccc;border-radius:12px;padding:10px;font-size:14px}
-    button{background:#f6f6f6}
-    button:disabled{opacity:.55}
-    .pill{border:1px solid #ddd;border-radius:999px;padding:6px 10px;font-size:13px;background:#fff}
-    .pillBtn{cursor:pointer}
-    .pillBtn.active{background:#111;color:#fff;border-color:#111}
-    /* ✅ 클릭 불가(현황 표시) pill */
-    .pillStat{
-      cursor:default;
-      background:#f6f6f6;
-      border-color:#eee;
-      color:#111;
+    * {
+      box-sizing: border-box;
     }
-    .pillStat b{font-weight:800}
-        .list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-    .card{border:1px solid #e3e3e3;border-radius:16px;padding:12px}
-    .vin{font-size:26px;font-weight:800}
-    .muted{color:#666;font-size:13px}
-    .tabs button{border-radius:999px;padding:8px 12px}
-    .tabs button.active{background:#111;color:#fff;border-color:#111}
-    .right{margin-left:auto}
-    .sectionTitle{margin-top:10px;margin-bottom:6px;font-weight:700}
-    .warn{color:#b42318;font-weight:700}
 
-    /* 하단 고정 탭 바 */
-    #bottomTabs{display:flex;width:100%;gap:8px}
-    #bottomTabs button{flex:1;text-align:center;white-space:nowrap}
-    .bottomBar{
-      position:fixed;left:0;right:0;bottom:0;
-      background:#fff;border-top:1px solid #ddd;
-      padding:10px 12px;z-index:9999;
+    body {
+      margin: 14px;
+      padding-bottom: 92px;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      line-height: 1.4;
+      color: #111;
+      background: #fff;
     }
-    .bottomInner{
-      max-width:980px;margin:0 auto;
-      display:flex;gap:8px;flex-wrap:wrap;
-    }
-    body{padding-bottom:86px;}
 
-    @media (max-width: 520px) {
-      .summaryRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-      .summaryRow #search{width:100% !important;box-sizing:border-box}
-      .summaryPct{width:100%}
-      .growMobile{width:100%}
-      select.growMobile{width:100%}
+    h2 {
+      margin: 0 0 12px;
+      font-size: 23px;
+    }
+
+    .box {
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 13px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    button,
+    input {
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .pill {
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+      background: #f7f7f7;
+    }
+
+    .versionBox {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid #d6e4ff;
+      border-radius: 12px;
+      background: #f4f8ff;
+      font-size: 14px;
+    }
+
+    .versionValue {
+      font-weight: 800;
+      color: #174ea6;
+    }
+
+    .tabs {
+      margin-top: 11px;
+    }
+
+    .tabs button {
+      border-radius: 999px;
+    }
+
+    .tabs button.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .progressWrap {
+      width: 100%;
+      margin-top: 11px;
+    }
+
+    .progressBg {
+      height: 12px;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #eee;
+    }
+
+    #pctBar {
+      height: 100%;
+      width: 0%;
+      background: #2e7d32;
+      transition: width 0.2s;
+    }
+
+    .muted {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 13px;
+      background: #fff;
+    }
+
+    .card.updateOnly {
+      border-color: #e1b94f;
+      background: #fffdf5;
+    }
+
+    .card.done {
+      border-color: #86c896;
+      background: #f5fff7;
+    }
+
+    .vin {
+      font-size: 25px;
+      font-weight: 800;
+      word-break: break-all;
+    }
+
+    .state {
+      margin-top: 4px;
+      font-weight: 800;
+    }
+
+    .state.waiting {
+      color: #666;
+    }
+
+    .state.update {
+      color: #9a6700;
+    }
+
+    .state.done {
+      color: #20752e;
+    }
+
+    .checkLine {
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #e7e7e7;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .checkTitle {
+      font-weight: 800;
+    }
+
+    .memo {
+      margin-top: 8px;
+      padding: 9px;
+      border-radius: 10px;
+      background: #f2f2f2;
+      white-space: pre-wrap;
+    }
+
+    .lastChange {
+      margin-top: 9px;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+    }
+
+    .buttonRow {
+      margin-top: 11px;
+    }
+
+    .updateButton.on {
+      border-color: #d7a719;
+      background: #fff4c2;
+      font-weight: 800;
+    }
+
+    .dtcButton.on {
+      border-color: #5b9b69;
+      background: #dbf3df;
+      font-weight: 800;
+    }
+
+    .dangerButton {
+      color: #a32020;
+    }
+
+    .empty {
+      padding: 30px 15px;
+      text-align: center;
+      color: #666;
+      border: 1px dashed #ccc;
+      border-radius: 14px;
+    }
+
+    .bottomBar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 999;
+      border-top: 1px solid #ddd;
+      background: #fff;
+      padding: 10px 12px;
+    }
+
+    .bottomInner {
+      max-width: 980px;
+      margin: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .bottomInner button {
+      flex: 1;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        margin: 11px;
+      }
+
+      h2 {
+        font-size: 21px;
+      }
+
+      #search {
+        width: 100%;
+      }
+
+      .right {
+        margin-left: 0;
+      }
+
+      .topButtons {
+        width: 100%;
+      }
+
+      .topButtons button {
+        flex: 1;
+      }
+
+      .buttonRow button {
+        flex: 1 1 42%;
+      }
     }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
+
 <body>
+
   <h2>CN8 전방카메라 실차 조치 현황</h2>
 
   <div class="box">
-    <div class="row" style="justify-content:space-between">
-      <div>사용자: <b id="nickLabel">(미설정)</b></div>
-      <div class="row">
+
+    <div class="row">
+      <div>
+        사용자:
+        <b id="nickLabel">-</b>
+      </div>
+
+      <div class="right row topButtons">
+        <button id="refreshBtn">새로고침</button>
         <button id="nickBtn">닉네임 변경</button>
-        <button id="downloadBtn">엑셀 다운로드(XLSX)</button>
+        <button id="downloadBtn">엑셀</button>
       </div>
     </div>
 
-    <div class="row summaryRow" style="margin-top:10px">
-      <input id="search" placeholder="VIN 검색(4자리)" inputmode="numeric" style="width:150px"/>
+    <div class="versionBox">
+      적용 목표 버전:
+      <span class="versionValue" id="versionLabel">미정</span>
+    </div>
 
-      <span class="pill pillStat" id="cntTotal">총 -</span>
-      <span class="pill pillStat" id="cntDone">완료 -</span>
-      <span class="pill pillStat" id="cntRemain">미완료 -</span>
+    <div class="row" style="margin-top:10px">
+      <input
+        id="search"
+        placeholder="VIN 검색"
+        autocomplete="off"
+      >
 
-      <div class="summaryPct" style="margin-top:10px;width:100%">
-        <div class="muted">완료율: <b id="pctText">-</b></div>
-        <div style="height:12px;border:1px solid #ddd;border-radius:999px;overflow:hidden;background:#eee">
-          <div id="pctBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#2e7d32);transition:width .25s ease"></div>
-        </div>
+      <span class="pill" id="cntTotal">
+        총 -
+      </span>
+
+      <span class="pill" id="cntUpdate">
+        업데이트 -
+      </span>
+
+      <span class="pill" id="cntDtc">
+        VER/DTC -
+      </span>
+
+      <span class="pill" id="cntDone">
+        최종완료 -
+      </span>
+
+      <span class="right muted" id="connection">
+        연결 중...
+      </span>
+    </div>
+
+    <div class="progressWrap">
+      <div class="muted">
+        최종 완료율:
+        <b id="pctText">0%</b>
       </div>
 
-      <span class="muted" id="saving"></span>
-      <span class="right muted" id="rt"></span>
-    </div>
-
-    <!-- ✅ 상단 상태탭(5개만) -->
-    <div class="row tabs" style="margin-top:10px" id="topTabs">
-      <button data-tab="all" class="active">전체</button>
-      <button data-tab="작업중">작업중</button>
-      <button data-tab="완료">완료</button>
-      <button data-tab="기타">기타</button>
-      <button data-tab="remain">미완료</button>
-    </div>
-
-    <!-- ✅ 전체 탭에서만 지역별 요약 -->
-    <div id="regionSummaryWrap" style="display:none;margin-top:10px">
-      <div class="sectionTitle">지역별 현황(탭 클릭 시 해당 지역만 보기)</div>
-      <div class="row" id="regionSummary"></div>
-      <div class="row" style="margin-top:6px">
-        <span class="muted" id="regionFilterHint"></span>
+      <div class="progressBg">
+        <div id="pctBar"></div>
       </div>
     </div>
+
+    <div class="row tabs" id="topTabs">
+      <button data-tab="all" class="active">
+        전체
+      </button>
+
+      <button data-tab="waiting">
+        미완료
+      </button>
+
+      <button data-tab="update">
+        업데이트 완료
+      </button>
+
+      <button data-tab="dtc">
+        VER/DTC 완료
+      </button>
+
+      <button data-tab="done">
+        최종 완료
+      </button>
+    </div>
+
+    <div
+      class="muted"
+      id="saving"
+      style="margin-top:8px"
+    ></div>
+
   </div>
 
-  <div class="list" id="list"></div>
+  <div id="list" class="list"></div>
+
+  <div class="bottomBar">
+    <div class="bottomInner">
+      <button id="btnMine">내 작업</button>
+      <button id="btnRecent">최근 변경</button>
+    </div>
+  </div>
 
 <script>
-/* ======= 설정(필수) ======= */
-const SUPABASE_URL = "https://ulqpqkzgwtikxxnipjkx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_LMSx0JifZNOQXN-ViIjNaA_fg3Vkedl";
-const TABLE_NAME = "checklist_cn8_front_camera";
-/* ============================ */
+  /* ===================================
+     기본 설정
+     목표 버전 확정 후 "미정"만 변경
+     =================================== */
+
+  const TARGET_VERSION = "미정";
+
+  const SUPABASE_URL =
+    "https://ulqpqkzgwtikxxnipjkx.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_LMSx0JifZNOQXN-ViIjNaA_fg3Vkedl";
+
+  const TABLE_NAME =
+    "checklist_cn8_front_camera";
 
 
-/* ✅ 지역 리스트 */
-const REGION_LIST = [
-  "광주 출고",
-  "광주 공장",
-  "광주 PDI",      // ✅ 추가
-  "광명 출고",
-  "덕평 출고",
-  "PBV 컨버전 출고",
-  "화성 출고",
-  "고덕 출고",
-  "서산 출고",
-  "충주 출고",
-  "신태인 출고",
-  "경산 출고",
-  "기타",
-  "확인 필요"
-];
-
-let NICK = localStorage.getItem("checklist_nick") || "";
-let tab = "all";
-let items = [];
-let saving = false;
-
-let regionFilter = null;   // null | region string
-
-const $ = (id)=>document.getElementById(id);
-
-function mustNick(){
-  while(!NICK){
-    const n = prompt("닉네임을 입력하세요 (예: 신영/홍길동)");
-    if(!n) continue;
-    NICK = n.trim();
-    localStorage.setItem("checklist_nick", NICK);
-  }
-  $("nickLabel").innerText = NICK;
-}
-$("nickBtn").onclick = ()=>{
-  NICK = "";
-  localStorage.removeItem("checklist_nick");
-  mustNick();
-};
-
-function headers(preferReturn=true){
-  const h = {
-    "apikey": SUPABASE_ANON_KEY,
-    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-    "Content-Type": "application/json",
-  };
-  if(preferReturn) h["Prefer"] = "return=representation";
-  return h;
-}
-
-function setSaving(v){
-  saving=v;
-  $("saving").innerText = v ? "저장중..." : "";
-  document.querySelectorAll("button,select,input,textarea").forEach(el=>{
-    if(el.id === "nickBtn") return;
-    if(el.id === "search") return;
-    el.disabled = v;
-  });
-  $("nickBtn").disabled = false;
-}
-
-function normStatus(s){
-  s = (s || "").toString().trim();
-  if (s === "" || s === "잔여" || s === "남음" || s === "remain" || s === "미완" || s === "미완료") return "미완료";
-  if (s === "작업중") return "작업중";
-  if (s === "기타") return "기타";
-  if (s === "완료") return "완료"; // 레거시 보호
-  return "미완료";
-}
-
-function formatKST(iso){
-  if(!iso) return "-";
-  const d = new Date(iso);
-  return new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
-    hour12: false
-  }).format(d);
-}
+  const $ = id =>
+    document.getElementById(id);
 
 
-function effRegion(it){
-  const r = (it.region || "").toString().trim();
-  return r ? r : "확인 필요";
-}
-function effUpdateDone(it){ return !!it.update_done; }
+  let items = [];
 
-function derivedState(it){
-  if(effUpdateDone(it)) return "완료";
-  return normStatus(it.status);
-}
+  let currentTab = "all";
 
-function regionNeedsMemo(region){ return region === "기타"; }
-function isRegionValidForComplete(region, regionMemo){
-  if(!region || region === "확인 필요") return false;
-  if(regionNeedsMemo(region) && !(regionMemo || "").trim()) return false;
-  return true;
-}
+  let specialView = null;
 
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#39;");
-}
+  let saving = false;
 
-async function load(){
-  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*`;
-  const r = await fetch(url, {headers: headers(true)});
-  if(!r.ok){
-    $("rt").innerText = "로드 실패";
-    console.log(await r.text());
-    return;
-  }
-  items = await r.json();
-  $("rt").innerText = "연결됨 ✅";
-  render();
-}
-function renderMine(){
-  mustNick();
-  const q = $("search").value.trim();
+  let nickname =
+    localStorage.getItem(
+      "cn8_checklist_nickname"
+    ) || "";
 
-  let view = items.filter(x =>
-    (x.updated_by||"") === NICK ||
-    (x.update_by||"") === NICK ||
-    (x.region_by||"") === NICK
-  );
 
-  view = applyRegionFilter(view);
-
-  if(q) view = view.filter(x=>String(x.vin).includes(q));
-
-  view.sort((a,b)=> new Date(b.updated_at||0).getTime() - new Date(a.updated_at||0).getTime());
-
-  // 상단 상태탭 active 해제(내작업 모드)
-  document.querySelectorAll("#topTabs button").forEach(btn=>btn.classList.remove("active"));
-
-  renderListInBatches(view);
-}
-
-function renderRecent(){
-  const q = $("search").value.trim();
-  const since = Date.now() - 30*60*1000; // 30분
-
-  let view = items.filter(x =>
-    x.updated_at && (new Date(x.updated_at).getTime() >= since)
-  );
-
-  view = applyRegionFilter(view);
-
-  if(q) view = view.filter(x=>String(x.vin).includes(q));
-
-  view.sort((a,b)=> new Date(b.updated_at||0).getTime() - new Date(a.updated_at||0).getTime());
-
-  document.querySelectorAll("#topTabs button").forEach(btn=>btn.classList.remove("active"));
-
-  renderListInBatches(view);
-}
-
-function applyRegionFilter(view){
-  if(!regionFilter) return view;
-  return view.filter(x => effRegion(x) === regionFilter);
-}
-
-function renderRegionSummary(base){
-  $("regionSummaryWrap").style.display = (tab === "all") ? "block" : "none";
-  if(tab !== "all") return;
-
-  const wrap = $("regionSummary");
-  wrap.innerHTML = "";
-
-  const filtered = base;
-  const counts = {};
-  REGION_LIST.forEach(r => counts[r] = {total:0, done:0});
-
-  filtered.forEach(it=>{
-    const r = effRegion(it);
-    if(!counts[r]) counts[r] = {total:0, done:0};
-    counts[r].total += 1;
-    if(effUpdateDone(it)) counts[r].done += 1;
-  });
-
-  REGION_LIST.forEach(r=>{
-    const c = counts[r] || {total:0, done:0};
-    if(c.total === 0 && r !== "확인 필요") return;
-    const pill = document.createElement("span");
-    pill.className = "pill pillBtn" + (regionFilter === r ? " active" : "");
-    const remain = c.total - c.done;
-    pill.textContent = `${r}  ${c.done}/${c.total} (미완료 ${remain})`;
-    pill.onclick = ()=>{
-      regionFilter = (regionFilter === r) ? null : r;
-      render();
+  function getHeaders(returnData = false) {
+    const headers = {
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json"
     };
-    wrap.appendChild(pill);
-  });
 
-  const hint = $("regionFilterHint");
-  hint.innerHTML = regionFilter
-    ? `현재 지역 필터: <b>${regionFilter}</b> (다시 누르면 해제)`
-    : "지역별 요약을 눌러 해당 지역만 필터링할 수 있어요.";
-}
+    if (returnData) {
+      headers["Prefer"] =
+        "return=representation";
+    }
 
-/* ✅ 배치 렌더링으로 리스트 안보이는 현상 해결 */
-function renderListInBatches(view){
-  const box = $("list");
-  box.innerHTML = "";
+    return headers;
+  }
 
-  const BATCH = 50;
-  let i = 0;
 
-  const order = {"미완료":1,"작업중":2,"기타":3,"완료":4};
-  view.sort((a,b)=>
-    (order[derivedState(a)]||9)-(order[derivedState(b)]||9) ||
-    String(a.vin).localeCompare(String(b.vin))
-  );
+  function requireNickname() {
+    while (!nickname) {
+      const value = prompt(
+        "닉네임을 입력하세요.\n예: 신영"
+      );
 
-  function makeCard(it){
-    const d = document.createElement("div");
-    d.className="card";
+      if (value && value.trim()) {
+        nickname = value.trim();
 
-    const lastBy = it.updated_by || "-";
-    const lastAt = it.updated_at || null;
+        localStorage.setItem(
+          "cn8_checklist_nickname",
+          nickname
+        );
+      }
+    }
 
-    const updDone = !!it.update_done;
-    const updMark = updDone ? "✅" : "⬜";
-    const updBy = it.update_by || "-";
-    const updAt = it.update_at || null;
+    $("nickLabel").textContent =
+      nickname;
+  }
 
-    const reg = effRegion(it);
-    const regMemo = it.region_memo || "";
-    const regConfirmed = !!it.region_confirmed;
-    const regMark = regConfirmed ? "✅" : "⬜";
-    const regBy = it.region_by || "-";
-    const regAt = it.region_at || null;
 
-    const state = derivedState(it);
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
 
-    const needsRegion = updDone && !isRegionValidForComplete(reg, regMemo);
-    const warnHtml = needsRegion ? `<div class="muted warn">⚠ 완료인데 지역이 미입력 상태입니다.</div>` : "";
 
-    d.innerHTML = `
-      <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <div>
-          <div class="vin">${it.vin}</div>
-          <div class="muted">조치: <b>전방카메라</b></div>
-          <div class="muted">상태: <b>${state}</b></div>
+  function formatKST(value) {
+    if (!value) return "-";
+
+    return new Intl.DateTimeFormat(
+      "ko-KR",
+      {
+        timeZone: "Asia/Seoul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }
+    ).format(new Date(value));
+  }
+
+
+  function isUpdateDone(item) {
+    return Boolean(item?.update_done);
+  }
+
+
+  function isDtcDone(item) {
+    return Boolean(item?.dtc_done);
+  }
+
+
+  function isFinalDone(item) {
+    return (
+      isUpdateDone(item) &&
+      isDtcDone(item)
+    );
+  }
+
+
+  function derivedState(item) {
+    if (isFinalDone(item)) {
+      return "done";
+    }
+
+    if (isUpdateDone(item)) {
+      return "update";
+    }
+
+    if (isDtcDone(item)) {
+      return "dtc";
+    }
+
+    return "waiting";
+  }
+
+
+  function stateLabel(item) {
+    const state = derivedState(item);
+
+    if (state === "done") {
+      return "최종 완료";
+    }
+
+    if (state === "update") {
+      return "업데이트 완료 / VER·DTC 확인 대기";
+    }
+
+    if (state === "dtc") {
+      return "VER·DTC 확인 완료 / 업데이트 미완료";
+    }
+
+    return "미완료";
+  }
+
+
+  function stateClass(item) {
+    const state = derivedState(item);
+
+    if (state === "done") {
+      return "done";
+    }
+
+    if (
+      state === "update" ||
+      state === "dtc"
+    ) {
+      return "update";
+    }
+
+    return "waiting";
+  }
+
+
+  function cardClass(item) {
+    if (isFinalDone(item)) {
+      return "card done";
+    }
+
+    if (
+      isUpdateDone(item) ||
+      isDtcDone(item)
+    ) {
+      return "card updateOnly";
+    }
+
+    return "card";
+  }
+
+
+  function setSaving(value) {
+    saving = value;
+
+    $("saving").textContent =
+      value ? "저장 중..." : "";
+
+    document
+      .querySelectorAll(
+        "button,input"
+      )
+      .forEach(element => {
+        if (element.id === "search") {
+          return;
+        }
+
+        if (element.id === "nickBtn") {
+          return;
+        }
+
+        element.disabled = value;
+      });
+  }
+
+
+  async function loadData() {
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?select=*&order=vin.asc`;
+
+    $("connection").textContent =
+      "연결 중...";
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "GET",
+            headers: getHeaders(false)
+          }
+        );
+
+      const text =
+        await response.text();
+
+      if (!response.ok) {
+        $("connection").textContent =
+          `로드 실패 (${response.status})`;
+
+        alert(
+          "Supabase 로드 실패\n\n" +
+          "상태코드: " +
+          response.status +
+          "\n내용: " +
+          text
+        );
+
+        return;
+      }
+
+      items =
+        text ? JSON.parse(text) : [];
+
+      $("connection").textContent =
+        `연결됨 ✅ (${items.length}대)`;
+
+      render();
+
+    } catch (error) {
+      $("connection").textContent =
+        "연결 오류";
+
+      alert(
+        "Supabase 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  async function patchRow(id, payload) {
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?id=eq.${encodeURIComponent(id)}`;
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "PATCH",
+            headers: getHeaders(true),
+            body: JSON.stringify(payload)
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "저장 실패\n\n" +
+          "상태코드: " +
+          response.status +
+          "\n내용: " +
+          text
+        );
+
+        return false;
+      }
+
+      return true;
+
+    } catch (error) {
+      alert(
+        "저장 중 연결 오류\n\n" +
+        String(error)
+      );
+
+      return false;
+    }
+  }
+
+
+  function addLastChange(
+    payload,
+    now
+  ) {
+    payload.updated_by =
+      nickname;
+
+    payload.updated_at =
+      now;
+  }
+
+
+  async function toggleUpdate(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) return;
+
+    const currentValue =
+      isUpdateDone(current);
+
+    const nextValue =
+      !currentValue;
+
+    if (
+      isFinalDone(current) &&
+      !nextValue
+    ) {
+      const confirmed =
+        confirm(
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "업데이트 완료를 해제하면 " +
+          "VER/DTC 확인도 함께 해제되고 " +
+          "최종 완료 상태가 취소됩니다.\n\n" +
+          "정말 변경하시겠습니까?"
+        );
+
+      if (!confirmed) return;
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      update_done: nextValue,
+      update_by:
+        nextValue ? nickname : null,
+      update_at:
+        nextValue ? now : null
+    };
+
+    /*
+      업데이트 완료를 해제할 경우
+      DTC 완료도 함께 해제한다.
+      업데이트 전 DTC 완료 상태 방지.
+    */
+    if (!nextValue) {
+      payload.dtc_done = false;
+      payload.dtc_by = null;
+      payload.dtc_at = null;
+    }
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function toggleDtc(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) return;
+
+    const currentValue =
+      isDtcDone(current);
+
+    const nextValue =
+      !currentValue;
+
+    /*
+      DTC 완료는 업데이트 완료 후에만 가능
+    */
+    if (
+      nextValue &&
+      !isUpdateDone(current)
+    ) {
+      alert(
+        "먼저 업데이트 완료를 처리해주세요.\n\n" +
+        "VER/DTC 확인은 업데이트 완료 후에만 가능합니다."
+      );
+
+      return;
+    }
+
+    if (
+      isFinalDone(current) &&
+      !nextValue
+    ) {
+      const confirmed =
+        confirm(
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "VER/DTC 확인 완료를 해제하면 " +
+          "최종 완료 상태가 취소됩니다.\n\n" +
+          "정말 변경하시겠습니까?"
+        );
+
+      if (!confirmed) return;
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      dtc_done: nextValue,
+      dtc_by:
+        nextValue ? nickname : null,
+      dtc_at:
+        nextValue ? now : null
+    };
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function resetIncomplete(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) return;
+
+    if (
+      !isUpdateDone(current) &&
+      !isDtcDone(current)
+    ) {
+      alert(
+        "이미 미완료 상태입니다."
+      );
+
+      return;
+    }
+
+    const message =
+      isFinalDone(current)
+        ? (
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "업데이트 완료와 VER/DTC 확인을 " +
+          "모두 해제하고 미완료로 변경하시겠습니까?"
+        )
+        : (
+          "현재 작업 기록을 해제하고 " +
+          "미완료로 변경하시겠습니까?"
+        );
+
+    const confirmed =
+      confirm(message);
+
+    if (!confirmed) return;
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      update_done: false,
+      update_by: null,
+      update_at: null,
+
+      dtc_done: false,
+      dtc_by: null,
+      dtc_at: null
+    };
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function editComment(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) return;
+
+    if (isFinalDone(current)) {
+      const confirmed =
+        confirm(
+          "최종 완료된 차량입니다.\n\n" +
+          "최종 완료 상태는 유지되지만 " +
+          "코멘트와 최근 변경자 기록이 바뀝니다.\n\n" +
+          "코멘트를 수정하시겠습니까?"
+        );
+
+      if (!confirmed) return;
+    }
+
+    const value =
+      prompt(
+        "기타 코멘트를 입력하세요.\n" +
+        "빈칸으로 저장하면 기존 코멘트가 삭제됩니다.",
+        current.memo || ""
+      );
+
+    if (value === null) return;
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      memo: value.trim() || null
+    };
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  function filterItems() {
+    const query =
+      $("search")
+        .value
+        .trim()
+        .toUpperCase();
+
+    let view =
+      [...items];
+
+    if (query) {
+      view =
+        view.filter(item =>
+          String(item.vin || "")
+            .toUpperCase()
+            .includes(query)
+        );
+    }
+
+    if (specialView === "mine") {
+      view =
+        view.filter(item =>
+          item.updated_by === nickname ||
+          item.update_by === nickname ||
+          item.dtc_by === nickname
+        );
+    }
+
+    if (specialView === "recent") {
+      const limit =
+        Date.now() -
+        24 * 60 * 60 * 1000;
+
+      view =
+        view.filter(item =>
+          item.updated_at &&
+          new Date(
+            item.updated_at
+          ).getTime() >= limit
+        );
+    }
+
+    if (!specialView) {
+      if (currentTab === "waiting") {
+        view =
+          view.filter(item =>
+            !isUpdateDone(item) &&
+            !isDtcDone(item)
+          );
+      }
+
+      if (currentTab === "update") {
+        view =
+          view.filter(item =>
+            isUpdateDone(item)
+          );
+      }
+
+      if (currentTab === "dtc") {
+        view =
+          view.filter(item =>
+            isDtcDone(item)
+          );
+      }
+
+      if (currentTab === "done") {
+        view =
+          view.filter(item =>
+            isFinalDone(item)
+          );
+      }
+    }
+
+    /*
+      미완료 → 업데이트만 완료 →
+      최종완료 순으로 정렬
+    */
+    const order = {
+      waiting: 1,
+      update: 2,
+      dtc: 3,
+      done: 4
+    };
+
+    view.sort((a, b) => {
+      if (specialView) {
+        const timeA =
+          new Date(
+            a.updated_at || 0
+          ).getTime();
+
+        const timeB =
+          new Date(
+            b.updated_at || 0
+          ).getTime();
+
+        return timeB - timeA;
+      }
+
+      const stateDiff =
+        order[derivedState(a)] -
+        order[derivedState(b)];
+
+      if (stateDiff !== 0) {
+        return stateDiff;
+      }
+
+      return String(a.vin)
+        .localeCompare(
+          String(b.vin)
+        );
+    });
+
+    return view;
+  }
+
+
+  function makeCard(item) {
+    const card =
+      document.createElement("div");
+
+    card.className =
+      cardClass(item);
+
+    const updateMark =
+      isUpdateDone(item)
+        ? "✅"
+        : "⬜";
+
+    const dtcMark =
+      isDtcDone(item)
+        ? "✅"
+        : "⬜";
+
+    const finalMark =
+      isFinalDone(item)
+        ? "✅"
+        : "⬜";
+
+    const updateButtonText =
+      isUpdateDone(item)
+        ? "업데이트 완료 해제"
+        : "업데이트 완료";
+
+    const dtcButtonText =
+      isDtcDone(item)
+        ? "VER/DTC 완료 해제"
+        : "VER/DTC 완료";
+
+    card.innerHTML = `
+      <div class="vin">
+        ${escapeHtml(item.vin)}
+      </div>
+
+      <div class="state ${stateClass(item)}">
+        ${finalMark}
+        ${stateLabel(item)}
+      </div>
+
+      <div class="checkLine">
+        <div class="checkTitle">
+          ${updateMark}
+          업데이트 완료
+        </div>
+
+        <div class="muted">
+          작업자:
+          ${escapeHtml(item.update_by || "-")}
+        </div>
+
+        <div class="muted">
+          시간:
+          ${formatKST(item.update_at)}
         </div>
       </div>
 
-      ${warnHtml}
+      <div class="checkLine">
+        <div class="checkTitle">
+          ${dtcMark}
+          VER / DTC 확인 완료
+        </div>
 
-      <div class="muted">업데이트: ${updMark} ${formatKST(updAt)} · ${updBy}</div>
-      <div class="muted">지역확정: ${regMark} ${formatKST(regAt)} · ${regBy}</div>
-      <div class="muted">최근변경: ${formatKST(lastAt)} · ${lastBy}</div>
+        <div class="muted">
+          작업자:
+          ${escapeHtml(item.dtc_by || "-")}
+        </div>
 
-      <div class="row" style="margin-top:10px;align-items:center">
-        <div class="muted" style="min-width:56px">지역</div>
-        <select class="growMobile" onchange="setRegion('${it.id}', this.value)">
-          ${REGION_LIST.map(r=>`<option value="${r}" ${r===reg?"selected":""}>${r}</option>`).join("")}
-        </select>
-        <button onclick="toggleRegionConfirm('${it.id}')">지역확정</button>
+        <div class="muted">
+          시간:
+          ${formatKST(item.dtc_at)}
+        </div>
       </div>
 
-      <div class="row" style="margin-top:8px;align-items:center;${regionNeedsMemo(reg) ? "" : "display:none"}" id="regionMemoRow_${it.id}">
-        <div class="muted" style="min-width:56px">기타메모</div>
-        <input class="growMobile" id="regionMemo_${it.id}" placeholder="기타 지역 메모" value="${escapeHtml(regMemo)}" />
-        <button onclick="saveRegionMemo('${it.id}')">저장</button>
+      ${
+        item.memo
+          ? `
+            <div class="memo">
+              <b>기타 코멘트</b><br>
+              ${escapeHtml(item.memo)}
+            </div>
+          `
+          : `
+            <div class="muted" style="margin-top:8px">
+              기타 코멘트: -
+            </div>
+          `
+      }
+
+      <div class="lastChange muted">
+        최근 변경:
+        <b>${escapeHtml(item.updated_by || "-")}</b>
+        ·
+        ${formatKST(item.updated_at)}
       </div>
 
-      <div class="muted" style="margin-top:8px">메모: ${it.memo ? escapeHtml(it.memo) : "-"}</div>
+      <div class="row buttonRow">
+        <button
+          class="updateButton ${isUpdateDone(item) ? "on" : ""}"
+          onclick="toggleUpdate('${item.id}')"
+        >
+          ${updateButtonText}
+        </button>
 
-      <div class="row" style="margin-top:10px">
-        <button onclick="setWorkStatus('${it.id}','미완료')">미완료</button>
-        <button onclick="setWorkStatus('${it.id}','작업중')">작업중</button>
-        <button onclick="toggleUpdateDone('${it.id}')">완료(업데이트)</button>
-        <button onclick="setOther('${it.id}')">기타</button>
+        <button
+          class="dtcButton ${isDtcDone(item) ? "on" : ""}"
+          onclick="toggleDtc('${item.id}')"
+        >
+          ${dtcButtonText}
+        </button>
+
+        <button
+          onclick="editComment('${item.id}')"
+        >
+          기타 코멘트
+        </button>
+
+        <button
+          class="dangerButton"
+          onclick="resetIncomplete('${item.id}')"
+        >
+          미완료로 변경
+        </button>
       </div>
     `;
-    return d;
+
+    return card;
   }
 
-  function step(){
-    const frag = document.createDocumentFragment();
-    const end = Math.min(i + BATCH, view.length);
-    for(; i < end; i++){
-      frag.appendChild(makeCard(view[i]));
-    }
-    box.appendChild(frag);
-    if(i < view.length){
-      requestAnimationFrame(step);
-    }
-  }
-  step();
-}
 
-function render(){
-  const q = $("search").value.trim();
+  function renderList(view) {
+    const container =
+      $("list");
 
-  let view = [...items];
+    container.innerHTML = "";
 
-  if(tab !== "all"){
-    if(tab === "remain") view = view.filter(x => derivedState(x) === "미완료");
-    else view = view.filter(x => derivedState(x) === tab);
-  }
+    if (view.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          표시할 VIN이 없습니다.
+        </div>
+      `;
 
-  view = applyRegionFilter(view);
-
-  if(q) view = view.filter(x=>String(x.vin).includes(q));
-
-  const baseForCount = applyRegionFilter(items);
-  const total = baseForCount.length;
-  const done = baseForCount.filter(x=>effUpdateDone(x)).length;
-
-  $("cntTotal").innerText = `총 ${total}`;
-  $("cntDone").innerText = `완료 ${done}`;
-  $("cntRemain").innerText = `미완료 ${Math.max(0, total - done)}`;
-
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  $("pctText").innerText = pct + "%";
-  $("pctBar").style.width = pct + "%";
-
-  renderRegionSummary(items);
-  renderListInBatches(view);
-}
-
-async function patchRow(id, payload){
-  const url = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${encodeURIComponent(id)}`;
-  const r = await fetch(url, {method:"PATCH", headers: headers(true), body: JSON.stringify(payload)});
-  if(!r.ok){
-    alert("저장 실패. 콘솔/권한/RLS 확인 필요");
-    console.log(await r.text());
-    return false;
-  }
-  return true;
-}
-function bumpLastChange(payload, nowIso){
-  payload.updated_by = NICK;
-  payload.updated_at = nowIso;
-}
-
-async function setWorkStatus(id, status){
-  mustNick();
-
-  const cur = items.find(x => x.id === id);
-  if(cur?.update_done){
-    alert("이미 '완료(업데이트)' 상태입니다.\n먼저 '완료(업데이트)'를 다시 눌러 완료를 해제한 뒤 상태를 변경해주세요.");
-    return;
-  }
-
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = { status };
-  bumpLastChange(payload, now);
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
-
-
-async function setOther(id){
-  mustNick();
-  const cur = items.find(x => x.id === id);
-  const prevMemo = cur?.memo || "";
-  const m = prompt("특이사항 메모 입력", prevMemo);
-  if(m === null) return;
-
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = { status: "기타", memo: m.trim() };
-  bumpLastChange(payload, now);
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
-
-async function setRegion(id, region){
-  mustNick();
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = { region };
-
-  payload.region_confirmed = false;
-  payload.region_by = null;
-  payload.region_at = null;
-
-  if(!regionNeedsMemo(region)) payload.region_memo = null;
-
-  bumpLastChange(payload, now);
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
-
-async function saveRegionMemo(id){
-  mustNick();
-  const input = document.getElementById(`regionMemo_${id}`);
-  const memo = (input?.value || "").trim();
-  if(!memo){
-    alert("기타 지역 메모를 입력해주세요.");
-    return;
-  }
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = { region_memo: memo };
-  bumpLastChange(payload, now);
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
-
-async function toggleRegionConfirm(id){
-  mustNick();
-  const cur = items.find(x => x.id === id);
-  const region = effRegion(cur);
-  const regionMemo = cur?.region_memo || "";
-  const curr = !!cur?.region_confirmed;
-  const next = !curr;
-
-  if(next){
-    if(region === "확인 필요" || !region){
-      alert("지역을 먼저 선택해주세요.");
       return;
     }
-    if(regionNeedsMemo(region) && !regionMemo.trim()){
-      alert("기타 지역 메모를 입력해주세요.");
-      return;
-    }
-  }
 
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = {
-    region_confirmed: next,
-    region_by: next ? NICK : null,
-    region_at: next ? now : null,
-  };
-  bumpLastChange(payload, now);
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
+    const batchSize = 50;
 
-async function toggleUpdateDone(id){
-  mustNick();
-  const cur = items.find(x => x.id === id);
-  const curr = !!cur?.update_done;
-  const next = !curr;
+    let index = 0;
 
-  const region = effRegion(cur);
-  const regionMemo = cur?.region_memo || "";
+    function drawBatch() {
+      const fragment =
+        document.createDocumentFragment();
 
-  // ✅ 완료 ON은 옵션A(지역 필수)
-  if(next){
-    if(!isRegionValidForComplete(region, regionMemo)){
-      if(region === "확인 필요" || !region){
-        alert("완료 처리 전에 지역을 선택해주세요.");
-      } else if(regionNeedsMemo(region) && !regionMemo.trim()){
-        alert("기타 지역은 메모 입력이 필요합니다.");
-      } else {
-        alert("완료 처리 전에 지역 정보를 확인해주세요.");
+      const end =
+        Math.min(
+          index + batchSize,
+          view.length
+        );
+
+      for (
+        ;
+        index < end;
+        index++
+      ) {
+        fragment.appendChild(
+          makeCard(view[index])
+        );
       }
+
+      container.appendChild(
+        fragment
+      );
+
+      if (index < view.length) {
+        requestAnimationFrame(
+          drawBatch
+        );
+      }
+    }
+
+    drawBatch();
+  }
+
+
+  function updateSummary() {
+    const total =
+      items.length;
+
+    const updateCount =
+      items.filter(
+        isUpdateDone
+      ).length;
+
+    const dtcCount =
+      items.filter(
+        isDtcDone
+      ).length;
+
+    const finalCount =
+      items.filter(
+        isFinalDone
+      ).length;
+
+    $("cntTotal").textContent =
+      `총 ${total}`;
+
+    $("cntUpdate").textContent =
+      `업데이트 ${updateCount}`;
+
+    $("cntDtc").textContent =
+      `VER/DTC ${dtcCount}`;
+
+    $("cntDone").textContent =
+      `최종완료 ${finalCount}`;
+
+    const percentage =
+      total
+        ? Math.round(
+            finalCount /
+            total *
+            100
+          )
+        : 0;
+
+    $("pctText").textContent =
+      `${percentage}%`;
+
+    $("pctBar").style.width =
+      `${percentage}%`;
+  }
+
+
+  function updateTabAppearance() {
+    document
+      .querySelectorAll(
+        "#topTabs button"
+      )
+      .forEach(button => {
+        button.classList.toggle(
+          "active",
+          !specialView &&
+          button.dataset.tab ===
+          currentTab
+        );
+      });
+  }
+
+
+  function render() {
+    updateSummary();
+
+    updateTabAppearance();
+
+    const view =
+      filterItems();
+
+    renderList(view);
+  }
+
+
+  $("search").addEventListener(
+    "input",
+    render
+  );
+
+
+  $("refreshBtn").onclick =
+    loadData;
+
+
+  $("nickBtn").onclick = () => {
+    nickname = "";
+
+    localStorage.removeItem(
+      "cn8_checklist_nickname"
+    );
+
+    requireNickname();
+
+    specialView = null;
+
+    render();
+  };
+
+
+  document
+    .querySelectorAll(
+      "#topTabs button"
+    )
+    .forEach(button => {
+      button.onclick = () => {
+        currentTab =
+          button.dataset.tab;
+
+        specialView = null;
+
+        render();
+      };
+    });
+
+
+  $("btnMine").onclick = () => {
+    requireNickname();
+
+    specialView =
+      specialView === "mine"
+        ? null
+        : "mine";
+
+    render();
+  };
+
+
+  $("btnRecent").onclick = () => {
+    specialView =
+      specialView === "recent"
+        ? null
+        : "recent";
+
+    render();
+  };
+
+
+  $("downloadBtn").onclick = () => {
+    if (
+      typeof XLSX === "undefined"
+    ) {
+      alert(
+        "엑셀 기능을 불러오지 못했습니다."
+      );
+
       return;
     }
-  } else {
-    // ✅ 완료 OFF는 실수 방지 confirm
-    const okConfirm = confirm("정말 '완료(업데이트)'를 해제할까요?");
-    if(!okConfirm) return;
-  }
 
-  setSaving(true);
-  const now = new Date().toISOString();
-  const payload = {
-    update_done: next,
-    update_by: next ? NICK : null,
-    update_at: next ? now : null,
+    const rows =
+      items.map(item => ({
+        VIN:
+          item.vin,
+
+        목표버전:
+          TARGET_VERSION,
+
+        최종상태:
+          stateLabel(item),
+
+        업데이트완료:
+          isUpdateDone(item)
+            ? "Y"
+            : "N",
+
+        업데이트작업자:
+          item.update_by || "",
+
+        업데이트시간:
+          formatKST(item.update_at),
+
+        VER_DTC완료:
+          isDtcDone(item)
+            ? "Y"
+            : "N",
+
+        VER_DTC작업자:
+          item.dtc_by || "",
+
+        VER_DTC시간:
+          formatKST(item.dtc_at),
+
+        최종완료:
+          isFinalDone(item)
+            ? "Y"
+            : "N",
+
+        기타코멘트:
+          item.memo || "",
+
+        최근변경자:
+          item.updated_by || "",
+
+        최근변경시간:
+          formatKST(item.updated_at)
+      }));
+
+    const worksheet =
+      XLSX.utils.json_to_sheet(
+        rows
+      );
+
+    worksheet["!cols"] = [
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 23 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 23 },
+      { wch: 12 },
+      { wch: 35 },
+      { wch: 14 },
+      { wch: 23 }
+    ];
+
+    const workbook =
+      XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "CN8 Checklist"
+    );
+
+    const stamp =
+      new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replaceAll(":", "-");
+
+    XLSX.writeFile(
+      workbook,
+      `cn8_front_camera_${stamp}.xlsx`
+    );
   };
-  bumpLastChange(payload, now);
-
-  const ok = await patchRow(id, payload);
-  setSaving(false);
-  if(ok) await load();
-}
 
 
-/* 엑셀 다운로드 */
-$("downloadBtn").onclick = ()=>{
-  const rows = items.map(r => ({
-    vin: r.vin,
-    조치: "전방카메라",
-    상태: derivedState(r),
-    지역: effRegion(r),
-    기타지역메모: r.region_memo || "",
-    업데이트완료: r.update_done ? "Y" : "N",
-    업데이트자: r.update_by || "",
-    업데이트시간: formatKST(r.update_at),
-    지역확정: r.region_confirmed ? "Y" : "N",
-    지역확정자: r.region_by || "",
-    지역확정시간: formatKST(r.region_at),
-    메모: r.memo || "",
-    최근변경자: r.updated_by || "",
-    최근변경시간: formatKST(r.updated_at),
-  }));
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      $("versionLabel").textContent =
+        TARGET_VERSION;
 
-  const header = ["VIN","조치","상태","지역","기타지역메모","업데이트완료(Y/N)","업데이트자","업데이트시간(KST)","지역확정(Y/N)","지역확정자","지역확정시간(KST)","메모","최근변경자","최근변경시간(KST)"];
-  const aoa = [header, ...rows.map(x => [
-    x.vin, x.조치, x.상태, x.지역, x.기타지역메모, x.업데이트완료, x.업데이트자, x.업데이트시간,
-    x.지역확정, x.지역확정자, x.지역확정시간, x.메모, x.최근변경자, x.최근변경시간
-  ])];
+      requireNickname();
 
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"] = [
-    { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 22 },
-    { wch: 16 }, { wch: 12 }, { wch: 22 }, { wch: 14 }, { wch: 12 }, { wch: 22 },
-    { wch: 28 }, { wch: 12 }, { wch: 22 }
-  ];
-
-  const range = XLSX.utils.decode_range(ws["!ref"]);
-  for(let C = range.s.c; C <= range.e.c; ++C){
-    const addr = XLSX.utils.encode_cell({r:0, c:C});
-    if(ws[addr]){
-      ws[addr].s = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "111111" } },
-        alignment: { horizontal: "center", vertical: "center" }
-      };
+      loadData();
     }
-  }
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Checklist");
-  const stamp = new Date().toISOString().slice(0,19).replaceAll(":","-");
-  XLSX.writeFile(wb, `cn8_front_camera_${stamp}.xlsx`);
-};
-
-$("search").oninput = render;
-
-function setActiveTabs(newTab){
-  tab = newTab;
-  document.querySelectorAll("#topTabs button").forEach(btn=>{
-    btn.classList.toggle("active", btn.dataset.tab === newTab);
-  });
-  render();
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll('#topTabs button').forEach(btn => {
-    btn.onclick = () => setActiveTabs(btn.dataset.tab);
-  });
-
-  mustNick();
-  load();
-  $("btnMine").onclick = renderMine;
-  $("btnRecent").onclick = renderRecent;
-});
+  );
 </script>
-
-<!-- 하단바는 일단 유지(원하면 내작업/최근변경 버전도 다시 붙여줄게) -->
-<div class="bottomBar">
-  <div class="bottomInner tabs" id="bottomTabs">
-    <button id="btnMine">내 작업</button>
-    <button id="btnRecent">최근 변경</button>
-  </div>
-</div>
 
 </body>
 </html>
