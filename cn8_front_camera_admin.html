@@ -1,0 +1,31 @@
+grant select, insert, update, delete
+on table public.checklist_cn8_front_camera
+to anon;
+
+alter table public.checklist_cn8_front_camera
+enable row level security;
+
+create policy "cn8_admin_select"
+on public.checklist_cn8_front_camera
+for select
+to anon
+using (true);
+
+create policy "cn8_admin_insert"
+on public.checklist_cn8_front_camera
+for insert
+to anon
+with check (true);
+
+create policy "cn8_admin_update"
+on public.checklist_cn8_front_camera
+for update
+to anon
+using (true)
+with check (true);
+
+create policy "cn8_admin_delete"
+on public.checklist_cn8_front_camera
+for delete
+to anon
+using (true);
