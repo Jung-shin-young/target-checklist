@@ -12,22 +12,16 @@
     }
 
     body {
-      margin: 12px;
-      padding-bottom: 76px;
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      line-height: 1.35;
+      margin: 10px;
+      padding-bottom: 78px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #111;
       background: #fff;
     }
 
     h2 {
       margin: 0 0 10px;
-      font-size: 22px;
+      font-size: 21px;
     }
 
     button,
@@ -36,7 +30,7 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       padding: 8px 10px;
-      font-size: 14px;
+      font: inherit;
       background: #fff;
     }
 
@@ -51,24 +45,9 @@
     }
 
     .box {
+      padding: 10px;
       border: 1px solid #ddd;
       border-radius: 14px;
-      padding: 11px;
-    }
-
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .right {
-      margin-left: auto;
-    }
-
-    .muted {
-      color: #666;
-      font-size: 12px;
     }
 
     .topLine {
@@ -85,7 +64,12 @@
 
     .topActions button {
       min-height: 35px;
-      padding: 6px 9px;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    .muted {
+      color: #666;
       font-size: 12px;
     }
 
@@ -99,16 +83,16 @@
     }
 
     .versionValue {
-      font-weight: 800;
       color: #174ea6;
+      font-weight: 800;
     }
 
     .searchLine {
       display: grid;
-      grid-template-columns: minmax(130px, 1fr) auto;
+      grid-template-columns: minmax(120px, 1fr) auto;
       gap: 6px;
-      margin-top: 8px;
       align-items: center;
+      margin-top: 8px;
     }
 
     #search {
@@ -118,30 +102,29 @@
 
     #connection {
       white-space: nowrap;
-      text-align: right;
     }
 
     .countGrid {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 5px;
+      gap: 4px;
       margin-top: 7px;
     }
 
     .countItem {
       min-width: 0;
-      padding: 6px 3px;
+      padding: 6px 2px;
       border: 1px solid #ddd;
       border-radius: 9px;
       text-align: center;
       background: #f8f8f8;
-      font-size: 11px;
+      font-size: 9px;
       white-space: nowrap;
     }
 
     .countItem b {
       display: block;
-      margin-top: 1px;
+      margin-top: 2px;
       font-size: 14px;
     }
 
@@ -150,8 +133,6 @@
     }
 
     .progressTitle {
-      display: flex;
-      align-items: center;
       font-size: 12px;
       color: #666;
     }
@@ -177,10 +158,6 @@
       transition: width 0.2s;
     }
 
-    /*
-      탭은 모바일에서도 줄바꿈하지 않고
-      한 줄 가로 스크롤로 표시
-    */
     .tabs {
       display: flex;
       flex-wrap: nowrap;
@@ -188,7 +165,6 @@
       margin-top: 8px;
       overflow-x: auto;
       scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
     }
 
     .tabs::-webkit-scrollbar {
@@ -198,8 +174,8 @@
     .tabs button {
       flex: 0 0 auto;
       min-height: 35px;
-      border-radius: 999px;
       padding: 6px 11px;
+      border-radius: 999px;
       font-size: 12px;
       white-space: nowrap;
     }
@@ -223,7 +199,7 @@
     }
 
     .card {
-      padding: 11px;
+      padding: 10px;
       border: 1px solid #ddd;
       border-radius: 14px;
       background: #fff;
@@ -287,20 +263,16 @@
       background: #e5f7e9;
     }
 
-    /*
-      작업 이력 3개를 한 줄로 표시
-      화면이 좁아도 균등하게 유지
-    */
     .historyGrid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 5px;
       margin-top: 8px;
     }
 
     .historyItem {
       min-width: 0;
-      padding: 7px 5px;
+      padding: 7px 4px;
       border: 1px solid #e6e6e6;
       border-radius: 9px;
       background: #fafafa;
@@ -310,7 +282,6 @@
     .historyTitle {
       font-size: 11px;
       font-weight: 800;
-      white-space: nowrap;
     }
 
     .historyWorker {
@@ -325,7 +296,14 @@
       margin-top: 1px;
       color: #666;
       font-size: 9px;
-      line-height: 1.2;
+    }
+
+    .snText {
+      margin-top: 3px;
+      color: #673ab7;
+      font-size: 11px;
+      font-weight: 800;
+      word-break: break-all;
     }
 
     .memo {
@@ -345,21 +323,17 @@
       font-size: 11px;
     }
 
-    /*
-      버튼은 빈 여백을 줄이기 위해 그리드 사용
-      모바일에서는 2열로 꽉 채움
-    */
     .buttonGrid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 5px;
       margin-top: 8px;
     }
 
     .buttonGrid button {
       min-width: 0;
-      min-height: 40px;
-      padding: 6px 3px;
+      min-height: 41px;
+      padding: 6px 4px;
       font-size: 11px;
       line-height: 1.2;
     }
@@ -375,6 +349,13 @@
       color: #805600;
       border-color: #d4ad2e;
       background: #fff2b5;
+      font-weight: 800;
+    }
+
+    .verSnButton.on {
+      color: #653394;
+      border-color: #b79ad8;
+      background: #f1e9fb;
       font-weight: 800;
     }
 
@@ -418,45 +399,12 @@
 
     .bottomInner button {
       min-height: 40px;
-      padding: 7px;
     }
 
     .bottomInner button.active {
       color: #fff;
       border-color: #333;
       background: #333;
-    }
-
-    @media (max-width: 560px) {
-      body {
-        margin: 9px;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
-
-      .box {
-        padding: 9px;
-      }
-
-      .countItem {
-        padding-right: 1px;
-        padding-left: 1px;
-        font-size: 9px;
-      }
-
-      .countItem b {
-        font-size: 13px;
-      }
-
-      .buttonGrid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .buttonGrid button:last-child {
-        grid-column: span 2;
-      }
     }
   </style>
 
@@ -468,7 +416,6 @@
   <h2>CN8 전방카메라 실차 조치 현황</h2>
 
   <div class="box">
-
     <div class="topLine">
       <div>
         사용자:
@@ -516,8 +463,8 @@
       </div>
 
       <div class="countItem">
-        VER/DTC
-        <b id="cntDtc">-</b>
+        VER·S/N
+        <b id="cntVerSn">-</b>
       </div>
 
       <div class="countItem">
@@ -538,33 +485,15 @@
     </div>
 
     <div class="tabs" id="topTabs">
-      <button data-tab="all" class="active">
-        전체
-      </button>
-
-      <button data-tab="waiting">
-        미완료
-      </button>
-
-      <button data-tab="working">
-        작업중
-      </button>
-
-      <button data-tab="update">
-        업데이트 완료
-      </button>
-
-      <button data-tab="dtc">
-        VER/DTC 완료
-      </button>
-
-      <button data-tab="done">
-        최종 완료
-      </button>
+      <button data-tab="all" class="active">전체</button>
+      <button data-tab="waiting">미완료</button>
+      <button data-tab="working">작업중</button>
+      <button data-tab="update">업데이트 완료</button>
+      <button data-tab="ver">VER·S/N 완료</button>
+      <button data-tab="done">최종 완료</button>
     </div>
 
     <div class="muted" id="saving"></div>
-
   </div>
 
   <div id="list" class="list"></div>
@@ -579,8 +508,7 @@
 
 <script>
   /*
-    목표 버전이 확정되면
-    "미정" 부분만 변경
+    목표 버전 확정 시 아래 "미정"만 변경
   */
   const TARGET_VERSION = "미정";
 
@@ -597,13 +525,9 @@
   const $ = id =>
     document.getElementById(id);
 
-
   let items = [];
-
   let currentTab = "all";
-
   let specialView = null;
-
   let saving = false;
 
   let nickname =
@@ -612,15 +536,16 @@
     ) || "";
 
 
-  function getHeaders(returnData = false) {
+  function getHeaders(prefer = "") {
     const headers = {
       apikey: SUPABASE_KEY,
+      Authorization:
+        "Bearer " + SUPABASE_KEY,
       "Content-Type": "application/json"
     };
 
-    if (returnData) {
-      headers.Prefer =
-        "return=representation";
+    if (prefer) {
+      headers.Prefer = prefer;
     }
 
     return headers;
@@ -682,6 +607,13 @@
   }
 
 
+  function validSerial(value) {
+    return /^[0-9]{3,}$/.test(
+      String(value || "")
+    );
+  }
+
+
   function isWorkStarted(item) {
     return Boolean(item?.work_at);
   }
@@ -689,6 +621,14 @@
 
   function isUpdateDone(item) {
     return Boolean(item?.update_done);
+  }
+
+
+  function isVerSnDone(item) {
+    return (
+      Boolean(item?.ver_sn_done) &&
+      validSerial(item?.serial_number)
+    );
   }
 
 
@@ -700,6 +640,7 @@
   function isFinalDone(item) {
     return (
       isUpdateDone(item) &&
+      isVerSnDone(item) &&
       isDtcDone(item)
     );
   }
@@ -710,12 +651,12 @@
       return "done";
     }
 
-    if (isDtcDone(item)) {
-      return "dtc";
-    }
-
-    if (isUpdateDone(item)) {
-      return "update";
+    if (
+      isUpdateDone(item) ||
+      isVerSnDone(item) ||
+      isDtcDone(item)
+    ) {
+      return "progress";
     }
 
     if (isWorkStarted(item)) {
@@ -727,22 +668,27 @@
 
 
   function stateLabel(item) {
-    const state =
-      derivedState(item);
-
-    if (state === "done") {
+    if (isFinalDone(item)) {
       return "최종 완료";
     }
 
-    if (state === "dtc") {
-      return "VER/DTC 완료";
+    if (isVerSnDone(item) && isDtcDone(item)) {
+      return "최종 확인 완료";
     }
 
-    if (state === "update") {
+    if (isVerSnDone(item)) {
+      return "VER·S/N 완료";
+    }
+
+    if (isDtcDone(item)) {
+      return "DTC·경고등 완료";
+    }
+
+    if (isUpdateDone(item)) {
       return "업데이트 완료";
     }
 
-    if (state === "working") {
+    if (isWorkStarted(item)) {
       return "작업중";
     }
 
@@ -758,10 +704,7 @@
       return "card done";
     }
 
-    if (
-      state === "update" ||
-      state === "dtc"
-    ) {
+    if (state === "progress") {
       return "card progress";
     }
 
@@ -781,10 +724,7 @@
       return "stateBadge done";
     }
 
-    if (
-      state === "update" ||
-      state === "dtc"
-    ) {
+    if (state === "progress") {
       return "stateBadge progress";
     }
 
@@ -837,9 +777,6 @@
 
         alert(
           "Supabase 로드 실패\n\n" +
-          "상태코드: " +
-          response.status +
-          "\n\n" +
           text
         );
 
@@ -879,7 +816,9 @@
           url,
           {
             method: "PATCH",
-            headers: getHeaders(true),
+            headers: getHeaders(
+              "return=minimal"
+            ),
             body: JSON.stringify(payload)
           }
         );
@@ -890,9 +829,6 @@
 
         alert(
           "저장 실패\n\n" +
-          "상태코드: " +
-          response.status +
-          "\n\n" +
           text
         );
 
@@ -940,8 +876,7 @@
       const confirmed =
         confirm(
           "이미 최종 완료된 차량입니다.\n\n" +
-          "작업을 다시 시작하면 업데이트 완료와 " +
-          "VER/DTC 완료가 모두 해제됩니다.\n\n" +
+          "작업을 다시 시작하면 기존 완료 기록과 S/N이 모두 해제됩니다.\n\n" +
           "정말 다시 작업하시겠습니까?"
         );
 
@@ -952,12 +887,11 @@
 
     if (
       isWorkStarted(current) &&
-      !isUpdateDone(current) &&
-      !isDtcDone(current)
+      !isFinalDone(current)
     ) {
       const confirmed =
         confirm(
-          "이미 작업중인 차량입니다.\n\n" +
+          "이미 작업 시작 기록이 있습니다.\n\n" +
           "작업 시작자를 현재 사용자로 변경하시겠습니까?"
         );
 
@@ -980,6 +914,11 @@
       payload.update_done = false;
       payload.update_by = null;
       payload.update_at = null;
+
+      payload.ver_sn_done = false;
+      payload.ver_sn_by = null;
+      payload.ver_sn_at = null;
+      payload.serial_number = null;
 
       payload.dtc_done = false;
       payload.dtc_by = null;
@@ -1035,15 +974,10 @@
       }
     }
 
-    if (
-      isFinalDone(current) &&
-      !nextValue
-    ) {
+    if (!nextValue) {
       const confirmed =
         confirm(
-          "이미 최종 완료된 차량입니다.\n\n" +
-          "업데이트 완료를 해제하면 VER/DTC 완료도 " +
-          "함께 해제되고 최종 완료가 취소됩니다.\n\n" +
+          "업데이트 완료를 해제하면 VER·S/N 및 DTC·경고등 기록도 함께 해제됩니다.\n\n" +
           "정말 변경하시겠습니까?"
         );
 
@@ -1081,10 +1015,104 @@
     }
 
     if (!nextValue) {
+      payload.ver_sn_done = false;
+      payload.ver_sn_by = null;
+      payload.ver_sn_at = null;
+      payload.serial_number = null;
+
       payload.dtc_done = false;
       payload.dtc_by = null;
       payload.dtc_at = null;
     }
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function saveVerSn(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    if (!isUpdateDone(current)) {
+      alert(
+        "먼저 업데이트 완료를 처리해주세요.\n\n" +
+        "VER 확인과 S/N 기록은 업데이트 완료 후 가능합니다."
+      );
+
+      return;
+    }
+
+    const value =
+      prompt(
+        "VER 확인 후 S/N을 입력하세요.\n\n" +
+        "숫자만 입력 가능하며 최소 3자리 이상이어야 합니다.\n" +
+        "예: 00123",
+        current.serial_number || ""
+      );
+
+    if (value === null) {
+      return;
+    }
+
+    const serial =
+      value.trim();
+
+    if (!validSerial(serial)) {
+      alert(
+        "S/N 형식이 올바르지 않습니다.\n\n" +
+        "숫자로만 3자리 이상 입력해주세요.\n" +
+        "예: 123 또는 00123"
+      );
+
+      return;
+    }
+
+    if (isFinalDone(current)) {
+      const confirmed =
+        confirm(
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "S/N 또는 VER 확인 기록을 수정하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      serial_number: serial,
+      ver_sn_done: true,
+      ver_sn_by: nickname,
+      ver_sn_at: now
+    };
 
     addLastChange(
       payload,
@@ -1126,21 +1154,17 @@
     ) {
       alert(
         "먼저 업데이트 완료를 처리해주세요.\n\n" +
-        "VER/DTC 확인은 업데이트 완료 후에만 가능합니다."
+        "DTC 및 경고등 확인은 업데이트 완료 후 가능합니다."
       );
 
       return;
     }
 
-    if (
-      isFinalDone(current) &&
-      !nextValue
-    ) {
+    if (!nextValue) {
       const confirmed =
         confirm(
-          "이미 최종 완료된 차량입니다.\n\n" +
-          "VER/DTC 완료를 해제하면 최종 완료가 취소됩니다.\n\n" +
-          "정말 변경하시겠습니까?"
+          "DTC·경고등 완료 기록을 해제하시겠습니까?\n\n" +
+          "최종 완료 상태도 해제됩니다."
         );
 
       if (!confirmed) {
@@ -1196,24 +1220,10 @@
       return;
     }
 
-    if (isFinalDone(current)) {
-      const confirmed =
-        confirm(
-          "최종 완료된 차량입니다.\n\n" +
-          "완료 상태는 유지되지만 코멘트와 " +
-          "최근 변경자 기록이 수정됩니다.\n\n" +
-          "계속하시겠습니까?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-    }
-
     const value =
       prompt(
         "기타 코멘트를 입력하세요.\n" +
-        "내용을 모두 지우고 저장하면 코멘트가 삭제됩니다.",
+        "내용을 모두 지우고 저장하면 삭제됩니다.",
         current.memo || ""
       );
 
@@ -1265,6 +1275,7 @@
     if (
       !isWorkStarted(current) &&
       !isUpdateDone(current) &&
+      !isVerSnDone(current) &&
       !isDtcDone(current)
     ) {
       alert(
@@ -1276,16 +1287,8 @@
 
     const confirmed =
       confirm(
-        isFinalDone(current)
-          ? (
-            "이미 최종 완료된 차량입니다.\n\n" +
-            "작업 시작, 업데이트 완료, VER/DTC 완료 기록을 " +
-            "모두 해제하고 미완료로 변경하시겠습니까?"
-          )
-          : (
-            "현재 작업 진행 상태를 모두 해제하고 " +
-            "미완료로 변경하시겠습니까?"
-          )
+        "작업 시작, 업데이트, VER·S/N, DTC·경고등 기록을 모두 해제하고 미완료로 변경하시겠습니까?\n\n" +
+        "S/N도 삭제됩니다."
       );
 
     if (!confirmed) {
@@ -1298,12 +1301,19 @@
       new Date().toISOString();
 
     const payload = {
+      status: "미완료",
+
       work_by: null,
       work_at: null,
 
       update_done: false,
       update_by: null,
       update_at: null,
+
+      ver_sn_done: false,
+      ver_sn_by: null,
+      ver_sn_at: null,
+      serial_number: null,
 
       dtc_done: false,
       dtc_by: null,
@@ -1329,134 +1339,12 @@
   }
 
 
-  function filterItems() {
-    const query =
-      $("search")
-        .value
-        .trim()
-        .toUpperCase();
-
-    let view =
-      [...items];
-
-    if (query) {
-      view =
-        view.filter(item =>
-          String(item.vin || "")
-            .toUpperCase()
-            .includes(query)
-        );
-    }
-
-    if (specialView === "mine") {
-      view =
-        view.filter(item =>
-          item.work_by === nickname ||
-          item.update_by === nickname ||
-          item.dtc_by === nickname ||
-          item.updated_by === nickname
-        );
-    }
-
-    if (specialView === "recent") {
-      const limit =
-        Date.now() -
-        24 * 60 * 60 * 1000;
-
-      view =
-        view.filter(item =>
-          item.updated_at &&
-          new Date(
-            item.updated_at
-          ).getTime() >= limit
-        );
-    }
-
-    if (!specialView) {
-      if (currentTab === "waiting") {
-        view =
-          view.filter(item =>
-            derivedState(item) ===
-            "waiting"
-          );
-      }
-
-      if (currentTab === "working") {
-        view =
-          view.filter(item =>
-            derivedState(item) ===
-            "working"
-          );
-      }
-
-      if (currentTab === "update") {
-        view =
-          view.filter(item =>
-            isUpdateDone(item)
-          );
-      }
-
-      if (currentTab === "dtc") {
-        view =
-          view.filter(item =>
-            isDtcDone(item)
-          );
-      }
-
-      if (currentTab === "done") {
-        view =
-          view.filter(item =>
-            isFinalDone(item)
-          );
-      }
-    }
-
-    const order = {
-      waiting: 1,
-      working: 2,
-      update: 3,
-      dtc: 4,
-      done: 5
-    };
-
-    view.sort((a, b) => {
-      if (specialView) {
-        const timeA =
-          new Date(
-            a.updated_at || 0
-          ).getTime();
-
-        const timeB =
-          new Date(
-            b.updated_at || 0
-          ).getTime();
-
-        return timeB - timeA;
-      }
-
-      const difference =
-        order[derivedState(a)] -
-        order[derivedState(b)];
-
-      if (difference !== 0) {
-        return difference;
-      }
-
-      return String(a.vin)
-        .localeCompare(
-          String(b.vin)
-        );
-    });
-
-    return view;
-  }
-
-
   function historyItem(
     title,
     done,
     worker,
-    time
+    time,
+    extra = ""
   ) {
     return `
       <div class="historyItem">
@@ -1472,6 +1360,8 @@
         <div class="historyTime">
           ${formatKST(time)}
         </div>
+
+        ${extra}
       </div>
     `;
   }
@@ -1484,21 +1374,25 @@
     card.className =
       cardClass(item);
 
-    const workButtonText =
-      isWorkStarted(item) &&
-      !isUpdateDone(item)
-        ? "작업자 변경"
-        : "작업 시작";
-
     const updateButtonText =
       isUpdateDone(item)
         ? "업데이트 해제"
         : "업데이트 완료";
 
+    const verSnButtonText =
+      isVerSnDone(item)
+        ? "VER·S/N 수정"
+        : "VER·S/N 입력";
+
     const dtcButtonText =
       isDtcDone(item)
-        ? "VER/DTC 해제"
-        : "VER/DTC 완료";
+        ? "DTC·경고등 해제"
+        : "DTC·경고등 완료";
+
+    const serialHtml =
+      item.serial_number
+        ? `<div class="snText">S/N ${escapeHtml(item.serial_number)}</div>`
+        : "";
 
     card.innerHTML = `
       <div class="cardHeader">
@@ -1527,7 +1421,15 @@
         )}
 
         ${historyItem(
-          "VER/DTC",
+          "VER·S/N",
+          isVerSnDone(item),
+          item.ver_sn_by,
+          item.ver_sn_at,
+          serialHtml
+        )}
+
+        ${historyItem(
+          "DTC·경고등",
           isDtcDone(item),
           item.dtc_by,
           item.dtc_at
@@ -1538,8 +1440,7 @@
         item.memo
           ? `
             <div class="memo">
-              <b>기타</b>
-              ·
+              <b>기타</b> ·
               ${escapeHtml(item.memo)}
             </div>
           `
@@ -1549,8 +1450,7 @@
       <div class="lastChange muted">
         최근 변경:
         <b>${escapeHtml(item.updated_by || "-")}</b>
-        ·
-        ${formatKST(item.updated_at)}
+        · ${formatKST(item.updated_at)}
       </div>
 
       <div class="buttonGrid">
@@ -1563,7 +1463,7 @@
           }"
           onclick="startWork('${item.id}')"
         >
-          ${workButtonText}
+          작업 시작
         </button>
 
         <button
@@ -1575,6 +1475,17 @@
           onclick="toggleUpdate('${item.id}')"
         >
           ${updateButtonText}
+        </button>
+
+        <button
+          class="verSnButton ${
+            isVerSnDone(item)
+              ? "on"
+              : ""
+          }"
+          onclick="saveVerSn('${item.id}')"
+        >
+          ${verSnButtonText}
         </button>
 
         <button
@@ -1607,56 +1518,103 @@
   }
 
 
-  function renderList(view) {
-    const container =
-      $("list");
+  function filterItems() {
+    const query =
+      $("search")
+        .value
+        .trim()
+        .toUpperCase();
 
-    container.innerHTML = "";
-
-    if (view.length === 0) {
-      container.innerHTML = `
-        <div class="empty">
-          표시할 VIN이 없습니다.
-        </div>
-      `;
-
-      return;
-    }
-
-    const batchSize = 50;
-
-    let index = 0;
-
-    function drawBatch() {
-      const fragment =
-        document.createDocumentFragment();
-
-      const end =
-        Math.min(
-          index + batchSize,
-          view.length
-        );
-
-      while (index < end) {
-        fragment.appendChild(
-          makeCard(view[index])
-        );
-
-        index++;
-      }
-
-      container.appendChild(
-        fragment
+    let view =
+      items.filter(item =>
+        !query ||
+        String(item.vin || "")
+          .toUpperCase()
+          .includes(query)
       );
 
-      if (index < view.length) {
-        requestAnimationFrame(
-          drawBatch
+    if (specialView === "mine") {
+      view =
+        view.filter(item =>
+          item.work_by === nickname ||
+          item.update_by === nickname ||
+          item.ver_sn_by === nickname ||
+          item.dtc_by === nickname ||
+          item.updated_by === nickname
         );
+    }
+
+    if (specialView === "recent") {
+      const limit =
+        Date.now() -
+        24 * 60 * 60 * 1000;
+
+      view =
+        view.filter(item =>
+          item.updated_at &&
+          new Date(item.updated_at)
+            .getTime() >= limit
+        );
+    }
+
+    if (!specialView) {
+      if (currentTab === "waiting") {
+        view =
+          view.filter(item =>
+            derivedState(item) ===
+            "waiting"
+          );
+      }
+
+      if (currentTab === "working") {
+        view =
+          view.filter(item =>
+            derivedState(item) ===
+            "working"
+          );
+      }
+
+      if (currentTab === "update") {
+        view =
+          view.filter(item =>
+            isUpdateDone(item)
+          );
+      }
+
+      if (currentTab === "ver") {
+        view =
+          view.filter(item =>
+            isVerSnDone(item)
+          );
+      }
+
+      if (currentTab === "done") {
+        view =
+          view.filter(item =>
+            isFinalDone(item)
+          );
       }
     }
 
-    drawBatch();
+    if (specialView) {
+      view.sort((a, b) =>
+        new Date(
+          b.updated_at || 0
+        ).getTime() -
+        new Date(
+          a.updated_at || 0
+        ).getTime()
+      );
+    } else {
+      view.sort((a, b) =>
+        String(a.vin)
+          .localeCompare(
+            String(b.vin)
+          )
+      );
+    }
+
+    return view;
   }
 
 
@@ -1675,9 +1633,9 @@
         isUpdateDone
       ).length;
 
-    const dtcCount =
+    const verSnCount =
       items.filter(
-        isDtcDone
+        isVerSnDone
       ).length;
 
     const finalCount =
@@ -1694,8 +1652,8 @@
     $("cntUpdate").textContent =
       updateCount;
 
-    $("cntDtc").textContent =
-      dtcCount;
+    $("cntVerSn").textContent =
+      verSnCount;
 
     $("cntDone").textContent =
       finalCount;
@@ -1745,11 +1703,37 @@
 
   function render() {
     updateSummary();
-
     updateTabAppearance();
 
-    renderList(
-      filterItems()
+    const view =
+      filterItems();
+
+    const container =
+      $("list");
+
+    container.innerHTML = "";
+
+    if (!view.length) {
+      container.innerHTML = `
+        <div class="empty">
+          표시할 VIN이 없습니다.
+        </div>
+      `;
+
+      return;
+    }
+
+    const fragment =
+      document.createDocumentFragment();
+
+    view.forEach(item => {
+      fragment.appendChild(
+        makeCard(item)
+      );
+    });
+
+    container.appendChild(
+      fragment
     );
   }
 
@@ -1818,9 +1802,7 @@
 
 
   $("downloadBtn").onclick = () => {
-    if (
-      typeof XLSX === "undefined"
-    ) {
+    if (typeof XLSX === "undefined") {
       alert(
         "엑셀 기능을 불러오지 못했습니다."
       );
@@ -1828,86 +1810,114 @@
       return;
     }
 
+    const header = [
+      "VIN",
+      "목표버전",
+      "현재상태",
+      "작업시작(Y/N)",
+      "작업시작자",
+      "작업시작시간",
+      "업데이트완료(Y/N)",
+      "업데이트작업자",
+      "업데이트시간",
+      "VER확인·SN기록(Y/N)",
+      "S/N",
+      "VER·SN작업자",
+      "VER·SN시간",
+      "DTC·경고등확인(Y/N)",
+      "DTC·경고등작업자",
+      "DTC·경고등시간",
+      "최종완료(Y/N)",
+      "기타코멘트",
+      "최근변경자",
+      "최근변경시간"
+    ];
+
     const rows =
-      items.map(item => ({
-        VIN:
-          item.vin,
+      items.map(item => [
+        item.vin,
+        TARGET_VERSION,
+        stateLabel(item),
 
-        목표버전:
-          TARGET_VERSION,
+        isWorkStarted(item) ? "Y" : "N",
+        item.work_by || "",
+        formatKST(item.work_at),
 
-        현재상태:
-          stateLabel(item),
+        isUpdateDone(item) ? "Y" : "N",
+        item.update_by || "",
+        formatKST(item.update_at),
 
-        작업시작:
-          isWorkStarted(item)
-            ? "Y"
-            : "N",
+        isVerSnDone(item) ? "Y" : "N",
+        item.serial_number == null
+          ? ""
+          : String(item.serial_number),
+        item.ver_sn_by || "",
+        formatKST(item.ver_sn_at),
 
-        작업시작자:
-          item.work_by || "",
+        isDtcDone(item) ? "Y" : "N",
+        item.dtc_by || "",
+        formatKST(item.dtc_at),
 
-        작업시작시간:
-          formatKST(item.work_at),
-
-        업데이트완료:
-          isUpdateDone(item)
-            ? "Y"
-            : "N",
-
-        업데이트작업자:
-          item.update_by || "",
-
-        업데이트시간:
-          formatKST(item.update_at),
-
-        VER_DTC완료:
-          isDtcDone(item)
-            ? "Y"
-            : "N",
-
-        VER_DTC작업자:
-          item.dtc_by || "",
-
-        VER_DTC시간:
-          formatKST(item.dtc_at),
-
-        최종완료:
-          isFinalDone(item)
-            ? "Y"
-            : "N",
-
-        기타코멘트:
-          item.memo || "",
-
-        최근변경자:
-          item.updated_by || "",
-
-        최근변경시간:
-          formatKST(item.updated_at)
-      }));
+        isFinalDone(item) ? "Y" : "N",
+        item.memo || "",
+        item.updated_by || "",
+        formatKST(item.updated_at)
+      ]);
 
     const worksheet =
-      XLSX.utils.json_to_sheet(
-        rows
+      XLSX.utils.aoa_to_sheet(
+        [header, ...rows]
       );
+
+    /*
+      S/N 열을 텍스트 형식으로 설정
+      00123 같은 앞자리 0 유지
+    */
+    for (
+      let row = 1;
+      row <= rows.length;
+      row++
+    ) {
+      const address =
+        XLSX.utils.encode_cell({
+          r: row,
+          c: 10
+        });
+
+      if (worksheet[address]) {
+        worksheet[address].t =
+          "s";
+
+        worksheet[address].z =
+          "@";
+
+        worksheet[address].v =
+          String(
+            worksheet[address].v
+          );
+      }
+    }
 
     worksheet["!cols"] = [
       { wch: 20 },
       { wch: 18 },
-      { wch: 28 },
-      { wch: 11 },
+      { wch: 17 },
       { wch: 13 },
-      { wch: 18 },
-      { wch: 13 },
-      { wch: 15 },
-      { wch: 18 },
-      { wch: 13 },
-      { wch: 15 },
-      { wch: 18 },
-      { wch: 11 },
-      { wch: 35 },
       { wch: 14 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 19 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 35 },
+      { wch: 15 },
       { wch: 18 }
     ];
 
