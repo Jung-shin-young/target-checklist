@@ -12,14 +12,9 @@
     }
 
     body {
-      margin: 12px;
+      margin: 10px;
       padding-bottom: 30px;
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #111;
       background: #f5f6f8;
     }
@@ -84,10 +79,6 @@
       gap: 7px;
     }
 
-    .wrap {
-      flex-wrap: wrap;
-    }
-
     .right {
       margin-left: auto;
     }
@@ -101,18 +92,18 @@
 
     .summaryItem {
       min-width: 0;
-      padding: 8px 3px;
+      padding: 8px 2px;
       border: 1px solid #ddd;
       border-radius: 10px;
       text-align: center;
       background: #fafafa;
-      font-size: 10px;
+      font-size: 9px;
     }
 
     .summaryItem b {
       display: block;
       margin-top: 2px;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .guide {
@@ -123,6 +114,7 @@
       background: #f4f4f4;
       font-size: 12px;
       line-height: 1.5;
+      word-break: break-word;
     }
 
     .buttonGrid {
@@ -186,6 +178,11 @@
       background: #f5faff;
     }
 
+    .card.progress {
+      border-color: #e1bd55;
+      background: #fffdf4;
+    }
+
     .vinLine {
       display: flex;
       align-items: flex-start;
@@ -212,14 +209,14 @@
 
     .history {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 5px;
       margin-top: 7px;
     }
 
     .historyItem {
       min-width: 0;
-      padding: 6px 3px;
+      padding: 7px 3px;
       border: 1px solid #e7e7e7;
       border-radius: 8px;
       text-align: center;
@@ -233,6 +230,14 @@
       margin-top: 2px;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .sn {
+      margin-top: 3px;
+      color: #673ab7;
+      font-size: 11px;
+      font-weight: 800;
+      word-break: break-all;
     }
 
     .cardButtons {
@@ -283,24 +288,6 @@
       width: 100%;
       margin-top: 8px;
     }
-
-    @media (max-width: 520px) {
-      body {
-        margin: 8px;
-      }
-
-      .panel {
-        padding: 10px;
-      }
-
-      .summaryItem {
-        font-size: 9px;
-      }
-
-      .summaryItem b {
-        font-size: 14px;
-      }
-    }
   </style>
 </head>
 
@@ -321,11 +308,17 @@
         autocomplete="current-password"
       >
 
-      <button id="loginBtn" class="primary">
+      <button
+        id="loginBtn"
+        class="primary"
+      >
         관리자 화면 열기
       </button>
 
-      <div id="loginMessage" class="status"></div>
+      <div
+        id="loginMessage"
+        class="status"
+      ></div>
     </div>
   </div>
 
@@ -334,11 +327,17 @@
     <h1>CN8 전방카메라 관리자</h1>
 
     <div class="row">
-      <span class="muted" id="connection">
+      <span
+        class="muted"
+        id="connection"
+      >
         연결 대기
       </span>
 
-      <button id="refreshBtn" class="right">
+      <button
+        id="refreshBtn"
+        class="right"
+      >
         새로고침
       </button>
     </div>
@@ -365,8 +364,8 @@
       </div>
 
       <div class="summaryItem">
-        업데이트
-        <b id="countUpdate">-</b>
+        진행중
+        <b id="countProgress">-</b>
       </div>
 
       <div class="summaryItem">
@@ -400,12 +399,18 @@
         입력 확인
       </button>
 
-      <button id="addBtn" class="primary">
+      <button
+        id="addBtn"
+        class="primary"
+      >
         VIN 추가
       </button>
     </div>
 
-    <div id="addStatus" class="status muted"></div>
+    <div
+      id="addStatus"
+      class="status muted"
+    ></div>
   </div>
 
 
@@ -424,21 +429,24 @@
       </button>
     </div>
 
-    <div id="resultCount" class="status muted"></div>
+    <div
+      id="resultCount"
+      class="status muted"
+    ></div>
 
-    <div id="list" class="list"></div>
+    <div
+      id="list"
+      class="list"
+    ></div>
   </div>
 
 
 <script>
   /*
-    관리자 URL에 접근할 때 사용하는 간단한 비밀번호입니다.
-
-    반드시 원하는 값으로 변경하세요.
-    단, HTML 안에 들어가는 비밀번호이므로
-    전문적인 보안 기능은 아니고 실수 방지용입니다.
+    관리자 비밀번호
   */
-  const ADMIN_PASSWORD = "1234";
+  const ADMIN_PASSWORD =
+    "1234";
 
   const SUPABASE_URL =
     "https://ulqpqkzgwitkxxnipjkx.supabase.co";
@@ -453,7 +461,6 @@
   const $ = id =>
     document.getElementById(id);
 
-
   let items = [];
 
   let authenticated =
@@ -465,11 +472,14 @@
   function getHeaders(prefer = "") {
     const headers = {
       apikey: SUPABASE_KEY,
+      Authorization:
+        "Bearer " + SUPABASE_KEY,
       "Content-Type": "application/json"
     };
 
     if (prefer) {
-      headers.Prefer = prefer;
+      headers.Prefer =
+        prefer;
     }
 
     return headers;
@@ -486,8 +496,17 @@
   }
 
 
+  function escapeJs(value) {
+    return String(value ?? "")
+      .replaceAll("\\", "\\\\")
+      .replaceAll("'", "\\'");
+  }
+
+
   function formatKST(value) {
-    if (!value) return "-";
+    if (!value) {
+      return "-";
+    }
 
     return new Intl.DateTimeFormat(
       "ko-KR",
@@ -503,18 +522,41 @@
   }
 
 
-  function isWorking(item) {
-    return (
-      Boolean(item.work_at) &&
-      !Boolean(item.update_done)
+  function validSerial(value) {
+    return /^[0-9]{3,}$/.test(
+      String(value || "")
     );
+  }
+
+
+  function isWorkStarted(item) {
+    return Boolean(item?.work_at);
+  }
+
+
+  function isUpdateDone(item) {
+    return Boolean(item?.update_done);
+  }
+
+
+  function isVerSnDone(item) {
+    return (
+      Boolean(item?.ver_sn_done) &&
+      validSerial(item?.serial_number)
+    );
+  }
+
+
+  function isDtcDone(item) {
+    return Boolean(item?.dtc_done);
   }
 
 
   function isFinalDone(item) {
     return (
-      Boolean(item.update_done) &&
-      Boolean(item.dtc_done)
+      isUpdateDone(item) &&
+      isVerSnDone(item) &&
+      isDtcDone(item)
     );
   }
 
@@ -524,11 +566,15 @@
       return "최종 완료";
     }
 
-    if (item.update_done) {
-      return "업데이트 완료";
+    if (
+      isUpdateDone(item) ||
+      isVerSnDone(item) ||
+      isDtcDone(item)
+    ) {
+      return "진행중";
     }
 
-    if (isWorking(item)) {
+    if (isWorkStarted(item)) {
       return "작업중";
     }
 
@@ -536,9 +582,32 @@
   }
 
 
+  function cardClass(item) {
+    if (isFinalDone(item)) {
+      return "card done";
+    }
+
+    if (
+      isUpdateDone(item) ||
+      isVerSnDone(item) ||
+      isDtcDone(item)
+    ) {
+      return "card progress";
+    }
+
+    if (isWorkStarted(item)) {
+      return "card working";
+    }
+
+    return "card";
+  }
+
+
   function showLogin() {
     $("loginOverlay").style.display =
-      authenticated ? "none" : "flex";
+      authenticated
+        ? "none"
+        : "flex";
   }
 
 
@@ -584,6 +653,7 @@
         await fetch(
           url,
           {
+            method: "GET",
             headers: getHeaders()
           }
         );
@@ -604,7 +674,9 @@
       }
 
       items =
-        text ? JSON.parse(text) : [];
+        text
+          ? JSON.parse(text)
+          : [];
 
       $("connection").textContent =
         `연결됨 ✅ ${items.length}대`;
@@ -630,21 +702,34 @@
 
     const waiting =
       items.filter(item =>
-        !item.work_at &&
-        !item.update_done &&
-        !item.dtc_done
+        !isWorkStarted(item) &&
+        !isUpdateDone(item) &&
+        !isVerSnDone(item) &&
+        !isDtcDone(item)
       ).length;
 
     const working =
-      items.filter(isWorking).length;
-
-    const update =
       items.filter(item =>
-        Boolean(item.update_done)
+        isWorkStarted(item) &&
+        !isUpdateDone(item) &&
+        !isVerSnDone(item) &&
+        !isDtcDone(item)
+      ).length;
+
+    const progress =
+      items.filter(item =>
+        !isFinalDone(item) &&
+        (
+          isUpdateDone(item) ||
+          isVerSnDone(item) ||
+          isDtcDone(item)
+        )
       ).length;
 
     const done =
-      items.filter(isFinalDone).length;
+      items.filter(
+        isFinalDone
+      ).length;
 
     $("countTotal").textContent =
       total;
@@ -655,8 +740,8 @@
     $("countWorking").textContent =
       working;
 
-    $("countUpdate").textContent =
-      update;
+    $("countProgress").textContent =
+      progress;
 
     $("countDone").textContent =
       done;
@@ -675,10 +760,6 @@
         )
         .filter(Boolean);
 
-    /*
-      입력창 내부 중복 제거
-      대소문자는 구분하지 않도록 대문자로 통일
-    */
     return [
       ...new Set(
         values.map(value =>
@@ -714,7 +795,8 @@
       ).length;
 
     const newCount =
-      vins.length - duplicateCount;
+      vins.length -
+      duplicateCount;
 
     $("addStatus").textContent =
       `입력 ${vins.length}대 · ` +
@@ -762,9 +844,13 @@
         `기존 중복 ${vins.length - newVins.length}대는 무시됩니다.`
       );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
-    $("addBtn").disabled = true;
+    $("addBtn").disabled =
+      true;
+
     $("addStatus").textContent =
       "VIN 추가 중...";
 
@@ -776,7 +862,10 @@
       newVins.map(vin => ({
         vin,
         status: "미완료",
+
         update_done: false,
+        ver_sn_done: false,
+        serial_number: null,
         dtc_done: false
       }));
 
@@ -811,7 +900,8 @@
       $("addStatus").textContent =
         `신규 VIN ${newVins.length}대 추가 완료`;
 
-      $("vinInput").value = "";
+      $("vinInput").value =
+        "";
 
       await loadData();
 
@@ -825,126 +915,33 @@
         "연결 오류";
 
     } finally {
-      $("addBtn").disabled = false;
-    }
-  }
-
-
-  async function deleteVin(id, vin) {
-    const current =
-      items.find(item =>
-        item.id === id
-      );
-
-    if (!current) return;
-
-    let warning =
-      `VIN ${vin}을 삭제하시겠습니까?\n\n` +
-      "삭제하면 해당 VIN의 모든 작업 기록과 코멘트가 함께 삭제됩니다.";
-
-    if (
-      current.work_at ||
-      current.update_done ||
-      current.dtc_done ||
-      current.memo
-    ) {
-      warning =
-        `주의: VIN ${vin}에는 작업 기록이 있습니다.\n\n` +
-        "작업자, 시간, 완료 상태, 코멘트까지 모두 삭제됩니다.\n\n" +
-        "정말 삭제하시겠습니까?";
-    }
-
-    const firstConfirm =
-      confirm(warning);
-
-    if (!firstConfirm) return;
-
-    const typed =
-      prompt(
-        "삭제 확인을 위해 VIN을 다시 입력하세요.",
-        ""
-      );
-
-    if (typed === null) return;
-
-    if (
-      typed.trim().toUpperCase() !==
-      String(vin).toUpperCase()
-    ) {
-      alert(
-        "입력한 VIN이 일치하지 않아 삭제하지 않았습니다."
-      );
-
-      return;
-    }
-
-    const url =
-      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
-      `?id=eq.${encodeURIComponent(id)}`;
-
-    try {
-      const response =
-        await fetch(
-          url,
-          {
-            method: "DELETE",
-            headers: getHeaders(
-              "return=minimal"
-            )
-          }
-        );
-
-      if (!response.ok) {
-        const text =
-          await response.text();
-
-        alert(
-          "삭제 실패\n\n" +
-          text
-        );
-
-        return;
-      }
-
-      alert(
-        `${vin} 삭제 완료`
-      );
-
-      await loadData();
-
-    } catch (error) {
-      alert(
-        "삭제 중 연결 오류\n\n" +
-        String(error)
-      );
+      $("addBtn").disabled =
+        false;
     }
   }
 
 
   async function resetVin(id, vin) {
-    const current =
-      items.find(item =>
-        item.id === id
-      );
-
-    if (!current) return;
-
     const confirmed =
       confirm(
         `VIN ${vin}의 작업 상태를 초기화하시겠습니까?\n\n` +
-        "작업 시작, 업데이트, VER/DTC 완료 기록과 코멘트가 모두 삭제됩니다.\n" +
+        "작업 시작, 업데이트, VER·S/N, DTC·경고등 기록과 코멘트가 모두 삭제됩니다.\n" +
         "VIN 자체는 삭제되지 않습니다."
       );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     const secondConfirm =
       confirm(
-        "초기화 후에는 기존 작업자와 시간을 복구할 수 없습니다.\n\n" +
+        "초기화 후에는 작업자, 시간, S/N을 복구할 수 없습니다.\n\n" +
         "정말 초기화하시겠습니까?"
       );
 
-    if (!secondConfirm) return;
+    if (!secondConfirm) {
+      return;
+    }
 
     const now =
       new Date().toISOString();
@@ -958,6 +955,11 @@
       update_done: false,
       update_by: null,
       update_at: null,
+
+      ver_sn_done: false,
+      ver_sn_by: null,
+      ver_sn_at: null,
+      serial_number: null,
 
       dtc_done: false,
       dtc_by: null,
@@ -1013,6 +1015,130 @@
   }
 
 
+  async function deleteVin(id, vin) {
+    const current =
+      items.find(item =>
+        item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    let warning =
+      `VIN ${vin}을 삭제하시겠습니까?\n\n` +
+      "해당 VIN의 모든 작업 기록과 S/N, 코멘트도 함께 삭제됩니다.";
+
+    if (
+      isWorkStarted(current) ||
+      isUpdateDone(current) ||
+      isVerSnDone(current) ||
+      isDtcDone(current) ||
+      current.memo
+    ) {
+      warning =
+        `주의: VIN ${vin}에는 작업 기록이 있습니다.\n\n` +
+        "작업자, 시간, S/N, 완료 상태, 코멘트까지 모두 삭제됩니다.\n\n" +
+        "정말 삭제하시겠습니까?";
+    }
+
+    const firstConfirm =
+      confirm(warning);
+
+    if (!firstConfirm) {
+      return;
+    }
+
+    const typed =
+      prompt(
+        "삭제 확인을 위해 VIN을 다시 입력하세요.",
+        ""
+      );
+
+    if (typed === null) {
+      return;
+    }
+
+    if (
+      typed.trim().toUpperCase() !==
+      String(vin).toUpperCase()
+    ) {
+      alert(
+        "입력한 VIN이 일치하지 않아 삭제하지 않았습니다."
+      );
+
+      return;
+    }
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?id=eq.${encodeURIComponent(id)}`;
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "DELETE",
+            headers: getHeaders(
+              "return=minimal"
+            )
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "삭제 실패\n\n" +
+          text
+        );
+
+        return;
+      }
+
+      alert(
+        `${vin} 삭제 완료`
+      );
+
+      await loadData();
+
+    } catch (error) {
+      alert(
+        "삭제 중 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  function historyItem(
+    title,
+    done,
+    worker,
+    time,
+    extra = ""
+  ) {
+    return `
+      <div class="historyItem">
+        ${done ? "✅" : "⬜"}
+        ${title}
+
+        <b>
+          ${escapeHtml(worker || "-")}
+        </b>
+
+        <div>
+          ${formatKST(time)}
+        </div>
+
+        ${extra}
+      </div>
+    `;
+  }
+
+
   function render() {
     const query =
       $("search")
@@ -1034,7 +1160,8 @@
     const container =
       $("list");
 
-    container.innerHTML = "";
+    container.innerHTML =
+      "";
 
     if (!view.length) {
       container.innerHTML = `
@@ -1054,11 +1181,16 @@
         document.createElement("div");
 
       card.className =
-        isFinalDone(item)
-          ? "card done"
-          : isWorking(item)
-            ? "card working"
-            : "card";
+        cardClass(item);
+
+      const serialHtml =
+        item.serial_number
+          ? `
+            <div class="sn">
+              S/N ${escapeHtml(item.serial_number)}
+            </div>
+          `
+          : "";
 
       card.innerHTML = `
         <div class="vinLine">
@@ -1072,23 +1204,34 @@
         </div>
 
         <div class="history">
-          <div class="historyItem">
-            작업 시작
-            <b>${escapeHtml(item.work_by || "-")}</b>
-            ${formatKST(item.work_at)}
-          </div>
+          ${historyItem(
+            "작업 시작",
+            isWorkStarted(item),
+            item.work_by,
+            item.work_at
+          )}
 
-          <div class="historyItem">
-            업데이트
-            <b>${escapeHtml(item.update_by || "-")}</b>
-            ${formatKST(item.update_at)}
-          </div>
+          ${historyItem(
+            "업데이트",
+            isUpdateDone(item),
+            item.update_by,
+            item.update_at
+          )}
 
-          <div class="historyItem">
-            VER/DTC
-            <b>${escapeHtml(item.dtc_by || "-")}</b>
-            ${formatKST(item.dtc_at)}
-          </div>
+          ${historyItem(
+            "VER·S/N",
+            isVerSnDone(item),
+            item.ver_sn_by,
+            item.ver_sn_at,
+            serialHtml
+          )}
+
+          ${historyItem(
+            "DTC·경고등",
+            isDtcDone(item),
+            item.dtc_by,
+            item.dtc_at
+          )}
         </div>
 
         ${
@@ -1106,8 +1249,8 @@
           <button
             class="warning"
             onclick="resetVin(
-              '${item.id}',
-              '${escapeHtml(item.vin)}'
+              '${escapeJs(item.id)}',
+              '${escapeJs(item.vin)}'
             )"
           >
             작업 기록 초기화
@@ -1116,8 +1259,8 @@
           <button
             class="danger"
             onclick="deleteVin(
-              '${item.id}',
-              '${escapeHtml(item.vin)}'
+              '${escapeJs(item.id)}',
+              '${escapeJs(item.vin)}'
             )"
           >
             VIN 삭제
@@ -1125,10 +1268,14 @@
         </div>
       `;
 
-      fragment.appendChild(card);
+      fragment.appendChild(
+        card
+      );
     });
 
-    container.appendChild(fragment);
+    container.appendChild(
+      fragment
+    );
   }
 
 
@@ -1166,7 +1313,9 @@
 
 
   $("clearSearchBtn").onclick = () => {
-    $("search").value = "";
+    $("search").value =
+      "";
+
     render();
   };
 
