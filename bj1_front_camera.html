@@ -697,7 +697,9 @@
 
   function isVerSnDone(item) {
     return Boolean(item?.ver_sn_done) &&
-      /^\d{3,}$/.test(String(item?.serial_number || ""));
+      /^[A-Z0-9]{3,}$/.test(
+      String(item?.serial_number || "").toUpperCase()
+    );
   }
 
 
