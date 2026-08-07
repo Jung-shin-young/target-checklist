@@ -1698,7 +1698,27 @@
     $("pctText").textContent = `${percentage}%`;
     $("pctBar").style.width = `${percentage}%`;
   }
+function updateTabAppearance() {
+  document
+    .querySelectorAll("#topTabs button")
+    .forEach(button => {
+      button.classList.toggle(
+        "active",
+        !specialView &&
+        button.dataset.tab === currentTab
+      );
+    });
 
+  $("btnMine").classList.toggle(
+    "active",
+    specialView === "mine"
+  );
+
+  $("btnRecent").classList.toggle(
+    "active",
+    specialView === "recent"
+  );
+}
 
   function render() {
     updateSummary();
