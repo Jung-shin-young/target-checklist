@@ -513,9 +513,12 @@
 
   function isVerSnDone(item) {
     return Boolean(item.ver_sn_done) &&
-      /^\d{3,}$/.test(String(item.serial_number || ""));
+      /^(?:\d{5}|[A-Z]+\d{5})$/.test(
+        String(item.serial_number || "")
+          .trim()
+          .toUpperCase()  }
+    );
   }
-
 
   function isFinalDone(item) {
     return (
