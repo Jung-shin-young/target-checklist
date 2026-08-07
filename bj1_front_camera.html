@@ -1154,16 +1154,16 @@
     }
 
     const value = prompt(
-      "VER 확인 후 S/N을 입력하세요.\n\n숫자만 가능하며 최소 3자리입니다.\n예: 00123",
+      "VER 확인 후 S/N을 입력하세요.\n\n영문/숫자만 가능하며 최소 3자리입니다.\n예: AB123 또는 00123",
       current.serial_number || ""
     );
 
     if (value === null) return;
 
-    const serial = value.trim();
+    const serial = value.trim().toUpperCase();
 
-    if (!/^\d{3,}$/.test(serial)) {
-      alert("S/N은 숫자로만 3자리 이상 입력해야 합니다.\n\n예: 123 또는 00123");
+    if (!/^[A-Z0-9]{3,}$/.test(serial)) {
+      alert("S/N은 영문과 숫자만 3자리 이상 입력해야 합니다.\n\n예: AB123 또는 00123");
       return;
     }
 
