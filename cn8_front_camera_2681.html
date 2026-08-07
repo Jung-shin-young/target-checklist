@@ -1,0 +1,1913 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>CN8 전방카메라 실차 조치 현황</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 12px;
+      padding-bottom: 76px;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      line-height: 1.35;
+      color: #111;
+      background: #fff;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    button,
+    input {
+      min-height: 39px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .box {
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 11px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .right {
+      margin-left: auto;
+    }
+
+    .muted {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .topLine {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topActions {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+    }
+
+    .topActions button {
+      min-height: 35px;
+      padding: 6px 9px;
+      font-size: 12px;
+    }
+
+    .versionBox {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border: 1px solid #d6e4ff;
+      border-radius: 10px;
+      background: #f4f8ff;
+      font-size: 13px;
+    }
+
+    .versionValue {
+      font-weight: 800;
+      color: #174ea6;
+    }
+
+    .searchLine {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) auto;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    #search {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #connection {
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .countGrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .countItem {
+      min-width: 0;
+      padding: 6px 3px;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      text-align: center;
+      background: #f8f8f8;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .countItem b {
+      display: block;
+      margin-top: 1px;
+      font-size: 14px;
+    }
+
+    .progressWrap {
+      margin-top: 8px;
+    }
+
+    .progressTitle {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    #pctText {
+      margin-left: 4px;
+      color: #20752e;
+    }
+
+    .progressBg {
+      height: 10px;
+      margin-top: 4px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      background: #eee;
+    }
+
+    #pctBar {
+      width: 0;
+      height: 100%;
+      background: #2e7d32;
+      transition: width 0.2s;
+    }
+
+    /*
+      탭은 모바일에서도 줄바꿈하지 않고
+      한 줄 가로 스크롤로 표시
+    */
+    .tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 5px;
+      margin-top: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabs button {
+      flex: 0 0 auto;
+      min-height: 35px;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .tabs button.active {
+      color: #fff;
+      border-color: #111;
+      background: #111;
+    }
+
+    #saving {
+      min-height: 16px;
+      margin-top: 4px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .card {
+      padding: 11px;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .card.working {
+      border-color: #7ba6d8;
+      background: #f6faff;
+    }
+
+    .card.progress {
+      border-color: #e1b94f;
+      background: #fffdf5;
+    }
+
+    .card.done {
+      border-color: #86c896;
+      background: #f5fff7;
+    }
+
+    .cardHeader {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .vin {
+      min-width: 0;
+      font-size: 23px;
+      font-weight: 800;
+      word-break: break-all;
+    }
+
+    .stateBadge {
+      flex: 0 0 auto;
+      margin-left: auto;
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      background: #f5f5f5;
+    }
+
+    .stateBadge.working {
+      color: #15549a;
+      border-color: #9dc0e8;
+      background: #eaf4ff;
+    }
+
+    .stateBadge.progress {
+      color: #8a5a00;
+      border-color: #e2c261;
+      background: #fff5c9;
+    }
+
+    .stateBadge.done {
+      color: #20752e;
+      border-color: #91cc9e;
+      background: #e5f7e9;
+    }
+
+    /*
+      작업 이력 3개를 한 줄로 표시
+      화면이 좁아도 균등하게 유지
+    */
+    .historyGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .historyItem {
+      min-width: 0;
+      padding: 7px 5px;
+      border: 1px solid #e6e6e6;
+      border-radius: 9px;
+      background: #fafafa;
+      text-align: center;
+    }
+
+    .historyTitle {
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .historyWorker {
+      margin-top: 3px;
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .historyTime {
+      margin-top: 1px;
+      color: #666;
+      font-size: 9px;
+      line-height: 1.2;
+    }
+
+    .memo {
+      margin-top: 7px;
+      padding: 7px 8px;
+      border-radius: 9px;
+      background: #f1f1f1;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .missingBox {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border: 1px solid #f0c36d;
+      border-radius: 9px;
+      background: #fff8e7;
+      color: #6f4b00;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .lastChange {
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px solid #eee;
+      font-size: 11px;
+    }
+
+    /*
+      버튼은 빈 여백을 줄이기 위해 그리드 사용
+      모바일에서는 2열로 꽉 채움
+    */
+    .buttonGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .buttonGrid button {
+      min-width: 0;
+      min-height: 40px;
+      padding: 6px 3px;
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    .workButton.on {
+      color: #15549a;
+      border-color: #7ba6d8;
+      background: #eaf4ff;
+      font-weight: 800;
+    }
+
+    .updateButton.on {
+      color: #805600;
+      border-color: #d4ad2e;
+      background: #fff2b5;
+      font-weight: 800;
+    }
+
+    .verSnButton.on {
+      color: #6a3da1;
+      border-color: #b79ad8;
+      background: #f1e9fb;
+      font-weight: 800;
+    }
+
+    .dtcButton.on {
+      color: #20752e;
+      border-color: #6daf7c;
+      background: #dcf2e1;
+      font-weight: 800;
+    }
+
+    .resetButton {
+      color: #a32020;
+    }
+
+    .empty {
+      padding: 28px 12px;
+      border: 1px dashed #ccc;
+      border-radius: 13px;
+      color: #666;
+      text-align: center;
+    }
+
+    .bottomBar {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 999;
+      padding: 7px 10px;
+      border-top: 1px solid #ddd;
+      background: rgba(255,255,255,0.97);
+    }
+
+    .bottomInner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      max-width: 980px;
+      margin: auto;
+    }
+
+    .bottomInner button {
+      min-height: 40px;
+      padding: 7px;
+    }
+
+    .bottomInner button.active {
+      color: #fff;
+      border-color: #333;
+      background: #333;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        margin: 9px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .box {
+        padding: 9px;
+      }
+
+      .countItem {
+        padding-right: 1px;
+        padding-left: 1px;
+        font-size: 9px;
+      }
+
+      .countItem b {
+        font-size: 13px;
+      }
+
+      .buttonGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+
+<body>
+
+  <h2>CN8 전방카메라 실차 조치 현황</h2>
+
+  <div class="box">
+
+    <div class="topLine">
+      <div>
+        사용자:
+        <b id="nickLabel">-</b>
+      </div>
+
+      <div class="topActions">
+        <button id="refreshBtn">새로고침</button>
+        <button id="nickBtn">닉네임</button>
+        <button id="downloadBtn">엑셀</button>
+      </div>
+    </div>
+
+    <div class="versionBox">
+      적용 목표 버전:
+      <span class="versionValue" id="versionLabel">미정</span>
+    </div>
+
+    <div class="searchLine">
+      <input
+        id="search"
+        placeholder="VIN 검색"
+        autocomplete="off"
+      >
+
+      <span class="muted" id="connection">
+        연결 중...
+      </span>
+    </div>
+
+    <div class="countGrid">
+      <div class="countItem">
+        전체
+        <b id="cntTotal">-</b>
+      </div>
+
+      <div class="countItem">
+        작업중
+        <b id="cntWorking">-</b>
+      </div>
+
+      <div class="countItem">
+        업데이트 필요
+        <b id="cntNeedUpdate">-</b>
+      </div>
+
+      <div class="countItem">
+        VER·S/N 필요
+        <b id="cntNeedVer">-</b>
+      </div>
+
+      <div class="countItem">
+        DTC 필요
+        <b id="cntNeedDtc">-</b>
+      </div>
+
+      <div class="countItem">
+        최종완료
+        <b id="cntDone">-</b>
+      </div>
+    </div>
+
+    <div class="progressWrap">
+      <div class="progressTitle">
+        최종 완료율
+        <b id="pctText">0%</b>
+      </div>
+
+      <div class="progressBg">
+        <div id="pctBar"></div>
+      </div>
+    </div>
+
+    <div class="tabs" id="topTabs">
+      <button data-tab="all" class="active">전체</button>
+      <button data-tab="working">작업중</button>
+      <button data-tab="need_update">업데이트 필요</button>
+      <button data-tab="need_ver">VER·S/N 필요</button>
+      <button data-tab="need_dtc">DTC 필요</button>
+      <button data-tab="done">최종완료</button>
+    </div>
+
+    <div class="muted" id="saving"></div>
+
+  </div>
+
+  <div id="list" class="list"></div>
+
+  <div class="bottomBar">
+    <div class="bottomInner">
+      <button id="btnMine">내 작업</button>
+      <button id="btnRecent">최근 변경 24시간</button>
+    </div>
+  </div>
+
+
+<script>
+  /*
+    목표 버전이 확정되면
+    "미정" 부분만 변경
+  */
+  const TARGET_VERSION = "1.02 / 2681";
+
+  const SUPABASE_URL =
+    "https://ulqpqkzgwitkxxnipjkx.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_LMSx0JifZNOQXN-ViIjNaA_fg3Vkedl";
+
+  const TABLE_NAME =
+    "checklist_cn8_front_camera_2681";
+
+
+  const $ = id =>
+    document.getElementById(id);
+
+
+  let items = [];
+
+  let currentTab = "all";
+
+  let specialView = null;
+
+  let saving = false;
+
+  let nickname =
+    localStorage.getItem(
+      "cn8_2681_checklist_nickname"
+    ) || "";
+
+
+  function getHeaders(returnData = false) {
+    const headers = {
+      apikey: SUPABASE_KEY,
+      "Content-Type": "application/json"
+    };
+
+    if (returnData) {
+      headers.Prefer =
+        "return=representation";
+    }
+
+    return headers;
+  }
+
+
+  function requireNickname() {
+    while (!nickname) {
+      const value =
+        prompt(
+          "닉네임을 입력하세요.\n예: 신영"
+        );
+
+      if (
+        value &&
+        value.trim()
+      ) {
+        nickname =
+          value.trim();
+
+        localStorage.setItem(
+          "cn8_2681_checklist_nickname",
+          nickname
+        );
+      }
+    }
+
+    $("nickLabel").textContent =
+      nickname;
+  }
+
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+
+  function formatKST(value) {
+    if (!value) {
+      return "-";
+    }
+
+    return new Intl.DateTimeFormat(
+      "ko-KR",
+      {
+        timeZone: "Asia/Seoul",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }
+    ).format(new Date(value));
+  }
+
+
+  function isWorkStarted(item) {
+    return Boolean(item?.work_at);
+  }
+
+
+  function isUpdateDone(item) {
+    return Boolean(item?.update_done);
+  }
+
+
+  function isVerSnDone(item) {
+    return Boolean(item?.ver_sn_done) &&
+     /^(?:\d{5}|[A-Z]+\d{5})$/.test(
+      String(item?.serial_number || "").toUpperCase()
+    );
+  }
+
+
+  function isDtcDone(item) {
+    return Boolean(item?.dtc_done);
+  }
+
+
+  function isFinalDone(item) {
+    return (
+      isUpdateDone(item) &&
+      isVerSnDone(item) &&
+      isDtcDone(item)
+    );
+  }
+
+
+  function missingSteps(item) {
+    const missing = [];
+
+    if (!isUpdateDone(item)) missing.push("업데이트");
+    if (!isVerSnDone(item)) missing.push("VER·S/N");
+    if (!isDtcDone(item)) missing.push("DTC·경고등");
+
+    return missing;
+  }
+
+
+  function derivedState(item) {
+    if (isFinalDone(item)) {
+      return "done";
+    }
+
+    if (isVerSnDone(item) || isDtcDone(item)) {
+      return "dtc";
+    }
+
+    if (isUpdateDone(item)) {
+      return "update";
+    }
+
+    if (isWorkStarted(item)) {
+      return "working";
+    }
+
+    return "waiting";
+  }
+
+
+  function stateLabel(item) {
+    if (isFinalDone(item)) {
+      return "최종 완료";
+    }
+
+    if (isUpdateDone(item)) {
+      const needVer = !isVerSnDone(item);
+      const needDtc = !isDtcDone(item);
+
+      if (needVer && needDtc) return "VER·S/N · DTC 필요";
+      if (needVer) return "VER·S/N 필요";
+      if (needDtc) return "DTC 필요";
+    }
+
+    if (isWorkStarted(item)) {
+      return "작업중";
+    }
+
+    return "미완료";
+  }
+
+
+  function cardClass(item) {
+    const state =
+      derivedState(item);
+
+    if (state === "done") {
+      return "card done";
+    }
+
+    if (
+      state === "update" ||
+      state === "dtc"
+    ) {
+      return "card progress";
+    }
+
+    if (state === "working") {
+      return "card working";
+    }
+
+    return "card";
+  }
+
+
+  function badgeClass(item) {
+    const state =
+      derivedState(item);
+
+    if (state === "done") {
+      return "stateBadge done";
+    }
+
+    if (
+      state === "update" ||
+      state === "dtc"
+    ) {
+      return "stateBadge progress";
+    }
+
+    if (state === "working") {
+      return "stateBadge working";
+    }
+
+    return "stateBadge";
+  }
+
+
+  function setSaving(value) {
+    saving = value;
+
+    $("saving").textContent =
+      value ? "저장 중..." : "";
+
+    document
+      .querySelectorAll("button")
+      .forEach(button => {
+        button.disabled = value;
+      });
+  }
+
+
+  async function loadData() {
+    $("connection").textContent =
+      "연결 중...";
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      "?select=*&order=vin.asc";
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "GET",
+            headers: getHeaders()
+          }
+        );
+
+      const text =
+        await response.text();
+
+      if (!response.ok) {
+        $("connection").textContent =
+          `실패 ${response.status}`;
+
+        alert(
+          "Supabase 로드 실패\n\n" +
+          "상태코드: " +
+          response.status +
+          "\n\n" +
+          text
+        );
+
+        return;
+      }
+
+      items =
+        text
+          ? JSON.parse(text)
+          : [];
+
+      $("connection").textContent =
+        `연결됨 ✅ ${items.length}대`;
+
+      render();
+
+    } catch (error) {
+      $("connection").textContent =
+        "연결 오류";
+
+      alert(
+        "Supabase 연결 오류\n\n" +
+        String(error)
+      );
+    }
+  }
+
+
+  async function patchRow(id, payload) {
+    const url =
+      `${SUPABASE_URL}/rest/v1/${TABLE_NAME}` +
+      `?id=eq.${encodeURIComponent(id)}`;
+
+    try {
+      const response =
+        await fetch(
+          url,
+          {
+            method: "PATCH",
+            headers: getHeaders(true),
+            body: JSON.stringify(payload)
+          }
+        );
+
+      if (!response.ok) {
+        const text =
+          await response.text();
+
+        alert(
+          "저장 실패\n\n" +
+          "상태코드: " +
+          response.status +
+          "\n\n" +
+          text
+        );
+
+        return false;
+      }
+
+      return true;
+
+    } catch (error) {
+      alert(
+        "저장 중 연결 오류\n\n" +
+        String(error)
+      );
+
+      return false;
+    }
+  }
+
+
+  function addLastChange(
+    payload,
+    now
+  ) {
+    payload.updated_by =
+      nickname;
+
+    payload.updated_at =
+      now;
+  }
+
+
+  async function startWork(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    if (isFinalDone(current)) {
+      const confirmed =
+        confirm(
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "작업을 다시 시작하면 업데이트 완료와 " +
+          "VER·S/N 및 DTC·경고등 기록이 모두 해제됩니다.\n\n" +
+          "정말 다시 작업하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    if (
+      isWorkStarted(current) &&
+      !isUpdateDone(current) &&
+      !isVerSnDone(current) &&
+      !isDtcDone(current)
+    ) {
+      const confirmed =
+        confirm(
+          "이미 작업중인 차량입니다.\n\n" +
+          "작업 시작자를 현재 사용자로 변경하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      work_by: nickname,
+      work_at: now
+    };
+
+    if (isFinalDone(current)) {
+      payload.update_done = false;
+      payload.update_by = null;
+      payload.update_at = null;
+
+      payload.ver_sn_done = false;
+      payload.ver_sn_by = null;
+      payload.ver_sn_at = null;
+      payload.serial_number = null;
+
+      payload.dtc_done = false;
+      payload.dtc_by = null;
+      payload.dtc_at = null;
+    }
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function toggleUpdate(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    const nextValue =
+      !isUpdateDone(current);
+
+    if (
+      nextValue &&
+      !isWorkStarted(current)
+    ) {
+      const confirmed =
+        confirm(
+          "아직 작업 시작 처리가 되지 않았습니다.\n\n" +
+          "작업 시작과 업데이트 완료를 동시에 처리하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    if (
+      isFinalDone(current) &&
+      !nextValue
+    ) {
+      const confirmed =
+        confirm(
+          "이미 최종 완료된 차량입니다.\n\n" +
+          "업데이트 완료를 해제하면 VER·S/N과 DTC·경고등 완료도 " +
+          "함께 해제되고 최종 완료가 취소됩니다.\n\n" +
+          "정말 변경하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      update_done: nextValue,
+      update_by:
+        nextValue
+          ? nickname
+          : null,
+      update_at:
+        nextValue
+          ? now
+          : null
+    };
+
+    if (
+      nextValue &&
+      !isWorkStarted(current)
+    ) {
+      payload.work_by =
+        nickname;
+
+      payload.work_at =
+        now;
+    }
+
+    if (!nextValue) {
+      payload.ver_sn_done = false;
+      payload.ver_sn_by = null;
+      payload.ver_sn_at = null;
+      payload.serial_number = null;
+
+      payload.dtc_done = false;
+      payload.dtc_by = null;
+      payload.dtc_at = null;
+    }
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function saveVerSn(id) {
+    requireNickname();
+
+    const current = items.find(item => item.id === id);
+    if (!current) return;
+
+    if (!isUpdateDone(current)) {
+      alert("먼저 업데이트 완료를 처리해주세요.\n\nVER 확인과 S/N 기록은 업데이트 완료 후에만 가능합니다.");
+      return;
+    }
+
+    if (isFinalDone(current)) {
+      const confirmed = confirm(
+        "이미 최종 완료된 차량입니다.\n\nVER/S/N을 수정하면 최종 완료 상태가 변경될 수 있습니다.\n\n계속하시겠습니까?"
+      );
+      if (!confirmed) return;
+    }
+
+    const value = prompt(
+      "VER 확인 후 S/N을 입력하세요.\n\n기본은 숫자 5자리입니다.\n예: 00123\n\n중복일 경우 앞에 영문 구분자를 포함해 입력하세요.\n예: PLCD00123",
+      current.serial_number || ""
+    );
+
+   if (value === null) return;
+
+const serial = value.trim().toUpperCase();
+
+/*
+  허용 형식
+  1. 기본: 숫자 정확히 5자리
+     예) 00123
+
+  2. 구분 필요 시: 영문 + 숫자 5자리
+     예) PLCD00123
+*/
+if (!/^(?:\d{5}|[A-Z]+\d{5})$/.test(serial)) {
+  alert(
+    "S/N 형식이 맞지 않습니다.\n\n" +
+    "기본: 숫자 5자리\n" +
+    "예: 00123\n\n" +
+    "구분이 필요한 경우: 영문 + 숫자 5자리\n" +
+    "예: PLCD00123"
+  );
+  return;
+}
+
+/*
+  현재 VIN은 제외하고
+  완전히 동일한 S/N이 있는지 검사
+*/
+const duplicate = items.find(item =>
+  item.id !== id &&
+  String(item.serial_number || "")
+    .trim()
+    .toUpperCase() === serial
+);
+
+if (duplicate) {
+  alert(
+    "이미 사용된 S/N입니다.\n\n" +
+    "입력 S/N: " + serial + "\n" +
+    "기존 VIN: " + duplicate.vin + "\n\n" +
+    "실물 S/N의 영문 구분자까지 확인해서 입력해주세요.\n" +
+    "예: PLCD" + serial.slice(-5)
+  );
+  return;
+}
+
+    setSaving(true);
+    const now = new Date().toISOString();
+
+    const payload = {
+      ver_sn_done: true,
+      ver_sn_by: nickname,
+      ver_sn_at: now,
+      serial_number: serial
+    };
+
+    addLastChange(payload, now);
+
+    const success = await patchRow(id, payload);
+    setSaving(false);
+
+    if (success) await loadData();
+  }
+
+
+  async function toggleDtc(id) {
+    requireNickname();
+
+    const current = items.find(item => item.id === id);
+    if (!current) return;
+
+    const nextValue = !isDtcDone(current);
+
+    if (nextValue && !isUpdateDone(current)) {
+      alert("먼저 업데이트 완료를 처리해주세요.\n\nDTC 및 경고등 확인은 업데이트 완료 후에만 가능합니다.");
+      return;
+    }
+
+    if (isFinalDone(current) && !nextValue) {
+      const confirmed = confirm(
+        "이미 최종 완료된 차량입니다.\n\nDTC·경고등 완료를 해제하면 최종 완료가 취소됩니다.\n\n정말 변경하시겠습니까?"
+      );
+      if (!confirmed) return;
+    }
+
+    setSaving(true);
+    const now = new Date().toISOString();
+
+    const payload = {
+      dtc_done: nextValue,
+      dtc_by: nextValue ? nickname : null,
+      dtc_at: nextValue ? now : null
+    };
+
+    addLastChange(payload, now);
+
+    const success = await patchRow(id, payload);
+    setSaving(false);
+
+    if (success) await loadData();
+  }
+
+  async function editComment(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    if (isFinalDone(current)) {
+      const confirmed =
+        confirm(
+          "최종 완료된 차량입니다.\n\n" +
+          "완료 상태는 유지되지만 코멘트와 " +
+          "최근 변경자 기록이 수정됩니다.\n\n" +
+          "계속하시겠습니까?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    const value =
+      prompt(
+        "기타 코멘트를 입력하세요.\n" +
+        "내용을 모두 지우고 저장하면 코멘트가 삭제됩니다.",
+        current.memo || ""
+      );
+
+    if (value === null) {
+      return;
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      memo:
+        value.trim() || null
+    };
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  async function resetIncomplete(id) {
+    requireNickname();
+
+    const current =
+      items.find(
+        item => item.id === id
+      );
+
+    if (!current) {
+      return;
+    }
+
+    if (
+      !isWorkStarted(current) &&
+      !isUpdateDone(current) &&
+      !isDtcDone(current)
+    ) {
+      alert(
+        "이미 미완료 상태입니다."
+      );
+
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        isFinalDone(current)
+          ? (
+            "이미 최종 완료된 차량입니다.\n\n" +
+            "작업 시작, 업데이트, VER·S/N, DTC·경고등 기록을 " +
+            "모두 해제하고 미완료로 변경하시겠습니까?"
+          )
+          : (
+            "현재 작업 진행 상태를 모두 해제하고 " +
+            "미완료로 변경하시겠습니까?"
+          )
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setSaving(true);
+
+    const now =
+      new Date().toISOString();
+
+    const payload = {
+      work_by: null,
+      work_at: null,
+
+      update_done: false,
+      update_by: null,
+      update_at: null,
+
+      ver_sn_done: false,
+      ver_sn_by: null,
+      ver_sn_at: null,
+      serial_number: null,
+
+      dtc_done: false,
+      dtc_by: null,
+      dtc_at: null
+    };
+
+    addLastChange(
+      payload,
+      now
+    );
+
+    const success =
+      await patchRow(
+        id,
+        payload
+      );
+
+    setSaving(false);
+
+    if (success) {
+      await loadData();
+    }
+  }
+
+
+  function filterItems() {
+    const query =
+      $("search")
+        .value
+        .trim()
+        .toUpperCase();
+
+    let view =
+      [...items];
+
+    if (query) {
+      view =
+        view.filter(item =>
+          String(item.vin || "")
+            .toUpperCase()
+            .includes(query)
+        );
+    }
+
+    if (specialView === "mine") {
+      view =
+        view.filter(item =>
+          item.work_by === nickname ||
+          item.update_by === nickname ||
+          item.ver_sn_by === nickname ||
+          item.dtc_by === nickname ||
+          item.updated_by === nickname
+        );
+    }
+
+    if (specialView === "recent") {
+      const limit =
+        Date.now() -
+        24 * 60 * 60 * 1000;
+
+      view =
+        view.filter(item =>
+          item.updated_at &&
+          new Date(
+            item.updated_at
+          ).getTime() >= limit
+        );
+    }
+
+    if (!specialView) {
+      if (currentTab === "working") {
+        view = view.filter(item =>
+          isWorkStarted(item) && !isFinalDone(item)
+        );
+      }
+
+      if (currentTab === "need_update") {
+        view = view.filter(item =>
+          !isUpdateDone(item)
+        );
+      }
+
+      if (currentTab === "need_ver") {
+        view = view.filter(item =>
+          isUpdateDone(item) && !isVerSnDone(item)
+        );
+      }
+
+      if (currentTab === "need_dtc") {
+        view = view.filter(item =>
+          isUpdateDone(item) && !isDtcDone(item)
+        );
+      }
+
+      if (currentTab === "done") {
+        view = view.filter(item =>
+          isFinalDone(item)
+        );
+      }
+    }
+
+    const order = {
+      waiting: 1,
+      working: 2,
+      update: 3,
+      dtc: 4,
+      done: 5
+    };
+
+    view.sort((a, b) => {
+      if (specialView) {
+        const timeA =
+          new Date(
+            a.updated_at || 0
+          ).getTime();
+
+        const timeB =
+          new Date(
+            b.updated_at || 0
+          ).getTime();
+
+        return timeB - timeA;
+      }
+
+      const difference =
+        order[derivedState(a)] -
+        order[derivedState(b)];
+
+      if (difference !== 0) {
+        return difference;
+      }
+
+      return String(a.vin)
+        .localeCompare(
+          String(b.vin)
+        );
+    });
+
+    return view;
+  }
+
+
+  function historyItem(
+    title,
+    done,
+    worker,
+    time
+  ) {
+    return `
+      <div class="historyItem">
+        <div class="historyTitle">
+          ${done ? "✅" : "⬜"}
+          ${title}
+        </div>
+
+        <div class="historyWorker">
+          ${escapeHtml(worker || "-")}
+        </div>
+
+        <div class="historyTime">
+          ${formatKST(time)}
+        </div>
+      </div>
+    `;
+  }
+
+
+  function makeCard(item) {
+    const card = document.createElement("div");
+    card.className = cardClass(item);
+
+    const workButtonText =
+      isWorkStarted(item) && !isUpdateDone(item)
+        ? "작업자 변경"
+        : "작업 시작";
+
+    const updateButtonText =
+      isUpdateDone(item)
+        ? "업데이트 해제"
+        : "업데이트 완료";
+
+    const verSnButtonText =
+      isVerSnDone(item)
+        ? "VER·S/N 수정"
+        : "VER·S/N 입력";
+
+    const dtcButtonText =
+      isDtcDone(item)
+        ? "DTC·경고등 해제"
+        : "DTC·경고등 완료";
+
+    card.innerHTML = `
+      <div class="cardHeader">
+        <div class="vin">${escapeHtml(item.vin)}</div>
+        <div class="${badgeClass(item)}">${stateLabel(item)}</div>
+      </div>
+
+      <div class="historyGrid">
+        ${historyItem("작업 시작", isWorkStarted(item), item.work_by, item.work_at)}
+        ${historyItem("업데이트", isUpdateDone(item), item.update_by, item.update_at)}
+        ${historyItem(
+          isVerSnDone(item)
+            ? `VER·S/N<br><span style="font-size:10px">S/N ${escapeHtml(item.serial_number || "")}</span>`
+            : "VER·S/N",
+          isVerSnDone(item),
+          item.ver_sn_by,
+          item.ver_sn_at
+        )}
+        ${historyItem("DTC·경고등", isDtcDone(item), item.dtc_by, item.dtc_at)}
+      </div>
+
+      ${
+        !isFinalDone(item)
+          ? `<div class="missingBox">남은 작업: ${missingSteps(item).map(escapeHtml).join(" / ")}</div>`
+          : ""
+      }
+
+      ${
+        item.memo
+          ? `<div class="memo"><b>기타</b> · ${escapeHtml(item.memo)}</div>`
+          : ""
+      }
+
+      <div class="lastChange muted">
+        최근 변경:
+        <b>${escapeHtml(item.updated_by || "-")}</b>
+        · ${formatKST(item.updated_at)}
+      </div>
+
+      <div class="buttonGrid">
+        <button
+          class="workButton ${isWorkStarted(item) && !isUpdateDone(item) ? "on" : ""}"
+          onclick="startWork('${item.id}')"
+        >${workButtonText}</button>
+
+        <button
+          class="updateButton ${isUpdateDone(item) ? "on" : ""}"
+          onclick="toggleUpdate('${item.id}')"
+        >${updateButtonText}</button>
+
+        <button
+          class="verSnButton ${isVerSnDone(item) ? "on" : ""}"
+          onclick="saveVerSn('${item.id}')"
+        >${verSnButtonText}</button>
+
+        <button
+          class="dtcButton ${isDtcDone(item) ? "on" : ""}"
+          onclick="toggleDtc('${item.id}')"
+        >${dtcButtonText}</button>
+
+        <button onclick="editComment('${item.id}')">기타 코멘트</button>
+
+        <button
+          class="resetButton"
+          onclick="resetIncomplete('${item.id}')"
+        >미완료로 변경</button>
+      </div>
+    `;
+
+    return card;
+  }
+
+  function renderList(view) {
+    const container =
+      $("list");
+
+    container.innerHTML = "";
+
+    if (view.length === 0) {
+      container.innerHTML = `
+        <div class="empty">
+          표시할 VIN이 없습니다.
+        </div>
+      `;
+
+      return;
+    }
+
+    const batchSize = 50;
+
+    let index = 0;
+
+    function drawBatch() {
+      const fragment =
+        document.createDocumentFragment();
+
+      const end =
+        Math.min(
+          index + batchSize,
+          view.length
+        );
+
+      while (index < end) {
+        fragment.appendChild(
+          makeCard(view[index])
+        );
+
+        index++;
+      }
+
+      container.appendChild(
+        fragment
+      );
+
+      if (index < view.length) {
+        requestAnimationFrame(
+          drawBatch
+        );
+      }
+    }
+
+    drawBatch();
+  }
+
+
+  function updateSummary() {
+    const total = items.length;
+
+    const workingCount = items.filter(item =>
+      isWorkStarted(item) && !isFinalDone(item)
+    ).length;
+
+    const needUpdateCount = items.filter(item =>
+      !isUpdateDone(item)
+    ).length;
+
+    const needVerCount = items.filter(item =>
+      isUpdateDone(item) && !isVerSnDone(item)
+    ).length;
+
+    const needDtcCount = items.filter(item =>
+      isUpdateDone(item) && !isDtcDone(item)
+    ).length;
+
+    const finalCount = items.filter(isFinalDone).length;
+
+    $("cntTotal").textContent = total;
+    $("cntWorking").textContent = workingCount;
+    $("cntNeedUpdate").textContent = needUpdateCount;
+    $("cntNeedVer").textContent = needVerCount;
+    $("cntNeedDtc").textContent = needDtcCount;
+    $("cntDone").textContent = finalCount;
+
+    const percentage = total
+      ? Math.round(finalCount / total * 100)
+      : 0;
+
+    $("pctText").textContent = `${percentage}%`;
+    $("pctBar").style.width = `${percentage}%`;
+  }
+function updateTabAppearance() {
+  document
+    .querySelectorAll("#topTabs button")
+    .forEach(button => {
+      button.classList.toggle(
+        "active",
+        !specialView &&
+        button.dataset.tab === currentTab
+      );
+    });
+
+  $("btnMine").classList.toggle(
+    "active",
+    specialView === "mine"
+  );
+
+  $("btnRecent").classList.toggle(
+    "active",
+    specialView === "recent"
+  );
+}
+
+  function render() {
+    updateSummary();
+
+    updateTabAppearance();
+
+    renderList(
+      filterItems()
+    );
+  }
+
+
+  $("search").addEventListener(
+    "input",
+    render
+  );
+
+
+  $("refreshBtn").onclick =
+    loadData;
+
+
+  $("nickBtn").onclick = () => {
+    nickname = "";
+
+    localStorage.removeItem(
+      "cn8_2681_checklist_nickname"
+    );
+
+    requireNickname();
+
+    specialView = null;
+
+    render();
+  };
+
+
+  document
+    .querySelectorAll(
+      "#topTabs button"
+    )
+    .forEach(button => {
+      button.onclick = () => {
+        currentTab =
+          button.dataset.tab;
+
+        specialView = null;
+
+        render();
+      };
+    });
+
+
+  $("btnMine").onclick = () => {
+    requireNickname();
+
+    specialView =
+      specialView === "mine"
+        ? null
+        : "mine";
+
+    render();
+  };
+
+
+  $("btnRecent").onclick = () => {
+    specialView =
+      specialView === "recent"
+        ? null
+        : "recent";
+
+    render();
+  };
+
+
+  $("downloadBtn").onclick = () => {
+    if (typeof XLSX === "undefined") {
+      alert("엑셀 기능을 불러오지 못했습니다.");
+      return;
+    }
+
+    const rows = items.map(item => ({
+      VIN: item.vin,
+      목표버전: TARGET_VERSION,
+      현재상태: stateLabel(item),
+
+      작업시작: isWorkStarted(item) ? "Y" : "N",
+      작업시작자: item.work_by || "",
+      작업시작시간: formatKST(item.work_at),
+
+      업데이트완료: isUpdateDone(item) ? "Y" : "N",
+      업데이트작업자: item.update_by || "",
+      업데이트시간: formatKST(item.update_at),
+
+      VER확인_SN기록: isVerSnDone(item) ? "Y" : "N",
+      SN: item.serial_number == null ? "" : String(item.serial_number),
+      VER_SN작업자: item.ver_sn_by || "",
+      VER_SN시간: formatKST(item.ver_sn_at),
+
+      DTC_경고등확인: isDtcDone(item) ? "Y" : "N",
+      DTC_경고등작업자: item.dtc_by || "",
+      DTC_경고등시간: formatKST(item.dtc_at),
+
+      최종완료: isFinalDone(item) ? "Y" : "N",
+      기타코멘트: item.memo || "",
+      최근변경자: item.updated_by || "",
+      최근변경시간: formatKST(item.updated_at)
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    /* S/N 열을 문자열 형식으로 강제해 00123 같은 앞자리 0을 유지 */
+    const snColumnIndex = 10;
+    for (let row = 1; row <= rows.length; row++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: snColumnIndex });
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].t = "s";
+        worksheet[cellAddress].z = "@";
+        worksheet[cellAddress].v = String(worksheet[cellAddress].v);
+      }
+    }
+
+    worksheet["!cols"] = [
+      { wch: 20 }, { wch: 18 }, { wch: 16 },
+      { wch: 11 }, { wch: 13 }, { wch: 18 },
+      { wch: 13 }, { wch: 15 }, { wch: 18 },
+      { wch: 15 }, { wch: 18 }, { wch: 15 }, { wch: 18 },
+      { wch: 17 }, { wch: 17 }, { wch: 18 },
+      { wch: 11 }, { wch: 35 }, { wch: 14 }, { wch: 18 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "cn8_2681 Checklist");
+
+    const stamp = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
+    XLSX.writeFile(workbook, `cn8_2681_front_camera_${stamp}.xlsx`);
+  };
+
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+      $("versionLabel").textContent =
+        TARGET_VERSION;
+
+      requireNickname();
+
+      loadData();
+    }
+  );
+</script>
+
+</body>
+</html>
