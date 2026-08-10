@@ -624,12 +624,14 @@
   }
 
 
-  function isVerSnDone(item) {
-    return (
-      Boolean(item?.ver_sn_done) &&
-      validSerial(item?.serial_number)
+function isVerSnDone(item) {
+  return Boolean(item?.ver_sn_done) &&
+    /^(?:\d{5}|\d{9}|[A-Z]+\d{5})$/.test(
+      String(item?.serial_number || "")
+        .trim()
+        .toUpperCase()
     );
-  }
+}
 
 
   function isDtcDone(item) {
@@ -1044,93 +1046,220 @@
   }
 
 
-  async function saveVerSn(id) {
-    requireNickname();
+async function saveVerSn(id) {
+  requireNickname();
 
-    const current =
-      items.find(
-        item => item.id === id
-      );
+  const current =
+    items.find(item => item.id === id);
 
-    if (!current) {
-      return;
-    }
+  if (!current) return;
 
-    if (!isUpdateDone(current)) {
-      alert(
-        "먼저 업데이트 완료를 처리해주세요.\n\n" +
-        "VER 확인과 S/N 기록은 업데이트 완료 후 가능합니다."
-      );
+  if (!isUpdateDone(current)) {
+    alert(
+      "먼저 업데이트 완료를 처리해주세요.\n\n" +
+      "VER 확인과 S/N 기록은 업데이트 완료 후에만 가능합니다."
+    );
+    return;
+  }
 
-      return;
-    }
-
-    const value =
-      prompt(
-        "VER 확인 후 S/N을 입력하세요.\n\n" +
-        "숫자만 입력 가능하며 최소 3자리 이상이어야 합니다.\n" +
-        "예: 00123",
-        current.serial_number || ""
-      );
-
-    if (value === null) {
-      return;
-    }
-
-    const serial =
-      value.trim();
-
-    if (!validSerial(serial)) {
-      alert(
-        "S/N 형식이 올바르지 않습니다.\n\n" +
-        "숫자로만 3자리 이상 입력해주세요.\n" +
-        "예: 123 또는 00123"
-      );
-
-      return;
-    }
-
-    if (isFinalDone(current)) {
-      const confirmed =
-        confirm(
-          "이미 최종 완료된 차량입니다.\n\n" +
-          "S/N 또는 VER 확인 기록을 수정하시겠습니까?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    setSaving(true);
-
-    const now =
-      new Date().toISOString();
-
-    const payload = {
-      serial_number: serial,
-      ver_sn_done: true,
-      ver_sn_by: nickname,
-      ver_sn_at: now
-    };
-
-    addLastChange(
-      payload,
-      now
+  if (isFinalDone(current)) {
+    const confirmed = confirm(
+      "이미 최종 완료된 차량입니다.\n\n" +
+      "VER/S/N을 수정하면 최종 완료 상태가 변경될 수 있습니다.\n\n" +
+      "계속하시겠습니까?"
     );
 
-    const success =
-      await patchRow(
-        id,
-        payload
+    if (!confirmed) return;
+  }
+
+  /*
+    기존에 예외 S/N이 저장돼 있는 차량을 수정하는 경우
+    기존 전체 S/N을 그대로 수정할 수 있도록 처리
+  */
+  const existingSerial =
+    String(current.serial_number || "")
+      .trim()
+      .toUpperCase();
+
+  let value = prompt(
+    "VER 확인 후 S/N을 입력하세요.\n\n" +
+    "기본은 숫자 5자리입니다.\n" +
+    "예: 00123\n\n" +
+    "중복이 확인되면 생산월일 4자리 또는 영문 구분자를\n" +
+    "앞에 추가할 수 있습니다.",
+    existingSerial
+  );
+
+  if (value === null) return;
+
+  let serial =
+    value.trim().toUpperCase();
+
+
+  /*
+    기존에 저장된 예외형 S/N을 수정하는 경우
+    9자리 숫자 또는 영문+5자리 형식을 그대로 허용
+  */
+  const isExistingExtended =
+    existingSerial &&
+    serial === existingSerial &&
+    /^(?:\d{9}|[A-Z]+\d{5})$/.test(serial);
+
+  if (isExistingExtended) {
+    const duplicateExtended =
+      items.find(item =>
+        item.id !== id &&
+        String(item.serial_number || "")
+          .trim()
+          .toUpperCase() === serial
       );
 
-    setSaving(false);
+    if (duplicateExtended) {
+      alert(
+        "이미 사용된 S/N입니다.\n\n" +
+        "S/N: " + serial + "\n" +
+        "기존 VIN: " + duplicateExtended.vin
+      );
+      return;
+    }
+  } else {
 
-    if (success) {
-      await loadData();
+    /*
+      최초 입력은 무조건 숫자 5자리
+    */
+    if (!/^\d{5}$/.test(serial)) {
+      alert(
+        "처음에는 S/N 숫자 5자리만 입력해주세요.\n\n" +
+        "예: 00123\n\n" +
+        "생산월일/영문 구분자는 중복이 발생했을 때만 입력할 수 있습니다."
+      );
+      return;
+    }
+
+    /*
+      현재 VIN을 제외하고 기본 5자리 S/N 중복 확인
+    */
+    const duplicate =
+      items.find(item =>
+        item.id !== id &&
+        String(item.serial_number || "")
+          .trim()
+          .toUpperCase() === serial
+      );
+
+    /*
+      중복이 없으면 5자리 그대로 저장
+    */
+    if (!duplicate) {
+      // 그대로 진행
+    } else {
+
+      const baseSerial = serial;
+
+      /*
+        중복인 경우에만 예외 S/N 재입력
+      */
+      const extendedValue = prompt(
+        "⚠️ 이미 사용된 S/N입니다.\n\n" +
+        "S/N: " + baseSerial + "\n" +
+        "기존 VIN: " + duplicate.vin + "\n\n" +
+        "앞에 생산월일 4자리 또는 영문 구분자를 추가해주세요.\n\n" +
+        "예:\n" +
+        "0810" + baseSerial + "\n" +
+        "PLCD" + baseSerial
+      );
+
+      if (extendedValue === null) return;
+
+      const extendedSerial =
+        extendedValue
+          .trim()
+          .toUpperCase();
+
+      /*
+        허용:
+        4자리 숫자 + 기존 S/N 5자리
+        영문 + 기존 S/N 5자리
+      */
+      const numericPrefixPattern =
+        new RegExp(
+          "^\\d{4}" + baseSerial + "$"
+        );
+
+      const letterPrefixPattern =
+        new RegExp(
+          "^[A-Z]+" + baseSerial + "$"
+        );
+
+      if (
+        !numericPrefixPattern.test(extendedSerial) &&
+        !letterPrefixPattern.test(extendedSerial)
+      ) {
+        alert(
+          "S/N 형식이 맞지 않습니다.\n\n" +
+          "기존 S/N " + baseSerial + " 앞에만 구분자를 추가해주세요.\n\n" +
+          "생산월일 4자리 예: 0810" + baseSerial + "\n" +
+          "영문 예: PLCD" + baseSerial
+        );
+        return;
+      }
+
+      /*
+        예외 S/N 전체값도 중복인지 다시 확인
+      */
+      const extendedDuplicate =
+        items.find(item =>
+          item.id !== id &&
+          String(item.serial_number || "")
+            .trim()
+            .toUpperCase() === extendedSerial
+        );
+
+      if (extendedDuplicate) {
+        alert(
+          "입력한 전체 S/N도 이미 사용 중입니다.\n\n" +
+          "S/N: " + extendedSerial + "\n" +
+          "기존 VIN: " + extendedDuplicate.vin + "\n\n" +
+          "실물 정보를 다시 확인해주세요."
+        );
+        return;
+      }
+
+      serial =
+        extendedSerial;
     }
   }
+
+
+  setSaving(true);
+
+  const now =
+    new Date().toISOString();
+
+  const payload = {
+    ver_sn_done: true,
+    ver_sn_by: nickname,
+    ver_sn_at: now,
+    serial_number: serial
+  };
+
+  addLastChange(
+    payload,
+    now
+  );
+
+  const success =
+    await patchRow(
+      id,
+      payload
+    );
+
+  setSaving(false);
+
+  if (success) {
+    await loadData();
+  }
+}
 
 
   async function toggleDtc(id) {
