@@ -357,14 +357,14 @@
     return Boolean(item?.update_done);
   }
 
-  function isVerSnDone(item) {
-    return Boolean(item?.ver_sn_done) &&
-      /^(?:\d{5}|[A-Z]+\d{5})$/.test(
-        String(item?.serial_number || "")
-          .trim()
-          .toUpperCase()
-      );
-  }
+function isVerSnDone(item) {
+  return Boolean(item?.ver_sn_done) &&
+    /^(?:\d{5}|\d{9}|[A-Z]+\d{5})$/.test(
+      String(item?.serial_number || "")
+        .trim()
+        .toUpperCase()
+    );
+}
 
   function isDtcDone(item) {
     return Boolean(item?.dtc_done);
@@ -683,53 +683,81 @@
     }
   }
 
-  async function saveVerSn(id) {
-    requireNickname();
+async function saveVerSn(id) {
+  requireNickname();
 
-    const current =
-      items.find(item => item.id === id);
+  const current =
+    items.find(item => item.id === id);
 
-    if (!current) return;
+  if (!current) return;
 
-    if (!isUpdateDone(current)) {
+  if (!isUpdateDone(current)) {
+    alert(
+      "Please complete the update first.\n\n" +
+      "VER confirmation and S/N entry are available only after the update is completed."
+    );
+    return;
+  }
+
+  if (isFinalDone(current)) {
+    const confirmed = confirm(
+      "This vehicle is already completed.\n\n" +
+      "Editing VER/S/N may change the final completion status.\n\n" +
+      "Continue?"
+    );
+
+    if (!confirmed) return;
+  }
+
+  const existingSerial =
+    String(current.serial_number || "")
+      .trim()
+      .toUpperCase();
+
+  let value = prompt(
+    "Confirm VER and enter the S/N.\n\n" +
+    "Normally, enter the last 5 digits only.\n" +
+    "Example: 00123\n\n" +
+    "If a duplicate is found, you may add a 4-digit production date\n" +
+    "or a letter prefix in front of the 5-digit S/N.",
+    existingSerial
+  );
+
+  if (value === null) return;
+
+  let serial =
+    value.trim().toUpperCase();
+
+  const isExistingExtended =
+    existingSerial &&
+    serial === existingSerial &&
+    /^(?:\d{9}|[A-Z]+\d{5})$/.test(serial);
+
+  if (isExistingExtended) {
+    const duplicateExtended =
+      items.find(item =>
+        item.id !== id &&
+        String(item.serial_number || "")
+          .trim()
+          .toUpperCase() === serial
+      );
+
+    if (duplicateExtended) {
       alert(
-        "Please complete the update first.\n\n" +
-        "VER confirmation and S/N entry are available only after the update is complete."
+        "This S/N is already in use.\n\n" +
+        "S/N: " + serial + "\n" +
+        "Existing VIN: " + duplicateExtended.vin
       );
       return;
     }
 
-    if (isFinalDone(current)) {
-      const confirmed = confirm(
-        "This vehicle is already completed.\n\n" +
-        "Editing VER/S/N may change the final completion status.\n\n" +
-        "Do you want to continue?"
-      );
+  } else {
 
-      if (!confirmed) return;
-    }
-
-    const value = prompt(
-      "Enter the S/N after checking the VER.\n\n" +
-      "Standard format: 5 digits\n" +
-      "Example: 00123\n\n" +
-      "If an identifier is required, enter the letter prefix followed by 5 digits.\n" +
-      "Example: PLCD00123",
-      current.serial_number || ""
-    );
-
-    if (value === null) return;
-
-    const serial =
-      value.trim().toUpperCase();
-
-    if (!/^(?:\d{5}|[A-Z]+\d{5})$/.test(serial)) {
+    if (!/^\d{5}$/.test(serial)) {
       alert(
-        "Invalid S/N format.\n\n" +
-        "Standard: 5 digits\n" +
+        "Enter the 5-digit S/N first.\n\n" +
         "Example: 00123\n\n" +
-        "With identifier: letters + 5 digits\n" +
-        "Example: PLCD00123"
+        "A production-date or letter prefix can only be added after a duplicate is detected."
       );
       return;
     }
@@ -742,40 +770,107 @@
           .toUpperCase() === serial
       );
 
-    if (duplicate) {
-      alert(
-        "This S/N is already in use.\n\n" +
-        "S/N: " + serial + "\n" +
+    if (!duplicate) {
+      // No duplicate: save the normal 5-digit S/N.
+
+    } else {
+
+      const baseSerial = serial;
+
+      const extendedValue = prompt(
+        "⚠️ Duplicate S/N detected.\n\n" +
+        "S/N: " + baseSerial + "\n" +
         "Existing VIN: " + duplicate.vin + "\n\n" +
-        "Please check the full S/N including the letter prefix on the actual unit.\n" +
-        "Example: PLCD" + serial.slice(-5)
+        "Add either a 4-digit production date or a letter prefix\n" +
+        "in front of the existing 5-digit S/N.\n\n" +
+        "Examples:\n" +
+        "0810" + baseSerial + "\n" +
+        "PLCD" + baseSerial
       );
-      return;
-    }
 
-    setSaving(true);
+      if (extendedValue === null) return;
 
-    const now =
-      new Date().toISOString();
+      const extendedSerial =
+        extendedValue
+          .trim()
+          .toUpperCase();
 
-    const payload = {
-      ver_sn_done: true,
-      ver_sn_by: nickname,
-      ver_sn_at: now,
-      serial_number: serial
-    };
+      const numericPrefixPattern =
+        new RegExp(
+          "^\\d{4}" + baseSerial + "$"
+        );
 
-    addLastChange(payload, now);
+      const letterPrefixPattern =
+        new RegExp(
+          "^[A-Z]+" + baseSerial + "$"
+        );
 
-    const success =
-      await patchRow(id, payload);
+      if (
+        !numericPrefixPattern.test(extendedSerial) &&
+        !letterPrefixPattern.test(extendedSerial)
+      ) {
+        alert(
+          "Invalid S/N format.\n\n" +
+          "Keep the original S/N " + baseSerial +
+          " and add the identifier only in front.\n\n" +
+          "4-digit production date example: 0810" + baseSerial + "\n" +
+          "Letter prefix example: PLCD" + baseSerial
+        );
+        return;
+      }
 
-    setSaving(false);
+      const extendedDuplicate =
+        items.find(item =>
+          item.id !== id &&
+          String(item.serial_number || "")
+            .trim()
+            .toUpperCase() === extendedSerial
+        );
 
-    if (success) {
-      await loadData();
+      if (extendedDuplicate) {
+        alert(
+          "The full S/N is also already in use.\n\n" +
+          "S/N: " + extendedSerial + "\n" +
+          "Existing VIN: " + extendedDuplicate.vin + "\n\n" +
+          "Please check the actual unit information again."
+        );
+        return;
+      }
+
+      serial =
+        extendedSerial;
     }
   }
+
+  setSaving(true);
+
+  const now =
+    new Date().toISOString();
+
+  const payload = {
+    ver_sn_done: true,
+    ver_sn_by: nickname,
+    ver_sn_at: now,
+    serial_number: serial
+  };
+
+  addLastChange(
+    payload,
+    now
+  );
+
+  const success =
+    await patchRow(
+      id,
+      payload
+    );
+
+  setSaving(false);
+
+  if (success) {
+    await loadData();
+  }
+}
 
   async function toggleDtc(id) {
     requireNickname();
