@@ -511,15 +511,14 @@
   }
 
 
-  function isVerSnDone(item) {
-    return Boolean(item.ver_sn_done) &&
-      /^(?:\d{5}|[A-Z]+\d{5})$/.test(
-        String(item.serial_number || "")
-          .trim()
-          .toUpperCase() 
+function isVerSnDone(item) {
+  return Boolean(item.ver_sn_done) &&
+    /^(?:\d{5}|\d{9}|[A-Z]+\d{5})$/.test(
+      String(item.serial_number || "")
+        .trim()
+        .toUpperCase()
     );
-  }
-
+}
   function isFinalDone(item) {
     return (
       Boolean(item.update_done) &&
